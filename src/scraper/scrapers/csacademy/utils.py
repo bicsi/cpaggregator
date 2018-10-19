@@ -64,7 +64,7 @@ def __parse_exec_time(exec_time_text: str):
     return int(float(value) * unit_dict[unit])
 
 
-def scrape_submissions_for_task(task_id):
+def scrape_submissions_for_task(task_id, from_date=None):
     page_url = 'https://csacademy.com/contest/archive/task/%s/submissions/' % task_id
     get_page(page_url)
 
@@ -76,7 +76,26 @@ def scrape_submissions_for_task(task_id):
         driver.get(page_url)
 
         while True:
-            last_date: datetime.datetime = None
+            last_date: datetime.datetime = from_date
+            from_date = None
+
+            if last_date is not None:
+                # Expand the filter.
+                filter_jobs_expander = driver.find_element_by_xpath('.//div[contains(text(), "Filter jobs")]')
+                __try_until(filter_jobs_expander.click, Exception)
+
+                date_input = driver.find_element_by_xpath('.//*[contains(text(), "Before")]') \
+                    .find_element_by_xpath('../..') \
+                    .find_element_by_tag_name('input')
+                next_date = datetime.datetime.strftime(
+                    last_date - datetime.timedelta(seconds=1),
+                    "%d/%m/%Y %H:%M:%S"
+                )
+                print('Setting filter to: %s' % next_date)
+                __try_until(date_input.clear, Exception)
+                __try_until(lambda: date_input.send_keys(next_date), Exception)
+                __try_until(driver.find_element_by_xpath('.//button[contains(text(), "Set filter")]').click, Exception)
+                __try_until(filter_jobs_expander.click, Exception)
 
             for submission_box in driver.find_elements_by_xpath('.//div[contains(@class, "submissionSummary")]'):
                 try:
@@ -140,20 +159,3 @@ def scrape_submissions_for_task(task_id):
 
             if last_date is None:
                 break
-
-            # Expand the filter.
-            filter_jobs_expander = driver.find_element_by_xpath('.//div[contains(text(), "Filter jobs")]')
-            __try_until(filter_jobs_expander.click, Exception)
-
-            date_input = driver.find_element_by_xpath('.//*[contains(text(), "Before")]') \
-                .find_element_by_xpath('../..') \
-                .find_element_by_tag_name('input')
-            next_date = datetime.datetime.strftime(
-                last_date - datetime.timedelta(seconds=1),
-                "%d/%m/%Y %H:%M:%S"
-            )
-            print('Setting filter to: %s' % next_date)
-            __try_until(date_input.clear, Exception)
-            __try_until(lambda: date_input.send_keys(next_date), Exception)
-            __try_until(driver.find_element_by_xpath('.//button[contains(text(), "Set filter")]').click, Exception)
-            __try_until(filter_jobs_expander.click, Exception)
