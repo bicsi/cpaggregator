@@ -1,9 +1,6 @@
 from .base import *
 
-from .production import *
-
-try:
-   from .local import *
-except:
-   pass
-
+if os.environ.get('PRODUCTION'):
+    from .production import *
+else:
+    from .local import *
