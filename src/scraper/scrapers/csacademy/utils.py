@@ -75,10 +75,8 @@ def scrape_submissions_for_task(task_id, from_date=None):
         driver.implicitly_wait(20)
         driver.get(page_url)
 
+        last_date: datetime.datetime = from_date
         while True:
-            last_date: datetime.datetime = from_date
-            from_date = None
-
             if last_date is not None:
                 # Expand the filter.
                 filter_jobs_expander = driver.find_element_by_xpath('.//div[contains(text(), "Filter jobs")]')
