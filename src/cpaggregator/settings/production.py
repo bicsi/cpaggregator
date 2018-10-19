@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'data',
     'info',
+    'scraper',
 ]
 
 DATABASES = {
@@ -49,10 +50,6 @@ DATABASES = {
         'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '5432',
-    },
-    'mongo': {
-        'ENGINE': 'djongo',
-        'NAME': 'competitive',
     }
 }
 
