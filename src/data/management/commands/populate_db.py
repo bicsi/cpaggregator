@@ -1,3 +1,4 @@
+import argparse
 import os
 
 from django.core.management.base import BaseCommand
@@ -77,9 +78,9 @@ def _create_users():
                 )
 
 
-def _create_submissions():
+def _create_submissions(queryset):
     db = get_db()
-    for task in Task.objects.all():
+    for task in queryset:
         task_id = ":".join([task.judge.judge_id, task.task_id])
         print("Scraping submissions for: %s" % task_id)
         scrape_submissions_for_task(db, task_id)
@@ -87,6 +88,10 @@ def _create_submissions():
 
 class Command(BaseCommand):
     help = 'Populates the database.'
+
+    def add_arguments(self, parser: argparse.ArgumentParser):
+        parser.add_argument('days', type=int, default=1)
+        parser.add_argument('tasks', nargs='*')
 
     def handle(self, *args, **options):
         _create_judges()

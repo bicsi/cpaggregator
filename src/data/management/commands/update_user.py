@@ -68,5 +68,3 @@ class Command(BaseCommand):
 
         for user in User.objects.all():
             _update_user(db, user.username)
-        # for username in options['users']:
-        #    _update_user(db, username)
