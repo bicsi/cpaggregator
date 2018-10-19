@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 from data import models
 from data.models import User, Submission, Task, Judge
+from scraper.database import get_db
 
 DATABASE_NAME = 'competitive'
 
@@ -60,15 +61,10 @@ def _update_user(db, username):
 
 
 class Command(BaseCommand):
-    help = 'Updates the user(s) with submissions for the available tasks.'
-    args = '<user1, user2, ...>'
-
-    def add_arguments(self, parser):
-        parser.add_argument('users', nargs='+', type=str)
+    help = 'Updates the users with submissions for the available tasks.'
 
     def handle(self, *args, **options):
-        client = MongoClient()
-        db = client[DATABASE_NAME]
+        db = get_db()
 
         for user in User.objects.all():
             _update_user(db, user.username)
