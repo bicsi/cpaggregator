@@ -1,1 +1,1 @@
-web: gunicorn competitive.wsgi
+web: gunicorn src/cpaggregator.wsgi
