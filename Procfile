@@ -1,1 +1,1 @@
-web: gunicorn src/cpaggregator.wsgi
+web: gunicorn --chdir src cpaggregator.wsgi
