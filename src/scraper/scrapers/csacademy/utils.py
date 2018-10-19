@@ -95,6 +95,8 @@ def scrape_submissions_for_task(task_id, from_date=None):
                 __try_until(driver.find_element_by_xpath('.//button[contains(text(), "Set filter")]').click, Exception)
                 __try_until(filter_jobs_expander.click, Exception)
 
+            last_date = None
+
             for submission_box in driver.find_elements_by_xpath('.//div[contains(@class, "submissionSummary")]'):
                 try:
                     submission = {
