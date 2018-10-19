@@ -1,11 +1,14 @@
-from django.contrib.auth.models import User
+import os
+
 from django.core.management.base import BaseCommand
 import csv
 
+from cpaggregator.settings import BASE_DIR
 from data.populate import create_judge, create_user, create_user_handle, create_task
 
-ASD_USERS_CSV_PATH = 'data/management/files/asd_users.csv'
-ASD_TASKS_CSV_PATH = 'data/management/files/asd_tasks.csv'
+
+ASD_USERS_CSV_PATH = os.path.join(os.path.dirname(BASE_DIR), "data", "management", "files", "asd_users.csv")
+ASD_TASKS_CSV_PATH = os.path.join(os.path.dirname(BASE_DIR), "data", "management", "files", "asd_tasks.csv")
 
 
 def _create_judges():
