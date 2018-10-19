@@ -12,8 +12,12 @@ def __insert_many_silent(coll, iterable, **kwargs):
 
 
 def get_db():
-    db = MongoClient(os.environ.get('MONGODB_URI'))
-    return db['competitive']
+    if os.environ.get('PRODUCTION'):
+        connection = MongoClient(os.environ.get('MONGODB_URI'), os.environ.get('MONGODB_PORT'))
+        db = connection[os.environ.get('MONGODB_NAME')]
+        db.authenticate(os.environ.get('MONGODB_USER'), os.environ.get('MONGODB_PASS'))
+        return db
+    return MongoClient()['competitive']
 
 
 def insert_report(db, report_id, created_at, report):
