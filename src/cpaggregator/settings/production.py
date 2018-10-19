@@ -22,12 +22,13 @@ BASE_DIR = os.path.dirname(
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '9n03926ncnffiw(6np41+zv9pv@q=vda4o_sgit&**(u*9ckr1'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS =  ['competitive.herokuapp.com', '.yourdomain.com']
 
 # Application definition
 
@@ -133,3 +134,9 @@ CSRF_COOKIE_SECURE = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_SECONDS = 1000000
 SECURE_FRAME_DENY = True
+
+# add this
+import dj_database_url
+db_from_env = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
+DATABASES['default']['CONN_MAX_AGE'] = 500
