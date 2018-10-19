@@ -2,7 +2,6 @@ import sys
 
 from data.models import Judge, User, UserHandle, Task
 
-
 def create_judge(judge_id, name, homepage):
     judge, created = Judge.objects.update_or_create(
         judge_id=judge_id,
@@ -47,3 +46,5 @@ def create_task(task_id):
     task, created = Task.objects.update_or_create(judge=judge, task_id=task_id)
     print('Task: {0}, Created: {1}'.format(str(task), str(created)))
     return task
+
+

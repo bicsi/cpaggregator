@@ -47,6 +47,10 @@ DATABASES = {
         'PASSWORD': 'password',
         'HOST': 'localhost',
         'PORT': '5432',
+    },
+    'mongo': {
+        'ENGINE': 'djongo',
+        'NAME': 'competitive',
     }
 }
 
