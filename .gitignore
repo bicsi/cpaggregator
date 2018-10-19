@@ -1,0 +1,6 @@
+__pycache__/
+*.log
+*.pot
+.idea/
+MANIFEST
+*.egg-info
