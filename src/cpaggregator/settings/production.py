@@ -1,27 +1,10 @@
-import os
 import django_heroku
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(
-                os.path.abspath(__file__))))
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+from . import base
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS =  ['competitive.herokuapp.com']
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': django_heroku.dj_database_url.parse(os.environ.get('DATABASE_URL', ''))
-}
+ALLOWED_HOSTS = ['competitive.herokuapp.com']
 
 # SSL Settings for Heroku.
 CORS_REPLACE_HTTPS_REFERER = True
@@ -35,4 +18,4 @@ SECURE_HSTS_SECONDS = 1000000
 SECURE_FRAME_DENY = True
 
 # Activate Django-Heroku.
-django_heroku.settings(locals())
+django_heroku.settings(vars(base))
