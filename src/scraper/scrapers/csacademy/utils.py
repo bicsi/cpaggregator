@@ -131,6 +131,7 @@ def scrape_submissions_for_task(task_id):
                             submission['source_size'] = __parse_source_size(v)
 
                     driver.find_element_by_css_selector('button.close').click()
+                    print('Submission %s parsed successfully.' % submission['submission_id'])
                     yield submission
                 except Exception as e:
                     print("Could not parse submission")
