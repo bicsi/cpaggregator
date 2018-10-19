@@ -13,7 +13,7 @@ def __insert_many_silent(coll, iterable, **kwargs):
 
 def get_db():
     if os.environ.get('PRODUCTION'):
-        connection = MongoClient(os.environ.get('MONGODB_HOST'), os.environ.get('MONGODB_PORT'))
+        connection = MongoClient(os.environ.get('MONGODB_HOST'), int(os.environ.get('MONGODB_PORT')))
         db = connection[os.environ.get('MONGODB_NAME')]
         db.authenticate(os.environ.get('MONGODB_USER'), os.environ.get('MONGODB_PASS'))
         return db
