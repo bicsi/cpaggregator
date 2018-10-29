@@ -15,7 +15,7 @@ def _update_user(db, username):
     print("Updating %s..." % username)
 
     user = User.objects.get(username=username)
-    for user_handle in user.userhandle_set.all():
+    for user_handle in user.handles.all():
         judge = user_handle.judge
         # Get all submissions from mongodb.
         mongo_submissions = db['submissions'].find(dict(

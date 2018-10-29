@@ -1,10 +1,21 @@
+import subprocess
+
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-sched = BlockingScheduler()
-
-@sched.scheduled_job('interval', minutes=3)
-def timed_job():
-    print('This job is run every three minutes.')
+scheduler = BlockingScheduler()
 
 
-sched.start()
+@scheduler.scheduled_job('interval', minutes=5)
+def scrape_infoarena_submissions():
+    print('Scraping infoarena submissions...')
+    subprocess.call('python ./src/manage.py scrape_submissions --tasks ia:* --from_days=0 --to_days=7',
+                    shell=True, close_fds=True)
+
+
+@scheduler.scheduled_job('interval', minutes=5)
+def update_users():
+    print('Updating users...')
+    subprocess.call('python ./src/manage.py update_user',
+                    shell=True, close_fds=True)
+
+scheduler.start()
