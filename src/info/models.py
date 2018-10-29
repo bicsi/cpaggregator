@@ -1,6 +1,8 @@
 import datetime
 
 from django.db import models
+from django.db.models import F
+
 import data.models as data_models
 
 
@@ -26,7 +28,7 @@ class TaskSheet(models.Model):
 
     def get_best_submissions(self):
         submissions = self.get_all_submissions() \
-            .order_by('verdict', '-score', 'submitted_on')
+            .order_by('verdict', F('score').desc(nulls_last=True), 'submitted_on')
 
         found = set()
         res = []

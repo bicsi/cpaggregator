@@ -34,7 +34,9 @@ class User(models.Model):
     created_at = models.DateTimeField(default=datetime.datetime.utcnow)
 
     def __str__(self):
-        return "%s %s" % (self.first_name, self.last_name)
+        if self.first_name and self.last_name:
+            return "%s %s" % (self.first_name, self.last_name)
+        return self.username
 
 
 class UserGroup(models.Model):
