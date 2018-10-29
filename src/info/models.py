@@ -1,7 +1,7 @@
-import datetime
 
 from django.db import models
 from django.db.models import F
+from django.utils import timezone
 
 import data.models as data_models
 
@@ -9,7 +9,7 @@ import data.models as data_models
 class TaskSheet(models.Model):
     title = models.CharField(max_length=256, default="Results")
     slice_id = models.CharField(max_length=256, unique=True)
-    created_at = models.DateTimeField(default=datetime.datetime.utcnow)
+    created_at = models.DateTimeField(default=timezone.now)
     users = models.ManyToManyField(data_models.User, blank=True)
     groups = models.ManyToManyField(data_models.UserGroup)
     tasks = models.ManyToManyField(data_models.Task)
