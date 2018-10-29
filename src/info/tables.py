@@ -1,6 +1,7 @@
 import django_tables2 as tables
 import itertools
 
+from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -13,20 +14,29 @@ class SubmissionIdColumn(tables.Column):
                            url=record.get_url(), name=record.submission_id)
 
 
+class AuthorColumn(tables.Column):
+    def render(self, record):
+        return format_html('<a href="{url}">{name}</a>',
+                           url=reverse('user-submissions', kwargs=dict(username=record.author.user.username)),
+                           name=record.author.user.get_display_name())
+
+
 class ResultsTable(tables.Table):
     submission_id = SubmissionIdColumn()
-    author = tables.Column(verbose_name='Author', accessor='author.user')
+    author = AuthorColumn()
     submitted_on = tables.DateColumn(format='d M Y, H:i')
 
     class Meta:
         template_name = 'django_tables2/bootstrap-responsive.html'
         model = models.data_models.Submission
         exclude = ['id', 'language', 'exec_time', 'memory_used']
+        sequence = ('submission_id', 'author', 'task', 'source_size', 'verdict', 'score', 'submitted_on')
 
     def __init__(self, *args, **kwargs):
         self.task = tables.URLColumn()
         super(ResultsTable, self).__init__(*args, **kwargs)
         self.counter = itertools.count()
+
 
     def render_task(self, value):
         return format_html('<a href="{url}">{name}</a>',

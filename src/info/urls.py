@@ -19,5 +19,6 @@ from django.urls import path
 from info import views
 
 urlpatterns = [
-    path(r'sheet/<slice_id>/results', views.ResultsDetailView.as_view(), name='sheets')
+    path(r'sheet/<slice_id>/results', views.ResultsDetailView.as_view(), name='sheets'),
+    path(r'user/<username>/submissions', views.UserSubmissionsDetailView.as_view(), name='user-submissions'),
 ]

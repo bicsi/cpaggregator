@@ -1,12 +1,21 @@
 from django.views import generic
 
-from info import models
+from info.models import TaskSheet
+from data.models import User
+
 from info.tables import ResultsTable
+
+
+class UserSubmissionsDetailView(generic.DetailView):
+    template_name = 'info/user_submissions_detail.html'
+    model = User
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
 
 
 class ResultsDetailView(generic.DetailView):
     template_name = 'info/results_detail.html'
-    model = models.TaskSheet
+    model = TaskSheet
     slug_url_kwarg = 'slice_id'
     slug_field = 'slice_id'
     table = None

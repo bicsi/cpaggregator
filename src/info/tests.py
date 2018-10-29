@@ -79,7 +79,7 @@ class TaskSheetTestCase(TestCase):
             source_size=1000,
             score=20,
             verdict='WA')
-        # Submission 2: score = 40.
+        # Submission 2: score = 50.
         submission_better_score = Submission.objects.create(
             submission_id='2',
             submitted_on=self.today,

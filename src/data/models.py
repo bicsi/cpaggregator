@@ -33,10 +33,31 @@ class User(models.Model):
     last_name = models.CharField(max_length=256, null=True)
     created_at = models.DateTimeField(default=datetime.datetime.utcnow)
 
-    def __str__(self):
+    def get_display_name(self):
         if self.first_name and self.last_name:
             return "%s %s" % (self.first_name, self.last_name)
         return self.username
+
+    def get_solved_tasks(self):
+        tasks = []
+        for handle in self.handles.all():
+            for submission in handle.submission_set.all():
+                if submission.verdict == 'AC':
+                    tasks.append(submission.task)
+        return set(tasks)
+
+    def get_submitted_tasks(self):
+        tasks = []
+        for handle in self.handles.all():
+            for submission in handle.submission_set.all():
+                tasks.append(submission.task)
+        return set(tasks)
+
+    def get_unsolved_tasks(self):
+        return self.get_submitted_tasks() - self.get_solved_tasks()
+
+    def __str__(self):
+        return self.get_display_name()
 
 
 class UserGroup(models.Model):
@@ -71,7 +92,7 @@ class Task(models.Model):
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     handle = models.CharField(max_length=256)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='handles')
 
     class Meta:
         unique_together = (('judge', 'handle'),)
