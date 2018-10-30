@@ -23,6 +23,9 @@ class Judge(models.Model):
     name = models.CharField(max_length=256)
     homepage = models.CharField(max_length=256)
 
+    def get_logo_url(self):
+        return 'img/judge_logos/%s.png' % self.judge_id
+
     def __str__(self):
         return self.name
 
