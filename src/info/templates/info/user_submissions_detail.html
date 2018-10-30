@@ -1,57 +1,50 @@
+{% extends "layout.html" %}
+
 {% load render_table from django_tables2 %}
-<html>
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% load bootstrap4 %}
 
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        <title>{{ object.get_display_name }} | Submissions</title>
-    </head>
-    <body>
-        <div class="container">
-            <h1 class="text-primary my-5">{{ object.get_display_name }}</h1>
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="card-title">Tasks solved:</h3>
-                    <ul class="list-unstyled list-inline">
-                        {% for task in object.get_solved_tasks %}
-                        <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <span class="small text-muted">
-                        {% if object.get_solved_tasks.empty %}
-                        No tasks
-                        {% else %}
-                        {{ object.get_solved_tasks|length }} task{{ object.get_solved_tasks|length|pluralize }}
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            <div class="card mt-5">
-                <div class="card-body">
-                    <h3 class="card-title">Tasks tried:</h3>
-                    <ul class="list-unstyled list-inline">
-                        {% for task in object.get_unsolved_tasks %}
-                        <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <span class="small text-muted">
-                        {% if object.get_unsolved_tasks|length <= 0 %}
-                        No tasks
-                        {% else %}
-                        {{ object.get_unsolved_tasks|length }} task{{ object.get_unsolved_tasks|length|pluralize }}
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
+{% block title_tag %}{{ object.title }} | Results{% endblock %}
+
+{% block body_content %}
+<div class="container">
+    <h1 class="text-primary my-5">{{ object.get_display_name }}</h1>
+    <div class="card">
+        <h6 class="card-header">Tasks solved</h6>
+        <div class="card-body">
+            <ul class="list-unstyled list-inline">
+                {% for task in object.get_solved_tasks %}
+                <li class="list-inline-item">
+                    <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <span class="small text-muted">
+                {% if object.get_solved_tasks.empty %}
+                No tasks
+                {% else %}
+                {{ object.get_solved_tasks|length }} task{{ object.get_solved_tasks|length|pluralize }}
+                {% endif %}
+            </span>
         </div>
-    </body>
-
-
-</html>
+    </div>
+    <div class="card mt-5">
+        <h6 class="card-header">Tasks tried</h6>
+        <div class="card-body">
+            <ul class="list-unstyled list-inline">
+                {% for task in object.get_unsolved_tasks %}
+                <li class="list-inline-item">
+                    <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            <span class="small text-muted">
+                {% if object.get_unsolved_tasks|length <= 0 %}
+                No tasks
+                {% else %}
+                {{ object.get_unsolved_tasks|length }} task{{ object.get_unsolved_tasks|length|pluralize }}
+                {% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+{% endblock %}

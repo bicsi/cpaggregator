@@ -1,50 +1,29 @@
+{% extends "layout.html" %}
+
 {% load render_table from django_tables2 %}
-<!doctype html>
-<html>
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% load bootstrap4 %}
 
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-        <title>{{ object.title }} | Results</title>
-    </head>
-    <body>
-        <div class="container">
-            <h1 class="text-primary my-5">{{ object.title }}</h1>
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="card-title">Tasks:</h3>
-                    <ul class="list-unstyled list-inline">
-                        {% for task in object.tasks.all %}
-                        <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <span class="small text-muted">
-                        {% if object.tasks.all|length <= 0 %}
-                        No tasks
-                        {% else %}
-                        {{ object.tasks.all|length }} task{{ object.tasks.all|length|pluralize }}
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-            <div class="card mt-5">
-                <div class="card-body">
-                    <h3 class="card-title">Results:</h3>
-                    {% render_table table %}
-                </div>
-            </div>
+{% block title_tag %}{{ object.title }} | Results{% endblock %}
+
+{% block body_content %}
+<div class="container">
+    <h1 class="text-primary my-5">{{ object.title }}</h1>
+    <div class="card">
+        <h6 class="card-header">Tasks</h6>
+        <div class="list-group list-group-flush">
+            {% for task in object.tasks.all %}
+            <a class="list-group-item list-group-item-action"
+               href="{{ task.get_url }}">
+                <span class="badge badge-light text-uppercase align-middle">{{ task.judge.judge_id }}</span>
+                <span class="ml-1 text-primary align-middle">{{ task.name }}</span>
+            </a>
+            {% endfor %}
         </div>
-
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-    </body>
-
-
-</html>
+    </div>
+    <div class="card mt-5">
+        <h6 class="card-header">Results</h6>
+        {% render_table table %}
+        <span class="card-footer text-muted small">Only the best submissions are shown for each user.</span>
+    </div>
+</div>
+{% endblock %}
