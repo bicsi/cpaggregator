@@ -12,7 +12,7 @@ def scrape_infoarena_submissions():
                     shell=True, close_fds=True)
 
 
-@scheduler.scheduled_job('interval', minutes=1)
+@scheduler.scheduled_job('interval', minutes=5)
 def scrape_csacademy_submissions():
     print('Scraping csacademy submissions...')
     subprocess.call('python ./src/manage.py scrape_submissions --tasks csa:* --from_days=0 --to_days=7',
