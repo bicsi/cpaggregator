@@ -1,161 +1,169 @@
 import datetime
-import time
 
-from dateutil import parser
-from selenium import webdriver
+import requests
+import json
 
-from scraper.utils import get_page
-
-CSACADEMY_JUDGE_ID = "csa"
+CSACADEMY_JUDGE_ID = 'csa'
 
 
-def __try_until(func, exception, max_tries=10, sleep_time=1):
-    for _ in range(0, max_tries):
-        try:
-            return func()
-        except exception as e:
-            print('Error: %s\nRetrying...' % e)
-            time.sleep(sleep_time)
-    raise RuntimeError('__try_until failed after %s tries' % max_tries)
-
-
-def __parse_score(verdict_text: str):
-    if 'points' in verdict_text:
-        points = float(verdict_text.split()[0])
-        return int(points)
-    return None
-
-
-def __parse_verdict(verdict_text: str):
-    points = __parse_score(verdict_text)
-    if points is not None:
-        if points == 100:
-            return 'AC'
-        return 'WA'
-    if verdict_text == 'Compilation Error':
-        return 'CE'
-    raise Exception('Could not parse verdict text: %s' % verdict_text)
-
-
-def __parse_memory_used(memory_used_text: str):
-    value, unit = memory_used_text.split()
-    unit_dict = {
-        'B': 1 / 1024,
-        'KB': 1,
-        'MB': 1024,
+def get_task_info(csrftoken):
+    cookies = {
+        'G_AUTHUSER_H': '0',
+        'csrftoken': csrftoken,
+        'G_ENABLED_IDPS': 'google',
     }
-    return int(float(value) * unit_dict[unit])
 
-
-def __parse_source_size(source_size_text: str):
-    value, unit = source_size_text.split()
-    unit_dict = {
-        'B': 1,
-        'KB': 1024,
+    headers = {
+        'Pragma': 'no-cache',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+        'Accept': '*/*',
+        'Cache-Control': 'no-cache',
+        'x-requested-with': 'XMLHttpRequest',
+        'Connection': 'keep-alive',
+        'Referer': 'https://csacademy.com/contest/archive/task/addition/submissions/',
+        'x-csrftoken': csrftoken,
     }
-    return int(float(value) * unit_dict[unit])
+
+    response = requests.get('https://csacademy.com/contest/archive/task/addition/submissions/',
+                            headers=headers, cookies=cookies)
+    json_data = json.loads(response.text)
+
+    return json_data['state']['contesttask']
 
 
-def __parse_exec_time(exec_time_text: str):
-    value, unit = exec_time_text.split()
-    unit_dict = {
-        'ms': 1,
+def get_task_name_to_id(csrftoken):
+    task_name_to_id = {}
+    for task in get_task_info(csrftoken):
+        task_name_to_id.update({task['name']: task['id']})
+    return task_name_to_id
+
+
+def get_eval_jobs(csrftoken, task_name, contest_task_id, from_date, num_jobs=1000):
+    from_timestamp = from_date.timestamp()
+
+    cookies = {
+        'csrftoken': csrftoken,
+        'G_ENABLED_IDPS': 'google',
     }
-    return int(float(value) * unit_dict[unit])
+
+    headers = {
+        'Pragma': 'no-cache',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
+        'Accept': '*/*',
+        'Cache-Control': 'no-cache',
+        'x-requested-with': 'XMLHttpRequest',
+        'Connection': 'keep-alive',
+        'Referer': 'https://csacademy.com/contest/archive/task/%s/submissions/' % task_name,
+        'x-csrftoken': csrftoken,
+    }
+
+    params = (
+        ('numJobs', num_jobs),
+        ('requestCount', 'false'),
+        ('contestId', '1'),
+        ('contestTaskId', contest_task_id),
+        ('endTime', from_timestamp),
+    )
+
+    response = requests.get('https://csacademy.com/eval/get_eval_jobs/', headers=headers, params=params,
+                            cookies=cookies)
+    json_data = json.loads(response.text)
+    return json_data['state']
 
 
-def scrape_submissions_for_task(task_id, from_date=None):
-    page_url = 'https://csacademy.com/contest/archive/task/%s/submissions/' % task_id
-    get_page(page_url)
+def get_csrftoken():
+    response = requests.get('https://csacademy.com/')
+    csrftoken = response.cookies['csrftoken']
+    return csrftoken
 
-    options = webdriver.ChromeOptions()
-    options.add_argument('headless')
 
-    with webdriver.Chrome(chrome_options=options) as driver:
-        driver.implicitly_wait(20)
-        driver.get(page_url)
+def parse_submissions(csrftoken, task_name, task_id, from_date):
+    eval_jobs = get_eval_jobs(csrftoken, task_name, task_id, from_date)
+    if 'publicuser' not in eval_jobs:
+        return
 
-        last_date: datetime.datetime = from_date
-        while True:
-            if last_date is not None:
-                # Expand the filter.
-                filter_jobs_expander = driver.find_element_by_xpath('.//div[contains(text(), "Filter jobs")]')
-                __try_until(filter_jobs_expander.click, Exception)
+    # Make user id to username map. We use usernames. :)
+    user_id_to_username = {}
+    for user in eval_jobs['publicuser']:
+        user_id_to_username.update({user['id']: user['username']})
 
-                date_input = driver.find_element_by_xpath('.//*[contains(text(), "Before")]') \
-                    .find_element_by_xpath('../..') \
-                    .find_element_by_tag_name('input')
-                next_date = datetime.datetime.strftime(
-                    last_date - datetime.timedelta(seconds=1),
-                    "%d/%m/%Y %H:%M:%S"
-                )
-                print('Setting filter to: %s' % next_date)
-                __try_until(date_input.clear, Exception)
-                __try_until(lambda: date_input.send_keys(next_date), Exception)
-                __try_until(driver.find_element_by_xpath('.//button[contains(text(), "Set filter")]').click, Exception)
-                __try_until(filter_jobs_expander.click, Exception)
+    # Parse submissions.
+    for eval_job in eval_jobs['evaljob']:
+        submission_id = eval_job['id']
+        if not eval_job['isDone']:
+            print('Skipping submission %s: Not finished evaluating.' % submission_id)
 
-            last_date = None
+        # Parse easy data.
+        submission = dict(
+            judge_id=CSACADEMY_JUDGE_ID,
+            submission_id=submission_id,
+            submitted_on=datetime.datetime.utcfromtimestamp(eval_job['timeSubmitted']),
+            task_id=task_name,
+            author_id=user_id_to_username[eval_job['userId']],
+            source_size=len(eval_job['sourceText']),
+            verdict='CE',
+        )
 
-            for submission_box in driver.find_elements_by_xpath('.//div[contains(@class, "submissionSummary")]'):
-                try:
-                    submission = {
-                        'judge_id': CSACADEMY_JUDGE_ID,
-                        'task_id': task_id,
-                    }
+        # Parse verdict.
+        verdict = 'CE'
+        score = None
+        if eval_job['compileOK']:
+            score = round(eval_job['score'] * 100)
+            if score == 100:
+                verdict = 'AC'
+            else:
+                verdict = 'WA'
 
-                    # Populate job id.
-                    href = submission_box.find_element_by_xpath('.//a[contains(@href, "submission")]').get_attribute('href')
-                    submission['submission_id'] = href.split('/')[-1]
+        if verdict != 'CE':
+            submission.update(dict(
+                verdict=verdict,
+                score=score,
+            ))
 
-                    # Populate date.
-                    date_text = ' '.join(submission_box.text.split()[2:6])
-                    submission['submitted_on'] = parser.parse(date_text)
-                    last_date = submission['submitted_on']
+        # Parse memory_used and time_exec.
+        time_exec = 0
+        memory_used = 0
 
-                    # Click on submission and go to summary.
-                    __try_until(submission_box.click, Exception)
-                    summary_a = driver.find_element_by_xpath('.//a[contains(text(), "Summary")]')
-                    __try_until(summary_a.click, Exception)
-                    user_p = driver.find_element_by_xpath('.//p[contains(text(), "User")]')
+        for test in eval_job['tests']:
+            time_exec = max(time_exec, test['wallTime'])
+            memory_used = max(memory_used, test['memUsage'])
 
-                    verdict_text = user_p.find_element_by_xpath('../../div').text
+        time_exec = round(time_exec * 1000)
+        memory_used = round(memory_used / 1024)
 
-                    # Populate author. Real author.
-                    __try_until(user_p
-                                .find_element_by_tag_name('b')
-                                .find_element_by_xpath('..')
-                                .click, Exception)
-                    href = driver.find_element_by_xpath('.//a[contains(@href, "user")]').get_attribute('href')
-                    if 'userid' in href:
-                        print('Skipped submission of user: %s' % href)
-                        driver.find_element_by_css_selector('button.close').click()
-                        continue
-                    submission['author_id'] = href.split('/')[-1]
+        submission.update(dict(
+            time_exec=time_exec,
+            memory_used=memory_used,
+        ))
+        yield submission
 
-                    for line in verdict_text.split('\n'):
-                        k, v = map(str.strip, line.split(':'))
-                        if k == 'Verdict':
-                            submission['verdict'] = __parse_verdict(v)
-                            score = __parse_score(v)
-                            if score is not None:
-                                submission['score'] = score
-                        if k == 'Language':
-                            submission['language'] = v
-                        if k == 'CPU Time usage':
-                            submission['exec_time'] = __parse_exec_time(v)
-                        if k == 'Memory usage':
-                            submission['memory_used'] = __parse_memory_used(v)
-                        if k == 'Source code':
-                            submission['source_size'] = __parse_source_size(v)
 
-                    driver.find_element_by_css_selector('button.close').click()
-                    print('Submission %s parsed successfully.' % submission['submission_id'])
-                    yield submission
-                except Exception as e:
-                    print("Could not parse submission")
-                    print("Error: %s" % e)
-                    break
+def scrape_submissions_for_tasks(tasks: [str]):
+    csrftoken = get_csrftoken()
+    print('Got csrftoken: %s' % csrftoken)
 
-            if last_date is None:
-                break
+    from_date = datetime.datetime.now() + datetime.timedelta(days=2)
+    task_name_to_id = get_task_name_to_id(csrftoken)
+
+    for task_name in tasks:
+        found = True
+        while found:
+            found = False
+
+            print("From date: %s" % from_date)
+            submissions = parse_submissions(
+                csrftoken, task_name,
+                task_name_to_id[task_name],
+                from_date=from_date
+            )
+            for submission in submissions:
+                found = True
+                from_date = min(from_date, submission['submitted_on'])
+                yield submission
+
+            from_date = from_date - datetime.timedelta(microseconds=1)
+
