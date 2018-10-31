@@ -6,6 +6,7 @@ JUDGE_CHOICES = [
     ("ac", "AtCoder"),
     ("ia", "Infoarena"),
     ("poj", "POJ"),
+    ("cf", "Codeforces"),
 ]
 
 VERDICT_CHOICES = [
@@ -110,7 +111,7 @@ class Submission(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     author = models.ForeignKey(UserHandle, on_delete=models.CASCADE)
     language = models.CharField(max_length=256)
-    source_size = models.IntegerField()
+    source_size = models.IntegerField(null=True)
     verdict = models.CharField(max_length=256, choices=VERDICT_CHOICES)
     score = models.IntegerField(null=True)
     exec_time = models.IntegerField(null=True)

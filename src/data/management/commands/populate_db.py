@@ -35,6 +35,11 @@ def _create_judges():
         name='CSAcademy',
         homepage='http://www.csacademy.com/',
     )
+    create_judge(
+        judge_id='cf',
+        name='Codeforces',
+        homepage='https://codeforces.com/',
+    )
 
 
 def _create_tasks():
@@ -78,14 +83,6 @@ def _create_users():
                 )
 
 
-def _create_submissions(queryset):
-    db = get_db()
-    for task in queryset:
-        task_id = ":".join([task.judge.judge_id, task.task_id])
-        print("Scraping submissions for: %s" % task_id)
-        scrape_submissions_for_task(db, task_id)
-
-
 class Command(BaseCommand):
     help = 'Populates the database.'
 
@@ -97,4 +94,3 @@ class Command(BaseCommand):
         _create_judges()
         _create_tasks()
         _create_users()
-        _create_submissions()

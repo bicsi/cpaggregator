@@ -42,6 +42,8 @@ def _update_user(db, username):
                 )
                 if math.isnan(update_dict['score']):
                     update_dict['score'] = None
+
+                # Filter values that are None.
                 update_dict = dict(filter(lambda x: x[1] and x[1], update_dict.items()))
 
                 print(update_dict)

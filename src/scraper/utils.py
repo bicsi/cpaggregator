@@ -31,7 +31,7 @@ def get_page(page_url, **query_dict):
     print("GET: %s" % page_url)
     page = requests.get(page_url)
     if page.status_code != 200:
-        raise Exception("Request failed. Status code: " % page.status_code)
+        raise Exception("Request failed. Status code: %d" % page.status_code)
     return page
 
 

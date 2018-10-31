@@ -2,6 +2,7 @@ from data.models import Task
 from scraper import utils
 from scraper.scrapers.infoarena import utils as infoarena_scraper
 from scraper.scrapers.csacademy import utils as csacademy_scraper
+from scraper.scrapers.codeforces import utils as codeforces_scraper
 
 
 def scrape_submissions_for_task(db, task, from_date, to_date):
@@ -24,6 +25,14 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
             submissions = csacademy_scraper.scrape_submissions_for_tasks(all_task_ids)
         else:
             submissions = csacademy_scraper.scrape_submissions_for_tasks([task_id])
+
+    elif judge_id == 'cf':
+        if task_id == '*':
+            all_task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
+            print("All task ids: ", all_task_ids)
+            submissions = codeforces_scraper.scrape_submissions_for_task(all_task_ids)
+        else:
+            submissions = codeforces_scraper.scrape_submissions_for_task([task_id])
 
     else:
         print("Judge id not recognized: %s" % judge_id)
