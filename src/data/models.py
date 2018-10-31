@@ -122,6 +122,10 @@ class Submission(models.Model):
             return 'https://csacademy.com/submission/%s' % self.submission_id
         if self.task.judge.judge_id == 'ia':
             return 'https://www.infoarena.ro/job_detail/%s' % self.submission_id
+        if self.task.judge.judge_id == 'cf':
+            contest_id, task_letter = self.task.task_id.split('_')
+            return 'https://codeforces.com/contest/%s/problem/%s' % (contest_id, task_letter)
+
         print("Bad", self.submission_id)
         return None
 
