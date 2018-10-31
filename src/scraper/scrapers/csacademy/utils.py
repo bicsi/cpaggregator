@@ -1,4 +1,5 @@
 import datetime
+import heapq
 
 import requests
 import json
@@ -92,7 +93,7 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
         user_id_to_username.update({user['id']: user['username']})
 
     # Parse submissions.
-    for eval_job in eval_jobs['evaljob']:
+    for eval_job in reversed(eval_jobs['evaljob']):
         submission_id = eval_job['id']
         if not eval_job['isDone']:
             print('Skipping submission %s: Not finished evaluating.' % submission_id)
@@ -142,28 +143,34 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
         yield submission
 
 
-def scrape_submissions_for_tasks(tasks: [str]):
+def scrape_submissions_for_task(csrftoken, task_name, task_id):
+    from_date = datetime.datetime.now() + datetime.timedelta(days=2)
+
+    print(task_name)
+    found = True
+    while found:
+        found = False
+
+        print("From date: %s" % from_date)
+        submissions = parse_submissions(
+            csrftoken, task_name,
+            task_id,
+            from_date=from_date
+        )
+        for submission in submissions:
+            found = True
+            from_date = submission['submitted_on']
+            yield submission
+
+        from_date = from_date - datetime.timedelta(microseconds=1)
+
+
+def scrape_submissions_for_tasks(tasks):
     csrftoken = get_csrftoken()
     print('Got csrftoken: %s' % csrftoken)
-
-    from_date = datetime.datetime.now() + datetime.timedelta(days=2)
     task_name_to_id = get_task_name_to_id(csrftoken)
 
-    for task_name in tasks:
-        found = True
-        while found:
-            found = False
+    submissions = [scrape_submissions_for_task(
+        csrftoken, task_name, task_name_to_id[task_name]) for task_name in tasks]
 
-            print("From date: %s" % from_date)
-            submissions = parse_submissions(
-                csrftoken, task_name,
-                task_name_to_id[task_name],
-                from_date=from_date
-            )
-            for submission in submissions:
-                found = True
-                from_date = min(from_date, submission['submitted_on'])
-                yield submission
-
-            from_date = from_date - datetime.timedelta(microseconds=1)
-
+    return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)

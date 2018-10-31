@@ -2,6 +2,7 @@ import math
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from pymongo import MongoClient
 
 from data import models
@@ -31,7 +32,7 @@ def _update_user(db, username):
                 )
 
                 update_dict = dict(
-                    submitted_on=mongo_submission['submitted_on'],
+                    submitted_on=timezone.make_aware(mongo_submission['submitted_on']),
                     author=user_handle,
                     verdict=mongo_submission['verdict'],
                     language=mongo_submission.get('language'),
@@ -46,8 +47,6 @@ def _update_user(db, username):
                 # Filter values that are None.
                 update_dict = dict(filter(lambda x: x[1] and x[1], update_dict.items()))
 
-                print(update_dict)
-
                 _, created = Submission.objects.update_or_create(
                     submission_id=mongo_submission['submission_id'],
                     task=task, defaults=update_dict
@@ -55,9 +54,6 @@ def _update_user(db, username):
 
                 if created:
                     print("Submission %s created." % mongo_submission['submission_id'])
-                else:
-                    print("Submissions %s updated." % mongo_submission['submission_id'])
-
             except:
                 pass
 

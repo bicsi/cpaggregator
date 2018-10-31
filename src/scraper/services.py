@@ -9,30 +9,22 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
     print('Scraping submissions for task: %s...' % task)
     judge_id, task_id = task.split(':')
 
+    task_ids = [task_id]
+    if task_id == '*':
+        task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
+    print('Task ids:', task_ids)
+
     if judge_id == 'ia':
-        if task_id == '*':
-            submissions = infoarena_scraper.scrape_submissions()
-            all_task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
-            print("All task ids: ", all_task_ids)
-            submissions = filter(lambda s: s['task_id'] in all_task_ids, submissions)
+        if len(task_ids) == 1:
+            submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
         else:
-            submissions = infoarena_scraper.scrape_submissions(task=task_id)
+            submissions = infoarena_scraper.scrape_submissions()
 
     elif judge_id == 'csa':
-        if task_id == '*':
-            all_task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
-            print("All task ids: ", all_task_ids)
-            submissions = csacademy_scraper.scrape_submissions_for_tasks(all_task_ids)
-        else:
-            submissions = csacademy_scraper.scrape_submissions_for_tasks([task_id])
+        submissions = csacademy_scraper.scrape_submissions_for_tasks(task_ids)
 
     elif judge_id == 'cf':
-        if task_id == '*':
-            all_task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
-            print("All task ids: ", all_task_ids)
-            submissions = codeforces_scraper.scrape_submissions_for_task(all_task_ids)
-        else:
-            submissions = codeforces_scraper.scrape_submissions_for_task([task_id])
+        submissions = codeforces_scraper.scrape_submissions_for_tasks(task_ids)
 
     else:
         print("Judge id not recognized: %s" % judge_id)
