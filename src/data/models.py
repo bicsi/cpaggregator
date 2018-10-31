@@ -84,6 +84,9 @@ class Task(models.Model):
             return 'https://csacademy.com/contest/archive/task/%s' % self.task_id
         if self.judge.judge_id == 'ia':
             return 'https://www.infoarena.ro/problema/%s' % self.task_id
+        if self.judge.judge_id == 'cf':
+            contest_id, task_letter = self.task_id.split('_')
+            return 'https://codeforces.com/contest/%s/problem/%s' % (contest_id, task_letter)
         return None
 
     class Meta:
@@ -123,8 +126,8 @@ class Submission(models.Model):
         if self.task.judge.judge_id == 'ia':
             return 'https://www.infoarena.ro/job_detail/%s' % self.submission_id
         if self.task.judge.judge_id == 'cf':
-            contest_id, task_letter = self.task.task_id.split('_')
-            return 'https://codeforces.com/contest/%s/problem/%s' % (contest_id, task_letter)
+            contest_id, _ = self.task.task_id.split('_')
+            return 'https://codeforces.com/contest/%s/submission/%s' % (contest_id, self.submission_id)
 
         print("Bad", self.submission_id)
         return None
