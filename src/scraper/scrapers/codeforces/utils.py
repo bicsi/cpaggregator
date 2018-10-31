@@ -64,6 +64,7 @@ def scrape_submissions_for_task(task_id, count=200):
 
             author_id = submission_data['author']['members'][0]['handle']
             submission = dict(
+                judge_id=CODEFORCES_JUDGE_ID,
                 submission_id=submission_id,
                 task_id=task_id,
                 submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
@@ -73,6 +74,7 @@ def scrape_submissions_for_task(task_id, count=200):
                 time_exec=submission_data['timeConsumedMillis'],
                 memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
             )
+
             yield submission
         id_from += count
 

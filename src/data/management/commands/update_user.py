@@ -28,9 +28,7 @@ def _update_user(db, username):
             try:
                 task = Task.objects.get(
                     judge=judge,
-                    task_id=mongo_submission['task_id'],
-                )
-
+                    task_id=mongo_submission['task_id'])
                 update_dict = dict(
                     submitted_on=timezone.make_aware(mongo_submission['submitted_on']),
                     author=user_handle,
@@ -41,7 +39,7 @@ def _update_user(db, username):
                     exec_time=mongo_submission.get('exec_time'),
                     memory_used=mongo_submission.get('memory_used'),
                 )
-                if math.isnan(update_dict['score']):
+                if update_dict['score'] and math.isnan(update_dict['score']):
                     update_dict['score'] = None
 
                 # Filter values that are None.
@@ -54,8 +52,10 @@ def _update_user(db, username):
 
                 if created:
                     print("Submission %s created." % mongo_submission['submission_id'])
-            except:
+            except ObjectDoesNotExist as e:
                 pass
+            except Exception as e:
+                print('Submission %s failed. Error: %s' % (mongo_submission['submission_id'], e))
 
 
 class Command(BaseCommand):
