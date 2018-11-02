@@ -5,6 +5,6 @@ from .models import *
 admin.site.register(Judge)
 admin.site.register(Task)
 admin.site.register(Submission)
-admin.site.register(User)
+admin.site.register(UserProfile)
 admin.site.register(UserHandle)
 admin.site.register(UserGroup)

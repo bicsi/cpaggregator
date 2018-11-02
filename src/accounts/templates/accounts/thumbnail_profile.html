@@ -1,0 +1,10 @@
+<!-- Template used to a thumbnail view of a user's profile. -->
+
+<div>
+    <img class="rounded-circle" src="{{ user.profile.avatar_url_or_default }}"
+        width="24" height="24" alt="{{ user.username }}"
+         title="{{ user.username }}" style="background-color: white">
+    {% if not hide_username %}
+    <span class="my-0 ml-2">{{ user.profile.get_display_name }}</span>
+    {% endif %}
+</div>

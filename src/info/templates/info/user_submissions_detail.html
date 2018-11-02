@@ -6,45 +6,78 @@
 {% block title_tag %}{{ object.get_display_name }}{% endblock %}
 
 {% block body_content %}
+{% if not object.user %}
+<div class="alert alert-info small" role="alert">
+    <div class="container">
+        <em>This user is not claimed yet.</em>
+        <strong class="ml-2">Is this you?</strong>
+        <a href="{% url 'login' %}">Log in</a> to your account and claim it!
+    </div>
+</div>
+{% endif %}
 <div class="container">
-    <h1 class="text-primary my-5">{{ object.get_display_name }}</h1>
-    <div class="card">
-        <h6 class="card-header">Tasks solved</h6>
-        <div class="card-body">
-            <ul class="list-unstyled list-inline">
-                {% for task in object.get_solved_tasks %}
-                <li class="list-inline-item">
-                    <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            <span class="small text-muted">
-                {% if object.get_solved_tasks.empty %}
-                No tasks
-                {% else %}
-                {{ object.get_solved_tasks|length }} task{{ object.get_solved_tasks|length|pluralize }}
-                {% endif %}
-            </span>
+
+    <div class="row">
+        <div class="col col-md-4 col-12">
+            <div class="card mx-auto mb-3" style="max-width: 24rem;">
+              <img class="card-img-top" src="{{ object.avatar_url_or_default }}" alt="{{ object.username }}" >
+              <div class="card-body">
+                <h5 class="card-title">{{ object.get_display_name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">@{{ object.username }}</h6>
+                <p>Joined on: {{ object.created_at|date:"M d, Y"}}</p>
+              </div>
+            </div>
+        </div>
+        <div class="col col-md-8 col-12">
+            <div class="card">
+                <h6 class="card-header">Tasks solved</h6>
+                <div class="card-body">
+                    <ul class="list-unstyled list-inline">
+                        {% for task in object.get_solved_tasks %}
+                        <li class="list-inline-item">
+                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <span class="small text-muted">
+                        {% if object.get_solved_tasks.empty %}
+                        No tasks
+                        {% else %}
+                        {{ object.get_solved_tasks|length }} task{{ object.get_solved_tasks|length|pluralize }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <h6 class="card-header">Tasks tried</h6>
+                <div class="card-body">
+                    <ul class="list-unstyled list-inline">
+                        {% for task in object.get_unsolved_tasks %}
+                        <li class="list-inline-item">
+                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <span class="small text-muted">
+                        {% if object.get_unsolved_tasks|length <= 0 %}
+                        No tasks
+                        {% else %}
+                        {{ object.get_unsolved_tasks|length }} task{{ object.get_unsolved_tasks|length|pluralize }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="card mt-5">
-        <h6 class="card-header">Tasks tried</h6>
-        <div class="card-body">
-            <ul class="list-unstyled list-inline">
-                {% for task in object.get_unsolved_tasks %}
-                <li class="list-inline-item">
-                    <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
-                </li>
-                {% endfor %}
-            </ul>
-            <span class="small text-muted">
-                {% if object.get_unsolved_tasks|length <= 0 %}
-                No tasks
-                {% else %}
-                {{ object.get_unsolved_tasks|length }} task{{ object.get_unsolved_tasks|length|pluralize }}
-                {% endif %}
-            </span>
+    {% if user.is_authenticated and not object.user %}
+    <div class="mt-5">
+        <div class="alert alert-warning small" role="alert">
+            <strong>Note:</strong>
+            Every claim request will need to be verified.
+            Please do not claim users that are not yours. :)
         </div>
+        <a class="btn btn-primary btn-block" href="{% url 'claim' username=object.username %}">CLAIM</a>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

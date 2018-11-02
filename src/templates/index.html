@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap4 %}
+
+{% block title_tag %}Log In or Sign Up{% endblock %}
+
+{% block body_content %}
+<div class="container">
+    <h1>Log in or sign up to use this platform.</h1>
+    <a class="btn btn-primary" href="{% url 'login' %}">Log In</a>
+    <a class="btn btn-primary" href="{% url 'register' %}">Sign Up</a>
+</div>
+{% endblock %}

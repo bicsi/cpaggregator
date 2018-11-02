@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap4',
     'django_tables2',
+    'accounts',
     'data',
     'info',
     'scraper',

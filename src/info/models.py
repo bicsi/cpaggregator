@@ -1,6 +1,6 @@
 
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Manager
 from django.utils import timezone
 
 import data.models as data_models
@@ -8,10 +8,10 @@ import data.models as data_models
 
 class TaskSheet(models.Model):
     title = models.CharField(max_length=256, default="Results")
-    slice_id = models.CharField(max_length=256, unique=True)
+    sheet_id = models.CharField(max_length=256, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
-    users = models.ManyToManyField(data_models.User, blank=True)
-    groups = models.ManyToManyField(data_models.UserGroup, blank=True)
+    users = models.ManyToManyField(data_models.UserProfile, blank=True, related_name='assigned_sheets')
+    groups = models.ManyToManyField(data_models.UserGroup, blank=True, related_name='assigned_sheets')
     tasks = models.ManyToManyField(data_models.Task)
 
     def get_all_users(self):
@@ -30,12 +30,14 @@ class TaskSheet(models.Model):
         best_submissions = self.get_all_submissions() \
             .order_by('author', 'task', 'verdict', F('score').desc(nulls_last=True), 'submitted_on') \
             .distinct('author', 'task')
-        
+
         return data_models.Submission.objects \
             .filter(id__in=best_submissions) \
             .order_by('submitted_on')
 
     def __str__(self):
         return self.title
+
+
 
 

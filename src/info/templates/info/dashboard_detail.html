@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+
+{% block title_tag %}Dashboard{% endblock %}
+
+{% block body_content %}
+{% with request.user as user %}
+<div class="container">
+    <div class="card">
+        <h6 class="card-header">Your task sheets</h6>
+        <div class="list-group list-group-flush">
+            {% for task_sheet in user.profile.get_task_sheets %}
+            <a class="list-group-item list-group-item-action"
+               href="{% url 'sheet-results' sheet_id=task_sheet.sheet_id %}">
+                <strong>{{ task_sheet.title }}</strong>
+                <span class="small ml-2">{{ task_sheet.tasks.all|length }} tasks</span>
+                <span class="small pull-right text-muted">Created on: {{ task_sheet.created_at|date:"M d Y" }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="card-footer">
+            <span class="small text-muted">
+                {% if user.profile.get_task_sheets|length <= 0 %}
+                No task sheets.
+                {% else %}
+                {{ user.profile.get_task_sheets|length }} task sheet{{ user.profile.get_task_sheets|length|pluralize }}
+                {% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}

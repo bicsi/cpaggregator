@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% load bootstrap4 %}
+
+{% block title_tag %}Login{% endblock %}
+
+{% block body_content %}
+<div class="container">
+    <h2>Login</h2>
+    <hr>
+
+    <div class="panel">
+        <div class="panel-body">
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <input type="submit" value="Login" class="btn btn-primary btn-block"/>
+            </form>
+        </div>
+    </div>
+    <div class="alert alert-success mt-5" role="alert">
+        <strong>No Account? No Problem!</strong>
+        <a href="{% url 'register' %}">Sign Up</a>
+    </div>
+</div>
+{% endblock body_content %}

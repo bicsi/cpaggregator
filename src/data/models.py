@@ -1,5 +1,8 @@
-
+from django.contrib.auth.models import User
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 JUDGE_CHOICES = [
@@ -31,16 +34,27 @@ class Judge(models.Model):
         return self.name
 
 
-class User(models.Model):
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL, related_name='profile')
     username = models.CharField(max_length=256, unique=True)
     first_name = models.CharField(max_length=256, null=True)
     last_name = models.CharField(max_length=256, null=True)
     created_at = models.DateTimeField(default=timezone.now)
 
+    def avatar_url_or_default(self):
+        return static("img/user-avatar.svg")
+
     def get_display_name(self):
         if self.first_name and self.last_name:
             return "%s %s" % (self.first_name, self.last_name)
         return self.username
+
+    def get_task_sheets(self):
+        task_sheets = []
+        task_sheets.extend(self.assigned_sheets.all())
+        for group in self.assigned_groups.all():
+            task_sheets.extend(group.assigned_sheets.all())
+        return set(task_sheets)
 
     def get_solved_tasks(self):
         tasks = []
@@ -64,10 +78,24 @@ class User(models.Model):
         return self.get_display_name()
 
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance, username=instance.username)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile') and instance.profile is not None:
+        instance.profile.save()
+    else:
+        UserProfile.objects.create(user=instance, username=instance.username)
+
+
 class UserGroup(models.Model):
     group_id = models.CharField(max_length=256)
     name = models.CharField(max_length=256, unique=True)
-    members = models.ManyToManyField(User)
+    members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
     created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -99,7 +127,7 @@ class Task(models.Model):
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     handle = models.CharField(max_length=256)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='handles')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='handles')
 
     class Meta:
         unique_together = (('judge', 'handle'),)

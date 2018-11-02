@@ -5,7 +5,7 @@ from django.test import TestCase
 # Create your tests here.
 from pytz import UTC
 
-from data.models import User, UserHandle, Judge, Task, Submission
+from data.models import UserProfile, UserHandle, Judge, Task, Submission
 from info.models import TaskSheet
 
 
@@ -15,7 +15,7 @@ class TaskSheetTestCase(TestCase):
     def setUp(self):
         # Create a task sheet.
         self.judge = Judge.objects.create(judge_id='ia')
-        self.user = User.objects.create(username='user1')
+        self.user = UserProfile.objects.create(username='user1')
         self.handle = UserHandle.objects.create(judge=self.judge, handle='ia_user', user=self.user)
         self.task = Task.objects.create(judge=self.judge, task_id='ia_task')
         self.sheet = TaskSheet.objects.create(slice_id='sheet')

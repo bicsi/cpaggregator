@@ -1,6 +1,6 @@
 import sys
 
-from data.models import Judge, User, UserHandle, Task
+from data.models import Judge, UserProfile, UserHandle, Task
 
 def create_judge(judge_id, name, homepage):
     judge, created = Judge.objects.update_or_create(
@@ -15,7 +15,7 @@ def create_judge(judge_id, name, homepage):
 
 
 def create_user(username, first_name, last_name):
-    user, created = User.objects.update_or_create(
+    user, created = UserProfile.objects.update_or_create(
         username=username,
         defaults=dict(
             first_name=first_name,
@@ -28,7 +28,7 @@ def create_user(username, first_name, last_name):
 
 def create_user_handle(username, judge_id, handle):
     judge = Judge.objects.get(judge_id=judge_id)
-    user = User.objects.get(username=username)
+    user = UserProfile.objects.get(username=username)
 
     user_handle, created = UserHandle.objects.update_or_create(
         user=user,

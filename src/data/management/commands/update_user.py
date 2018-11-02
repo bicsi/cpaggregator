@@ -6,7 +6,7 @@ from django.utils import timezone
 from pymongo import MongoClient
 
 from data import models
-from data.models import User, Submission, Task, Judge
+from data.models import UserProfile, Submission, Task, Judge
 from scraper.database import get_db
 
 DATABASE_NAME = 'competitive'
@@ -15,7 +15,7 @@ DATABASE_NAME = 'competitive'
 def _update_user(db, username):
     print("Updating %s..." % username)
 
-    user = User.objects.get(username=username)
+    user = UserProfile.objects.get(username=username)
     for user_handle in user.handles.all():
         judge = user_handle.judge
         # Get all submissions from mongodb.
@@ -64,5 +64,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         db = get_db()
 
-        for user in User.objects.all():
+        for user in UserProfile.objects.all():
             _update_user(db, user.username)
