@@ -140,6 +140,10 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
             time_exec=time_exec,
             memory_used=memory_used,
         ))
+
+        # If author has no username, put the user id (Facebook-created accounts?).
+        if submission['author_id'] is None:
+            submission['author_id'] = 'uid:%s' % eval_job['userId']
         yield submission
 
 

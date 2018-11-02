@@ -27,18 +27,10 @@ class TaskSheet(models.Model):
         )
 
     def get_best_submissions(self):
-        submissions = self.get_all_submissions() \
-            .order_by('verdict', F('score').desc(nulls_last=True), 'submitted_on')
+        return self.get_all_submissions() \
+            .order_by('author', 'task', 'verdict', F('score').desc(nulls_last=True), 'submitted_on') \
+            .distinct('author', 'task') \
 
-        found = set()
-        res = []
-        for submission in submissions.all():
-            key = (submission.task, submission.author)
-            if key in found:
-                continue
-            found.add(key)
-            res.append(submission)
-        return sorted(res, key=lambda x: x.submitted_on)
 
     def __str__(self):
         return self.title

@@ -3,7 +3,7 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap4 %}
 
-{% block title_tag %}{{ object.title }} | Results{% endblock %}
+{% block title_tag %}{{ object.get_display_name }}{% endblock %}
 
 {% block body_content %}
 <div class="container">
