@@ -55,7 +55,7 @@ def _create_users():
     with open(ASD_USERS_CSV_PATH, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            names = row['Nume & Prenume'].split()
+            names = row['Nume Prenume'].split()
             first_names = names[1:]
             last_name = names[0]
             username = "".join(first_names) + last_name
@@ -82,15 +82,18 @@ def _create_users():
                     handle=row['Handle CSAcademy'],
                 )
 
+            # Link codeforces username.
+            if row.get('Handle codeforces', "") != "":
+                create_user_handle(
+                    username=username,
+                    judge_id='cf',
+                    handle=row['Handle codeforces'],
+                )
+
 
 class Command(BaseCommand):
     help = 'Populates the database.'
 
-    def add_arguments(self, parser: argparse.ArgumentParser):
-        parser.add_argument('days', type=int, default=1)
-        parser.add_argument('tasks', nargs='*')
-
     def handle(self, *args, **options):
         _create_judges()
-        _create_tasks()
         _create_users()

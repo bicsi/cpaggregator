@@ -33,7 +33,9 @@ def create_user_handle(username, judge_id, handle):
     user_handle, created = UserHandle.objects.update_or_create(
         user=user,
         judge=judge,
-        handle=handle,
+        defaults=dict(
+            handle=handle,
+        )
     )
     print('User handle: {0}, Created: {1}'.format(str(user_handle), str(created)))
     return user_handle
