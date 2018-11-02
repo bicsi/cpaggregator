@@ -17,7 +17,7 @@ class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
     template_name = 'info/update_profile.html'
     form_class = UserProfileUpdateForm
     success_message = 'Success: User was updates.'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('me')
     model = UserProfile
     slug_url_kwarg = 'username'
     slug_field = 'username'
@@ -25,6 +25,12 @@ class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
     def get_queryset(self):
         return super(ProfileUpdateView, self).get_queryset() \
             .filter(user=self.request.user)
+
+
+class MeDetailView(LoginRequiredMixin, generic.RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse_lazy('profile', kwargs={
+            'username': self.request.user.profile.username})
 
 
 class UserSubmissionsDetailView(generic.DetailView):
