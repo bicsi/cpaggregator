@@ -27,10 +27,13 @@ class TaskSheet(models.Model):
         )
 
     def get_best_submissions(self):
-        return self.get_all_submissions() \
+        best_submissions = self.get_all_submissions() \
             .order_by('author', 'task', 'verdict', F('score').desc(nulls_last=True), 'submitted_on') \
-            .distinct('author', 'task') \
-
+            .distinct('author', 'task')
+        
+        return data_models.Submission.objects \
+            .filter(id__in=best_submissions) \
+            .order_by('submitted_on')
 
     def __str__(self):
         return self.title
