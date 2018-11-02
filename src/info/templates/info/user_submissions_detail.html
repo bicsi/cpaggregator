@@ -2,6 +2,7 @@
 
 {% load render_table from django_tables2 %}
 {% load bootstrap4 %}
+{% load static from staticfiles %}
 
 {% block title_tag %}{{ object.get_display_name }}{% endblock %}
 
@@ -26,6 +27,25 @@
                 <h6 class="card-subtitle mb-2 text-muted">@{{ object.username }}</h6>
                 <p>Joined on: {{ object.created_at|date:"M d, Y"}}</p>
               </div>
+            </div>
+
+            <div class="card mb-3">
+                <h6 class="card-header">Accounts</h6>
+                <div class="list-group list-group-flush">
+                    {% for handle in object.handles.all %}
+                    <a class="list-group-item p-2 small list-group-item-action"
+                       href="#">
+                        <div class="badge badge-light" style="width: 70px">
+                            <img class="img-fluid p-1"
+                                 style="width: 24px; height: 24px;"
+                                 src="{% static handle.judge.get_logo_url %}"
+                                 alt="{{ handle.judge.judge_id }}">
+                            <span class="text-uppercase">{{ handle.judge.judge_id }}</span>
+                        </div>
+                        <span class="ml-3 text-primary align-middle">{{ handle.handle }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
             </div>
         </div>
         <div class="col col-md-8 col-12">

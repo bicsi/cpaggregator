@@ -138,6 +138,7 @@ class UserHandle(models.Model):
         return "%s:%s" % (self.judge.judge_id, self.handle)
 
 
+
 class Submission(models.Model):
     submission_id = models.CharField(max_length=256)
     submitted_on = models.DateTimeField()
