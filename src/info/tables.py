@@ -17,7 +17,7 @@ class SubmissionIdColumn(tables.Column):
 class AuthorColumn(tables.Column):
     def render(self, record):
         return format_html('<a href="{url}">{name}</a>',
-                           url=reverse('user-submissions', kwargs=dict(username=record.author.user.username)),
+                           url=reverse('profile', kwargs=dict(username=record.author.user.username)),
                            name=record.author.user.get_display_name())
 
 
