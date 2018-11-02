@@ -7,6 +7,17 @@
 {% block title_tag %}{{ object.get_display_name }}{% endblock %}
 
 {% block body_content %}
+
+{% if object.user == user %}
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
 {% if not object.user %}
 <div class="alert alert-info small" role="alert">
     <div class="container">
@@ -26,11 +37,18 @@
                 <h5 class="card-title">{{ object.get_display_name }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">@{{ object.username }}</h6>
                 <p>Joined on: {{ object.created_at|date:"M d, Y"}}</p>
+                <button class="btn btn-secondary update-profile">Update profile</button>
               </div>
             </div>
 
+
             <div class="card mb-3">
-                <h6 class="card-header">Accounts</h6>
+                <h6 class="card-header">
+                    Accounts
+                    {% if user == object.user %}
+                    <a href="#" class="badge badge-secondary small pull-right">Manage</a>
+                    {% endif %}
+                </h6>
                 <div class="list-group list-group-flush">
                     {% for handle in object.handles.all %}
                     <a class="list-group-item p-2 small list-group-item-action"
@@ -100,4 +118,16 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block js_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+
+    $(".update-profile").modalForm({
+        formURL: "{% url 'update-profile' username=object.username %}"
+    });
+
+});
+</script>
 {% endblock %}

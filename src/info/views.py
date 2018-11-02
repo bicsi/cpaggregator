@@ -1,9 +1,30 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
 from django.views import generic
 
+from accounts.forms import UserForm
+from info.forms import UserProfileUpdateForm
 from info.models import TaskSheet
-from data.models import UserProfile
+from data.models import UserProfile, UserHandle
 
 from info.tables import ResultsTable
+from django.contrib.messages.views import SuccessMessageMixin
+from bootstrap_modal_forms.mixins import PassRequestMixin
+
+
+class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
+                        SuccessMessageMixin, generic.UpdateView):
+    template_name = 'info/update_profile.html'
+    form_class = UserProfileUpdateForm
+    success_message = 'Success: User was updates.'
+    success_url = reverse_lazy('home')
+    model = UserProfile
+    slug_url_kwarg = 'username'
+    slug_field = 'username'
+
+    def get_queryset(self):
+        return super(ProfileUpdateView, self).get_queryset() \
+            .filter(user=self.request.user)
 
 
 class UserSubmissionsDetailView(generic.DetailView):
