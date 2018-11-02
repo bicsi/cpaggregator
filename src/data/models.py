@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.crypto import get_random_string
 
 JUDGE_CHOICES = [
     ("ac", "AtCoder"),
@@ -81,7 +82,8 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance, username=instance.username)
+        UserProfile.objects.create(user=instance, username=get_random_string(length=32), first_name=instance.first_name,
+                                   last_name=instance.last_name)
 
 
 @receiver(post_save, sender=User)
