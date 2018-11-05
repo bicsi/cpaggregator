@@ -66,14 +66,13 @@
 
                         <span class="ml-3 text-primary align-middle">{{ handle.handle }}</span>
                         {% if user == object.user %}
-                        <div class="pull-right" style="line-height: 30px">
-                            <form method="post" action="{% url 'delete-handle' handle_id=handle.id %}">
-                                {% csrf_token %}
-                                <button class="badge badge-danger align-middle" type="submit">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </form>
-                        </div>
+                        <form style="display: inline-block; float: right"
+                              method="post" action="{% url 'delete-handle' handle_id=handle.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm align-middle" type="submit">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </form>
                         {% endif %}
                     </div>
                     {% endfor %}
