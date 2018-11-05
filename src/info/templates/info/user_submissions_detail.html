@@ -10,11 +10,11 @@
 
 {% if object.user == user %}
 <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content px-3">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content px-3">
 
+        </div>
     </div>
-  </div>
 </div>
 {% endif %}
 
@@ -27,18 +27,21 @@
     </div>
 </div>
 {% endif %}
+
 <div class="container">
 
     <div class="row">
         <div class="col col-md-4 col-12">
             <div class="card mx-auto mb-3" style="max-width: 24rem;">
-              <img class="card-img-top" src="{{ object.avatar_url_or_default }}" alt="{{ object.username }}" >
-              <div class="card-body">
-                <h5 class="card-title">{{ object.get_display_name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">@{{ object.username }}</h6>
-                <p>Joined on: {{ object.created_at|date:"M d, Y"}}</p>
-                <button class="btn btn-secondary update-profile">Update profile</button>
-              </div>
+                <img class="card-img-top" src="{{ object.avatar_url_or_default }}" alt="{{ object.username }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ object.get_display_name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@{{ object.username }}</h6>
+                    <p>Joined on: {{ object.created_at|date:"M d, Y"}}</p>
+                    {% if object.user == user %}
+                    <button class="btn btn-secondary update-profile">Update profile</button>
+                    {% endif %}
+                </div>
             </div>
 
 
@@ -46,12 +49,12 @@
                 <h6 class="card-header">
                     Accounts
                     {% if user == object.user %}
-                    <a href="#" class="badge badge-secondary small pull-right">Manage</a>
+                    <a href="#" class="badge badge-secondary small pull-right create-handle">Add</a>
                     {% endif %}
                 </h6>
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush" style="line-height: 30px">
                     {% for handle in object.handles.all %}
-                    <a class="list-group-item p-2 small list-group-item-action"
+                    <div class="list-group-item p-2 small list-group-item-action"
                        href="#">
                         <div class="badge badge-light" style="width: 70px">
                             <img class="img-fluid p-1"
@@ -60,8 +63,19 @@
                                  alt="{{ handle.judge.judge_id }}">
                             <span class="text-uppercase">{{ handle.judge.judge_id }}</span>
                         </div>
+
                         <span class="ml-3 text-primary align-middle">{{ handle.handle }}</span>
-                    </a>
+                        {% if user == object.user %}
+                        <div class="pull-right" style="line-height: 30px">
+                            <form method="post" action="{% url 'delete-handle' handle_id=handle.id %}">
+                                {% csrf_token %}
+                                <button class="badge badge-danger align-middle" type="submit">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -128,6 +142,11 @@ $(document).ready(function() {
         formURL: "{% url 'update-profile' username=object.username %}"
     });
 
+    $(".create-handle").modalForm({
+        formURL: "{% url 'create-handle' %}"
+    });
+
 });
+
 </script>
 {% endblock %}

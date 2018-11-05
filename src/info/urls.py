@@ -22,6 +22,8 @@ urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('sheet/<sheet_id>/results/', views.ResultsDetailView.as_view(), name='sheet-results'),
     path('me/', views.MeDetailView.as_view(), name='me'),
+    path('handle/<handle_id>/delete', views.HandleDeleteView.as_view(), name='delete-handle'),
+    path('handle/create', views.HandleCreateView.as_view(), name='create-handle'),
     path('profile/<username>/', views.UserSubmissionsDetailView.as_view(), name='profile'),
     path('profile/<username>/update/', views.ProfileUpdateView.as_view(), name='update-profile'),
 ]

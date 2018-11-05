@@ -37,7 +37,6 @@ class ResultsTable(tables.Table):
         super(ResultsTable, self).__init__(*args, **kwargs)
         self.counter = itertools.count()
 
-
     def render_task(self, value):
         return format_html('<a href="{url}">{name}</a>',
                            url=value.get_url(), name=value.name)

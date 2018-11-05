@@ -1,3 +1,6 @@
+import heapq
+from datetime import datetime, timedelta
+
 from data.models import Task
 from scraper import utils
 from scraper.scrapers.infoarena import utils as infoarena_scraper
@@ -18,7 +21,11 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
         if len(task_ids) == 1:
             submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
         else:
-            submissions = infoarena_scraper.scrape_submissions()
+            if to_date > datetime.now() - timedelta(days=100):
+                submissions = infoarena_scraper.scrape_submissions()
+            else:
+                all_submissions = [infoarena_scraper.scrape_submissions(task=task_id) for task_id in task_ids]
+                submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
 
     elif judge_id == 'csa':
         submissions = csacademy_scraper.scrape_submissions_for_tasks(task_ids)

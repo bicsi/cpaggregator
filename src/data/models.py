@@ -35,14 +35,22 @@ class Judge(models.Model):
         return self.name
 
 
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>.
+    return 'user_{0}/{1}'.format(instance.user.username, filename)
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL, related_name='profile')
     username = models.CharField(max_length=256, unique=True)
     first_name = models.CharField(max_length=256, null=True)
     last_name = models.CharField(max_length=256, null=True)
     created_at = models.DateTimeField(default=timezone.now)
+    avatar = models.ImageField(upload_to=user_directory_path, blank=True)
 
     def avatar_url_or_default(self):
+        if self.avatar:
+            return self.avatar.url
         return static("img/user-avatar.svg")
 
     def get_display_name(self):
