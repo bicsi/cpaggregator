@@ -18,7 +18,7 @@ class TaskSheetTestCase(TestCase):
         self.user = UserProfile.objects.create(username='user1')
         self.handle = UserHandle.objects.create(judge=self.judge, handle='ia_user', user=self.user)
         self.task = Task.objects.create(judge=self.judge, task_id='ia_task')
-        self.sheet = TaskSheet.objects.create(slice_id='sheet')
+        self.sheet = TaskSheet.objects.create(sheet_id='sheet')
         self.sheet.users.add(self.user)
         self.sheet.tasks.add(self.task)
 

@@ -106,3 +106,15 @@ class ResultsDetailView(generic.DetailView):
 class DashboardView(generic.TemplateView):
     template_name = 'info/dashboard_detail.html'
     model = UserProfile
+
+    def get_context_data(self, **kwargs):
+        context = super(DashboardView, self).get_context_data(**kwargs)
+
+        task_sheets = [{
+            'task_sheet': task_sheet,
+            'solved_count': len(task_sheet.get_best_submissions().filter(
+                author__user__user=self.request.user, verdict='AC').all()),
+        } for task_sheet in self.request.user.profile.get_task_sheets()]
+        print(task_sheets)
+        context['task_sheets'] = task_sheets
+        return context

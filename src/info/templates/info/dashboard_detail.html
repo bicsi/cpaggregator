@@ -9,24 +9,39 @@
 {% block body_content %}
 {% with request.user as user %}
 <div class="container">
+    <h1 class="my-5">Dashboard</h1>
     <div class="card">
         <h6 class="card-header">Your task sheets</h6>
         <div class="list-group list-group-flush">
-            {% for task_sheet in user.profile.get_task_sheets %}
+            {% for task_sheet_data in task_sheets %}
+            {% with task_sheet=task_sheet_data.task_sheet solved_count=task_sheet_data.solved_count %}
             <a class="list-group-item list-group-item-action"
                href="{% url 'sheet-results' sheet_id=task_sheet.sheet_id %}">
-                <strong>{{ task_sheet.title }}</strong>
-                <span class="small ml-2">{{ task_sheet.tasks.all|length }} tasks</span>
-                <span class="small pull-right text-muted">Created on: {{ task_sheet.created_at|date:"M d Y" }}</span>
+                <div class="d-flex align-items-center">
+                    <span class="flex-grow-1">
+                        <strong class="d-block">{{ task_sheet.title }}</strong>
+                        {% if solved_count == task_sheet.tasks.all|length %}
+                        <span class="small text-success">
+                        {% else %}
+                        <span class="small text-secondary">
+                        {% endif %}
+                            {{ solved_count }} of {{ task_sheet.tasks.all|length }} tasks solved
+                        </span>
+                    </span>
+                    <span class="small text-muted align-self-start">
+                        {{ task_sheet.created_at|date:"M d Y" }}
+                    </span>
+                </div>
             </a>
+            {% endwith %}
             {% endfor %}
         </div>
         <div class="card-footer">
             <span class="small text-muted">
-                {% if user.profile.get_task_sheets|length <= 0 %}
+                {% if task_sheets|length <= 0 %}
                 No task sheets.
                 {% else %}
-                {{ user.profile.get_task_sheets|length }} task sheet{{ user.profile.get_task_sheets|length|pluralize }}
+                {{ task_sheets|length }} task sheet{{ task_sheets|length|pluralize }}
                 {% endif %}
             </span>
         </div>
