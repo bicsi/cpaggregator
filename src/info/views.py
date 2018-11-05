@@ -75,18 +75,32 @@ class ResultsDetailView(generic.DetailView):
     slug_url_kwarg = 'sheet_id'
     slug_field = 'sheet_id'
     table = None
+    submissions = None
 
     def get_object(self, **kwargs):
         obj = super().get_object(**kwargs)
         submissions = obj.get_best_submissions()
         self.table = ResultsTable(submissions)
-        print(submissions)
         return obj
 
     def get_context_data(self, **kwargs):
-        print(kwargs)
         kwargs['table'] = self.table
-        return super().get_context_data(**kwargs)
+        context = super(ResultsDetailView, self).get_context_data(**kwargs)
+
+        # Map task to verdict of current user.
+        verdict_for_user_dict = {
+            submission.task: submission.verdict for submission in
+            self.object.get_best_submissions().filter(author__user__user=self.request.user)
+        }
+        # Build tasks as a dict.
+        tasks = [{'task': task, 'verdict_for_user': verdict_for_user_dict.get(task)}
+                 for task in self.object.tasks.all()]
+        print("TASKS", tasks)
+
+        # Build table object.
+
+        context['tasks'] = tasks
+        return context
 
 
 class DashboardView(generic.TemplateView):

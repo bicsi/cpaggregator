@@ -12,18 +12,33 @@
     <div class="card">
         <h6 class="card-header">Tasks</h6>
         <div class="list-group list-group-flush">
-            {% for task in object.tasks.all %}
+            {% for task_status in tasks %}
+            {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
             <a class="list-group-item list-group-item-action"
                href="{{ task.get_url }}">
-                <div class="badge badge-light" style="width: 70px">
-                    <img class="img-fluid p-1"
-                         style="width: 24px; height: 24px;"
-                         src="{% static task.judge.get_logo_url %}"
-                         alt="{{ task.judge.judge_id }}">
-                    <span class="text-uppercase">{{ task.judge.judge_id }}</span>
+                <div class="d-flex align-items-center">
+                    <div class="badge badge-light" style="width: 70px">
+                        <img class="img-fluid p-1"
+                             style="width: 24px; height: 24px;"
+                             src="{% static task.judge.get_logo_url %}"
+                             alt="{{ task.judge.judge_id }}">
+                        <span class="text-uppercase">{{ task.judge.judge_id }}</span>
+                    </div>
+                    <span class="ml-3 text-primary flex-grow-1">{{ task.name }}</span>
+                    {% if verdict_for_user %}
+                        {% if verdict_for_user == 'AC' %}
+                        <span class="text-success">
+                            <i class="fas fa-check" style="width: 16px"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-danger">
+                            <i class="fas fa-times" style="width: 16px"></i>
+                        </span>
+                        {% endif %}
+                    {% endif %}
                 </div>
-                <span class="ml-3 text-primary align-middle">{{ task.name }}</span>
             </a>
+            {% endwith %}
             {% endfor %}
         </div>
     </div>

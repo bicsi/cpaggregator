@@ -1,6 +1,6 @@
 
 from django.db import models
-from django.db.models import F, Manager
+from django.db.models import F, Manager, Case, When, Value, IntegerField
 from django.utils import timezone
 
 import data.models as data_models
@@ -28,7 +28,11 @@ class TaskSheet(models.Model):
 
     def get_best_submissions(self):
         best_submissions = self.get_all_submissions() \
-            .order_by('author', 'task', 'verdict', F('score').desc(nulls_last=True), 'submitted_on') \
+            .annotate(is_ac=Case(
+                When(verdict='AC', then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField())) \
+            .order_by('author', 'task', '-is_ac', F('score').desc(nulls_last=True), 'submitted_on') \
             .distinct('author', 'task')
 
         return data_models.Submission.objects \

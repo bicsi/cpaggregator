@@ -51,7 +51,7 @@ def parse_verdict(verdict_text: str):
         return 'WA'
     if verdict == 'Eroare de compilare':
         return 'CE'
-    return None
+    return 'WA'
 
 
 def parse_date(date_text: str):
