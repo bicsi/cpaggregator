@@ -45,7 +45,15 @@
     <div class="card mt-5">
         <h6 class="card-header">Results</h6>
         {% render_table table %}
-        <span class="card-footer text-muted small">Only the best submissions are shown for each user.</span>
+        <span class="card-footer text-muted small">
+            {% if show_all %}
+            All the submissions are shown for each user.
+            <a href="{% url 'sheet-results' sheet_id=object.sheet_id %}" class="ml-2">Show best</a>
+            {% else %}
+            Only the best submissions are shown for each user.
+            <a href="{% url 'sheet-results-all' sheet_id=object.sheet_id %}" class="ml-2">Show all</a>
+            {% endif %}
+        </span>
     </div>
 </div>
 {% endblock %}

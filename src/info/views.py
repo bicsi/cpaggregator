@@ -76,11 +76,16 @@ class ResultsDetailView(generic.DetailView):
     slug_field = 'sheet_id'
     table = None
     submissions = None
+    show_all = False
 
     def get_object(self, **kwargs):
         obj = super().get_object(**kwargs)
-        submissions = obj.get_best_submissions()
-        self.table = ResultsTable(submissions)
+        if self.show_all:
+            self.submissions = obj.get_all_submissions()
+        else:
+            self.submissions = obj.get_best_submissions()
+
+        self.table = ResultsTable(self.submissions)
         return obj
 
     def get_context_data(self, **kwargs):
@@ -90,16 +95,14 @@ class ResultsDetailView(generic.DetailView):
         # Map task to verdict of current user.
         verdict_for_user_dict = {
             submission.task: submission.verdict for submission in
-            self.object.get_best_submissions().filter(author__user__user=self.request.user)
+            self.submissions.filter(author__user__user=self.request.user)
         }
         # Build tasks as a dict.
         tasks = [{'task': task, 'verdict_for_user': verdict_for_user_dict.get(task)}
                  for task in self.object.tasks.all()]
-        print("TASKS", tasks)
-
-        # Build table object.
-
         context['tasks'] = tasks
+        context['show_all'] = self.show_all
+
         return context
 
 

@@ -6,6 +6,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
+from data.managers import BestSubmissionManager, JudgeManager
+
 JUDGE_CHOICES = [
     ("ac", "AtCoder"),
     ("ia", "Infoarena"),
@@ -24,9 +26,10 @@ VERDICT_CHOICES = [
 
 
 class Judge(models.Model):
-    judge_id = models.CharField(max_length=256, choices=JUDGE_CHOICES, unique=True)
+    judge_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
     homepage = models.CharField(max_length=256)
+    objects = JudgeManager()
 
     def get_logo_url(self):
         return 'img/judge_logos/%s.png' % self.judge_id
@@ -146,7 +149,6 @@ class UserHandle(models.Model):
         return "%s:%s" % (self.judge.judge_id, self.handle)
 
 
-
 class Submission(models.Model):
     submission_id = models.CharField(max_length=256)
     submitted_on = models.DateTimeField()
@@ -158,6 +160,10 @@ class Submission(models.Model):
     score = models.IntegerField(null=True)
     exec_time = models.IntegerField(null=True)
     memory_used = models.IntegerField(null=True)
+
+    # Managers.
+    objects = models.Manager()  # The default manager.
+    best = BestSubmissionManager()
 
     def get_url(self):
         if self.task.judge.judge_id == 'csa':
