@@ -1,0 +1,10 @@
+<!-- Template used for showing a judge with icon and name. -->
+{% load static from staticfiles %}
+
+<div class="badge badge-light" style="width: 70px">
+    <img class="img-fluid p-1"
+         width="24" height="24"
+         src="{% static judge.get_logo_url %}"
+         alt="{{ judge.judge_id }}">
+    <span class="text-uppercase text-monospace">{{ judge.judge_id }}</span>
+</div>

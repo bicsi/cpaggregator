@@ -17,13 +17,9 @@
             <a class="list-group-item list-group-item-action"
                href="{{ task.get_url }}">
                 <div class="d-flex align-items-center">
-                    <div class="badge badge-light" style="width: 70px">
-                        <img class="img-fluid p-1"
-                             style="width: 24px; height: 24px;"
-                             src="{% static task.judge.get_logo_url %}"
-                             alt="{{ task.judge.judge_id }}">
-                        <span class="text-uppercase">{{ task.judge.judge_id }}</span>
-                    </div>
+                    {% with task.judge as judge %}
+                    {% include 'accounts/judge_label.html' %}
+                    {% endwith %}
                     <span class="ml-3 text-primary flex-grow-1">{{ task.name }}</span>
                     {% if verdict_for_user %}
                         {% if verdict_for_user == 'AC' %}

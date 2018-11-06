@@ -8,13 +8,6 @@ from django.utils.crypto import get_random_string
 
 from data.managers import BestSubmissionManager, JudgeManager
 
-JUDGE_CHOICES = [
-    ("ac", "AtCoder"),
-    ("ia", "Infoarena"),
-    ("poj", "POJ"),
-    ("cf", "Codeforces"),
-]
-
 VERDICT_CHOICES = [
     ("AC", "Accepted"),
     ("CE", "Compile Error"),
@@ -144,6 +137,16 @@ class UserHandle(models.Model):
 
     class Meta:
         unique_together = (('judge', 'handle'),)
+
+    def get_url(self):
+        if self.judge.judge_id == 'csa':
+            if self.handle.startswith('_uid_'):
+                return "https://csacademy.com/userid/%s" % self.handle[5:]
+            return "https://csacademy.com/user/%s" % self.handle
+        if self.judge.judge_id == 'ia':
+            return "https://www.infoarena.ro/utilizator/%s" % self.handle
+        if self.judge.judge_id == 'cf':
+            return "https://codeforces.com/profile/%s" % self.handle
 
     def __str__(self):
         return "%s:%s" % (self.judge.judge_id, self.handle)
