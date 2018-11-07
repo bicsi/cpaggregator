@@ -22,7 +22,7 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
             submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
         else:
             if to_date > datetime.now() - timedelta(days=100):
-                submissions = infoarena_scraper.scrape_submissions()
+                submissions = filter(lambda sub: sub['task_id'] in task_ids, infoarena_scraper.scrape_submissions())
             else:
                 all_submissions = [infoarena_scraper.scrape_submissions(task=task_id) for task_id in task_ids]
                 submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
