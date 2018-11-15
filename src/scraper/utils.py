@@ -9,7 +9,6 @@ def __split_into_chunks(iterable, chunk_size):
     buffer = []
     for elem in iterable:
         buffer.append(elem)
-
         if len(buffer) == chunk_size:
             yield buffer
             buffer = []
@@ -64,7 +63,7 @@ def write_tasks(db, tasks, chunk_size=100):
     for chunk in __split_into_chunks(tasks, chunk_size):
         print("Writing chunk to database...")
         num_inserted = database.insert_tasks(db, chunk)
-        print("%s submissions written to database." % num_inserted)
+        print("%s tasks written to database." % num_inserted)
         total_inserted += num_inserted
     return total_inserted
 

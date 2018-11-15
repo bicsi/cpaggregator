@@ -10,7 +10,24 @@
 {% with request.user as user %}
 <div class="container">
     <h1 class="my-5">Dashboard</h1>
-    <div class="card">
+    {% if groups_owned|length > 0 %}
+    <div class="card mb-5">
+        <h6 class="card-header">Your groups</h6>
+        <div class="list-group list-group-flush">
+            {% for group in groups_owned %}
+            <a class="list-group-item list-group-item-action"
+               href="{% url 'group-detail' group_id=group.group_id %}">
+                <div class="d-flex align-items-center">
+                    <span class="flex-grow-1">
+                        <strong class="d-block">{{ group }}</strong>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <div class="card mb-5">
         <h6 class="card-header">Your task sheets</h6>
         <div class="list-group list-group-flush">
             {% for task_sheet_data in task_sheets %}

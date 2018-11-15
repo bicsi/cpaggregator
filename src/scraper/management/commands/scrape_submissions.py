@@ -3,9 +3,7 @@ import argparse
 from django.core.management.base import BaseCommand
 import datetime
 
-from data.models import Task
-from scraper.database import get_db
-from scraper.services import scrape_submissions_for_task
+from scraper import services, database
 
 
 class Command(BaseCommand):
@@ -17,7 +15,7 @@ class Command(BaseCommand):
         parser.add_argument('--tasks', nargs='+')
 
     def handle(self, *args, **options):
-        db = get_db()
+        db = database.get_db()
         tasks = options['tasks']
         print("TASKS", tasks)
         from_date = datetime.datetime.now() - datetime.timedelta(days=options['from_days'])
@@ -27,4 +25,4 @@ class Command(BaseCommand):
         print(from_date)
 
         for task in tasks:
-            scrape_submissions_for_task(db, task, from_date, to_date)
+            services.scrape_submissions_for_task(db, task, from_date, to_date)

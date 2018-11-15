@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
 
-from data.models import UserProfile, UserHandle
+from data.models import UserProfile, UserHandle, Task, Judge
+from info.models import TaskSheet
 
 
 class UserUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
@@ -26,7 +27,38 @@ class HandleCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
         return obj
 
 
+class GroupMemberCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
+    usernames = forms.CharField(label='Usernames (separated by comma)', max_length=256)
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('instance')
+        super(GroupMemberCreateForm, self).__init__(*args, **kwargs)
+
+
 class ProfileUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['avatar']
+
+
+class SheetCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.group = kwargs.pop('group')
+        super(SheetCreateForm, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        obj = super(SheetCreateForm, self).save(*args, **kwargs)
+        obj.groups.add(self.group)
+        return obj
+
+    class Meta:
+        model = TaskSheet
+        fields = ['title', 'sheet_id']
+
+
+class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
+    judge = forms.ModelChoiceField(queryset=Judge.objects)
+    task_id = forms.CharField(
+        label='Task id',
+        help_text='Example: binar (infoarena), 505_E (codeforces), 0-k-multiple (csacademy)',
+        max_length=256)

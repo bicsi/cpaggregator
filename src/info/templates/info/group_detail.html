@@ -1,0 +1,116 @@
+{% extends "layout.html" %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+
+{% block title_tag %}{{ group }}{% endblock %}
+
+{% block body_content %}
+{% with request.user as user %}
+
+<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content px-3">
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="my-5">
+        <h1>{{ group }}</h1>
+        <span class="text-muted">
+            Created by
+            {% with group.author.user as user %}
+            <a href="{% url 'profile' username=user.profile.username %}" class="badge badge-light">
+                {% include "accounts/thumbnail_profile.html" %}
+            </a>
+            {% endwith %}
+        </span>
+    </div>
+    {% with member_count=group.members.all|length %}
+    <div class="card mb-5">
+        <h6 class="card-header">
+            Members
+            {% if is_owner %}
+            <a href="#" class="badge badge-secondary small pull-right add-members">Add</a>
+            {% endif %}
+        </h6>
+
+        <div class="list-group list-group-flush">
+            {% for member in group.members.all %}
+            <a class="list-group-item list-group-item-action"
+               href="{% url 'profile' username=member.username %}">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <strong>{{ member.get_display_name }}</strong>
+                        <span class="small text-muted ml-1">@{{ member.username }}</span>
+                    </div>
+                    {% if is_owner %}
+                    <form style="display: inline-block; float: right"
+                          method="post" action="{% url 'group-member-delete' group_id=group.group_id %}">
+                        {% csrf_token %}
+                        <input type="hidden" value="{{ member.username }}" name="member_username" />
+                        <button class="btn btn-danger btn-sm align-middle" type="submit">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <span class="card-footer text-muted small">{{ member_count }} member{{ member_count|pluralize }}</span>
+    </div>
+    {% endwith %}
+    {% with sheet_count=group.assigned_sheets.all|length %}
+    <div class="card mb-5">
+        <h6 class="card-header">
+            Assigned sheets
+            {% if is_owner %}
+            <a href="#" class="badge badge-secondary small pull-right create-sheet">Add</a>
+            {% endif %}
+        </h6>
+
+        <div class="list-group list-group-flush">
+            {% for sheet in group.assigned_sheets.all %}
+            <a class="list-group-item list-group-item-action"
+               href="{% url 'sheet-results' sheet_id=sheet.sheet_id %}">
+                <div class="d-flex align-items-center">
+                    <span class="flex-grow-1">
+                        <strong class="d-block">{{ sheet.title }}</strong>
+                        {% with task_count=sheet.tasks.all|length %}
+                        <span class="small text-primary">{{ task_count }} task{{ task_count|pluralize }}</span>
+                        {% endwith %}
+                    </span>
+                    <span class="small text-muted align-self-start">
+                        {{ sheet.created_at|date:"M d Y" }}
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <span class="card-footer text-muted small">{{ sheet_count }} sheet{{ sheet_count|pluralize }}</span>
+    </div>
+    {% endwith %}
+</div>
+
+{% endwith %}
+{% endblock %}
+
+{% block js_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+
+    $(".add-members").modalForm({
+        formURL: "{% url 'group-member-add' group_id=group.group_id %}"
+    });
+
+    $(".create-sheet").modalForm({
+        formURL: "{% url 'sheet-create' group_id=group.group_id %}"
+    });
+
+});
+
+</script>
+{% endblock %}

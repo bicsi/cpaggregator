@@ -86,8 +86,11 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance, username=get_random_string(length=32), first_name=instance.first_name,
-                                   last_name=instance.last_name)
+        UserProfile.objects.create(
+            user=instance,
+            username=get_random_string(length=32),
+            first_name=instance.first_name,
+            last_name=instance.last_name)
 
 
 @receiver(post_save, sender=User)
@@ -103,15 +106,32 @@ class UserGroup(models.Model):
     name = models.CharField(max_length=256, unique=True)
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
     created_at = models.DateTimeField(default=timezone.now)
+    author = models.ForeignKey(UserProfile, related_name='groups_owned', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name
+
+
+class MethodTag(models.Model):
+    tag_id = models.CharField(max_length=256, unique=True)
+    tag_name = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.tag_name
 
 
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=256)
     name = models.CharField(null=True, max_length=256)
+    time_limit_ms = models.IntegerField(null=True)
+    memory_limit_kb = models.IntegerField(null=True)
+    tags = models.ManyToManyField(MethodTag)
+
+    def name_or_id(self):
+        if self.name:
+            return self.name
+        return self.task_id
 
     def get_url(self):
         if self.judge.judge_id == 'csa':
@@ -127,7 +147,7 @@ class Task(models.Model):
         unique_together = (('judge', 'task_id'),)
 
     def __str__(self):
-        return "%s:%s" % (self.judge.judge_id, self.task_id)
+        return "{}:{}".format(self.judge.judge_id, self.task_id)
 
 
 class UserHandle(models.Model):

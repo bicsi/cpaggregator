@@ -54,8 +54,7 @@
                 </h6>
                 <div class="list-group list-group-flush" style="line-height: 30px">
                     {% for handle in object.handles.all %}
-                    <div class="list-group-item p-2"
-                       href="#">
+                    <div class="list-group-item p-2">
                         {% with handle.judge as judge %}
                         {% include 'accounts/judge_label.html' %}
                         {% endwith %}

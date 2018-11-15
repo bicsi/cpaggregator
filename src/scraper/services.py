@@ -1,5 +1,6 @@
 import heapq
 from datetime import datetime, timedelta
+from itertools import takewhile
 
 from data.models import Task
 from scraper import utils
@@ -8,14 +9,19 @@ from scraper.scrapers.csacademy import utils as csacademy_scraper
 from scraper.scrapers.codeforces import utils as codeforces_scraper
 
 
-def scrape_submissions_for_task(db, task, from_date, to_date):
-    print('Scraping submissions for task: %s...' % task)
-    judge_id, task_id = task.split(':')
-
+def __expand_task(judge_id, task_id):
     task_ids = [task_id]
     if task_id == '*':
-        task_ids = [task.task_id for task in Task.objects.filter(judge__judge_id=judge_id)]
+        task_ids = [task.task_id for task in
+                    Task.objects.filter(judge__judge_id=judge_id)]
     print('Task ids:', task_ids)
+    return task_ids
+
+
+def scrape_submissions_for_task(db, task, from_date, to_date):
+    print('Scraping submissions for task: %s...' % task)
+    judge_id, task_id = task.split(':', 1)
+    task_ids = __expand_task(judge_id, task_id)
 
     if judge_id == 'ia':
         if len(task_ids) == 1:
@@ -37,11 +43,26 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
         print("Judge id not recognized: %s" % judge_id)
         return
 
-    submissions_to_write = []
-    for submission in submissions:
-        if submission['submitted_on'] < to_date:
-            break
-        submissions_to_write.append(submission)
+    submissions_to_write = takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+    utils.write_submissions(db, submissions_to_write, chunk_size=1000)
 
-    utils.write_submissions(db, submissions_to_write, chunk_size=1000000)
+
+def scrape_task_info(db, task):
+    print('Scraping task {} info...'.format(task))
+    judge_id, task_id = task.split(':', 1)
+    task_ids = __expand_task(judge_id, task_id)
+
+    if judge_id == 'ia':
+        task_infos = [infoarena_scraper.scrape_task_info(task_id)
+                      for task_id in task_ids]
+
+    elif judge_id == 'csa':
+        task_infos = csacademy_scraper.scrape_task_info(task_ids)
+
+    else:
+        print("Judge id not recognized: %s" % judge_id)
+        return
+
+    utils.write_tasks(db, task_infos)
+
 
