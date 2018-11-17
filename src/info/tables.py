@@ -39,7 +39,7 @@ class ResultsTable(tables.Table):
 
     def render_task(self, value):
         return format_html('<a href="{url}">{name}</a>',
-                           url=value.get_url(), name=value.name)
+                           url=value.get_url(), name=value.name_or_id())
 
     def render_verdict(self, value, column):
         if value == 'Accepted':

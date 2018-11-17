@@ -83,7 +83,7 @@
                     <ul class="list-unstyled list-inline">
                         {% for task in object.get_solved_tasks %}
                         <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name_or_id }}</a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -102,7 +102,7 @@
                     <ul class="list-unstyled list-inline">
                         {% for task in object.get_unsolved_tasks %}
                         <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name }}</a>
+                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name_or_id }}</a>
                         </li>
                         {% endfor %}
                     </ul>
