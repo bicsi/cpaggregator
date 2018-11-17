@@ -31,6 +31,9 @@ def scrape_infoarena_submissions_a():
     print('Scraping infoarena submissions...')
     subprocess.call('python ./src/manage.py scrape_submissions --tasks ia:* --from_days=0 --to_days=300000',
                     shell=True, close_fds=True)
+    print('Scraping infoarena tasks...')
+    subprocess.call('python ./src/manage.py scrape_task_info --tasks ia:*',
+                    shell=True, close_fds=True)
 
 
 @scheduler.scheduled_job('interval', minutes=30)
@@ -51,6 +54,13 @@ def scrape_codeforces_submissions_a():
 def update_users():
     print('Updating users...')
     subprocess.call('python ./src/manage.py update_user',
+                    shell=True, close_fds=True)
+
+
+@scheduler.scheduled_job('interval', minutes=30)
+def update_tasks():
+    print('Updating tasks...')
+    subprocess.call('python ./src/manage.py update_task_info',
                     shell=True, close_fds=True)
 
 print("SCHEDULER STARTING...")

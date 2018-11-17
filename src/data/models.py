@@ -37,10 +37,10 @@ def user_directory_path(instance, filename):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL, related_name='profile')
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='profile')
     username = models.CharField(max_length=256, unique=True)
-    first_name = models.CharField(max_length=256, null=True)
-    last_name = models.CharField(max_length=256, null=True)
+    first_name = models.CharField(max_length=256, null=True, blank=True)
+    last_name = models.CharField(max_length=256, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     avatar = models.ImageField(upload_to=user_directory_path, blank=True)
 
@@ -123,10 +123,10 @@ class MethodTag(models.Model):
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=256)
-    name = models.CharField(null=True, max_length=256)
-    time_limit_ms = models.IntegerField(null=True)
-    memory_limit_kb = models.IntegerField(null=True)
-    tags = models.ManyToManyField(MethodTag)
+    name = models.CharField(null=True, blank=True, max_length=256)
+    time_limit_ms = models.IntegerField(null=True, blank=True)
+    memory_limit_kb = models.IntegerField(null=True, blank=True)
+    tags = models.ManyToManyField(MethodTag, blank=True)
 
     def name_or_id(self):
         if self.name:
@@ -178,11 +178,11 @@ class Submission(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     author = models.ForeignKey(UserHandle, on_delete=models.CASCADE)
     language = models.CharField(max_length=256)
-    source_size = models.IntegerField(null=True)
+    source_size = models.IntegerField(null=True, blank=True)
     verdict = models.CharField(max_length=256, choices=VERDICT_CHOICES)
-    score = models.IntegerField(null=True)
-    exec_time = models.IntegerField(null=True)
-    memory_used = models.IntegerField(null=True)
+    score = models.IntegerField(null=True, blank=True)
+    exec_time = models.IntegerField(null=True, blank=True)
+    memory_used = models.IntegerField(null=True, blank=True)
 
     # Managers.
     objects = models.Manager()  # The default manager.
