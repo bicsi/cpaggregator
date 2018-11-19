@@ -25,6 +25,7 @@ urlpatterns = [
         path('all/', views.ResultsDetailView.as_view(show_all=True), name='sheet-results-all'),
         path('add-task/', views.SheetTaskCreateView.as_view(), name='sheet-task-add'),
         path('delete/', views.SheetDeleteView.as_view(), name='sheet-delete'),
+        path('update-description/', views.SheetDescriptionUpdateView.as_view(), name='sheet-description-update'),
     ])),
     path('group/<group_id>/', include([
         path('', views.GroupDetailView.as_view(), name='group-detail'),

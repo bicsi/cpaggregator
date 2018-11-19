@@ -9,15 +9,27 @@
 {% block body_content %}
 
 <div class="modal fade" tabindex="-1" role="dialog" id="modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content px-3">
         </div>
     </div>
 </div>
 
 <div class="container">
-    <h1 class="my-5">{{ object.title }}</h1>
-    <div class="card">
+    <h1 class="mt-5">{{ object.title }}</h1>
+    {% if object.description and object.description|length > 0 %}
+    <div class="description">
+        {{ object.formatted_description|safe }}
+    </div>
+    {% if is_owner %}
+    <a href="#" class="sheet-description-update">Edit description</a>
+    {% endif %}
+    {% else %}
+    {% if is_owner %}
+    <a href="#" class="sheet-description-update">Add description</a>
+    {% endif %}
+    {% endif %}
+    <div class="card mt-5">
         <h6 class="card-header">Tasks
             {% if is_owner %}
             <a href="#" class="badge badge-secondary ml-2 sheet-task-add">Add</a>
@@ -81,6 +93,10 @@ $(document).ready(function() {
 
     $(".sheet-task-add").modalForm({
         formURL: "{% url 'sheet-task-add' sheet_id=object.sheet_id %}"
+    });
+
+    $(".sheet-description-update").modalForm({
+        formURL: "{% url 'sheet-description-update' sheet_id=object.sheet_id %}"
     });
 
 });

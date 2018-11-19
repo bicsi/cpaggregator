@@ -62,3 +62,9 @@ class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
         label='Task id',
         help_text='Example: binar (infoarena), 505_E (codeforces), 0-k-multiple (csacademy)',
         max_length=256)
+
+
+class SheetDescriptionUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+    class Meta:
+        fields = ['title', 'description']
+        model = TaskSheet

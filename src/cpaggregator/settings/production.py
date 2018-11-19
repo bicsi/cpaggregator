@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrap4',
     'bootstrap_modal_forms',
+    'markdownx',
     'django_tables2',
     'accounts',
     'data',

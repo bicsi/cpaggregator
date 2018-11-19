@@ -60,7 +60,7 @@ class HandleDeleteView(LoginRequiredMixin, generic.DeleteView):
 class MeDetailView(LoginRequiredMixin, generic.RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         return reverse_lazy('profile', kwargs={
-            'username': self.request.user.profile.username})
+            'username': self.request.user.username})
 
 
 class UserSubmissionsDetailView(generic.DetailView):
@@ -241,3 +241,24 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
         } for task_sheet in self.request.user.profile.get_task_sheets()]
 
         return context
+
+
+class SheetDescriptionUpdateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin, generic.UpdateView):
+    template_name = 'info/sheet_description_update.html'
+    model = TaskSheet
+    slug_url_kwarg = 'sheet_id'
+    slug_field = 'sheet_id'
+    form_class = forms.SheetDescriptionUpdateForm
+
+    def get_success_url(self):
+        return reverse_lazy('sheet-results', kwargs=dict(sheet_id=self.object.sheet_id))
+
+    def get_form_kwargs(self):
+        kwargs = super(SheetDescriptionUpdateView, self).get_form_kwargs()
+        kwargs['auto_id'] = False
+        return kwargs
+
+    def form_valid(self, form):
+        for group in self.object.groups.all():
+            if group.author == self.request.user.profile:
+                return super(SheetDescriptionUpdateView, self).form_valid(form)

@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('info.urls')),
     path('', views.HomeView.as_view(), name='home'),
     path('account/', include('accounts.urls')),
+    path('markdownx/', include('markdownx.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
