@@ -1,3 +1,4 @@
+import django
 import django_heroku
 
 import os
@@ -72,8 +73,11 @@ ROOT_URLCONF = 'cpaggregator.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, '../templates')],
         'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(BASE_DIR, '../templates'),
+            django.__path__[0] + '/forms/templates',
+        ],
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -135,3 +139,5 @@ SECURE_FRAME_DENY = True
 
 # Activate Django-Heroku.
 django_heroku.settings(locals())
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
