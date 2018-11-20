@@ -68,3 +68,6 @@ class SheetDescriptionUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.M
     class Meta:
         fields = ['title', 'description']
         model = TaskSheet
+        help_texts = {
+            'description': 'You can write your description using Markdown.',
+        }
