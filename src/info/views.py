@@ -67,7 +67,9 @@ class UserSubmissionsDetailView(generic.DetailView):
     template_name = 'info/user_submissions_detail.html'
     model = UserProfile
     slug_url_kwarg = 'username'
-    slug_field = 'username'
+
+    def get_object(self, queryset=None):
+        return UserProfile.objects.get(user__username=self.kwargs['username'])
 
 
 class ResultsDetailView(generic.DetailView):

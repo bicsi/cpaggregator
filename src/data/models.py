@@ -38,11 +38,16 @@ def user_directory_path(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='profile')
-    username = models.CharField(max_length=256, unique=True)
     first_name = models.CharField(max_length=256, null=True, blank=True)
     last_name = models.CharField(max_length=256, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     avatar = models.ImageField(upload_to=user_directory_path, blank=True)
+
+    @property
+    def username(self):
+        if self.user:
+            return self.user.username
+        return str(self.id)
 
     def avatar_url_or_default(self):
         if self.avatar:
