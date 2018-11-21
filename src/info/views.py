@@ -8,7 +8,7 @@ from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
 from . import forms
 from info.models import TaskSheet
-from data.models import UserProfile, UserHandle, UserGroup, Task
+from data.models import UserProfile, UserHandle, UserGroup, Task, User
 
 from info.tables import ResultsTable
 from django.contrib.messages.views import SuccessMessageMixin
@@ -142,8 +142,8 @@ class GroupMemberCreateView(LoginRequiredMixin, PassRequestMixin,
         if group.author == self.request.user.profile:
             users = []
             for username in map(str.strip, form.cleaned_data['usernames'].split(',')):
-                for user in UserProfile.objects.filter(username=username):
-                    users.append(user)
+                for user in User.objects.filter(username=username):
+                    users.append(user.profile)
             group.members.add(*users)
         return redirect('group-detail', group_id=group.group_id)
 
