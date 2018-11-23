@@ -52,6 +52,7 @@ class Assignment(models.Model):
 
     class Meta:
         unique_together = (('group', 'sheet'),)
+        ordering = ['assigned_on']
 
 
 
