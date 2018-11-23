@@ -47,6 +47,9 @@ class Assignment(models.Model):
             task__in=self.sheet.tasks.all(),
         ).order_by('submitted_on')
 
+    def __str__(self):
+        return '{} assigned to {}'.format(self.sheet, self.group)
+
     class Meta:
         unique_together = (('group', 'sheet'),)
 
