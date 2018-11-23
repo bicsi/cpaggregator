@@ -135,11 +135,13 @@
 $(document).ready(function() {
 
     $(".update-profile").modalForm({
-        formURL: "{% url 'update-profile' username=object.username %}"
+        formURL: "{% url 'update-profile' username=object.username %}",
+        errorClass: ".is-invalid",
     });
 
     $(".create-handle").modalForm({
-        formURL: "{% url 'create-handle' %}"
+        formURL: "{% url 'create-handle' %}",
+        errorClass: ".is-invalid",
     });
 
 });

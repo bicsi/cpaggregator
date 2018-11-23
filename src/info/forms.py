@@ -2,9 +2,11 @@ from django import forms
 from django.contrib.auth.models import User
 
 from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
+from django.forms import SelectDateWidget
 
 from data.models import UserProfile, UserHandle, Task, Judge
-from info.models import TaskSheet
+from info.models import TaskSheet, Assignment
+from betterforms import multiform
 
 
 class UserUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
@@ -40,22 +42,6 @@ class ProfileUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm)
         model = UserProfile
         fields = ['avatar']
 
-
-class SheetCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        self.group = kwargs.pop('group')
-        super(SheetCreateForm, self).__init__(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        obj = super(SheetCreateForm, self).save(*args, **kwargs)
-        obj.groups.add(self.group)
-        return obj
-
-    class Meta:
-        model = TaskSheet
-        fields = ['title', 'sheet_id']
-
-
 class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
     judge = forms.ModelChoiceField(queryset=Judge.objects)
     task_id = forms.CharField(
@@ -71,3 +57,23 @@ class SheetDescriptionUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.M
         help_texts = {
             'description': 'You can write your description using Markdown.',
         }
+
+
+class SheetCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+    class Meta:
+        model = TaskSheet
+        fields = ['title', 'sheet_id']
+
+class AssignmentCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['assigned_on']
+        widgets = {
+            'assigned_on': SelectDateWidget(),
+        }
+
+class AssignmentSheetCreateMultiForm(PopRequestMixin, CreateUpdateAjaxMixin, multiform.MultiModelForm):
+    form_classes = {
+        'sheet': SheetCreateForm,
+        'assignment': AssignmentCreateForm,
+    }

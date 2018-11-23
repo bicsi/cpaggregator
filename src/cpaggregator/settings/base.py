@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'markdownx',
+    'betterforms',
     'django_tables2',
     'widget_tweaks',
     'bootstrap_modal_forms',

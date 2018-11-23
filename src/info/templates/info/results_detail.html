@@ -5,9 +5,10 @@
 {% load static from staticfiles %}
 {% load humanize %}
 
-{% block title_tag %}{{ object.title }} - Results{% endblock %}
+{% block title_tag %}{{ sheet.title }} - Results{% endblock %}
 
 {% block body_content %}
+{% with sheet=assignation.sheet group=assignation.group %}
 
 <div class="modal fade" tabindex="-1" role="dialog" id="modal">
     <div class="modal-dialog modal-lg" role="document">
@@ -17,10 +18,10 @@
 </div>
 
 <div class="container">
-    <h1 class="mt-5">{{ object.title }}</h1>
-    {% if object.description and object.description|length > 0 %}
+    <h1 class="mt-5">{{ sheet.title }}</h1>
+    {% if sheet.description and sheet.description|length > 0 %}
     <div class="description">
-        {{ object.formatted_description|safe }}
+        {{ sheet.formatted_description|safe }}
     </div>
     {% if is_owner %}
     <a href="#" class="sheet-description-update">Edit description</a>
@@ -31,10 +32,19 @@
     {% endif %}
     {% endif %}
     <div class="card mt-5">
-        <div class="card-body d-flex align-items-center">
-            <strong>Assigned on: </strong>
-            <span class="ml-2">{{ object.created_at|date:"M d, Y" }}</span>
-            <span class="text-muted small ml-2">({{ object.created_at|naturaltime }})</span>
+        <h6 class="card-header">Assignment</h6>
+        <div class="card-body">
+            <div>
+                <i style="width: 24px" class="fas fa-calendar-alt text-secondary text-center"></i>
+                <span class="ml-2">{{ assignation.assigned_on|date:"M d, Y | H:m" }}</span>
+                <span class="text-muted small ml-2">({{ assignation.assigned_on|naturaltime }})</span>
+            </div>
+            <div class="mt-1">
+                <i style="width: 24px" class="fas fa-users text-secondary text-center"></i>
+                <a class="ml-2" href="{% url 'group-detail' group_id=group.group_id %}">
+                    {{ assignation.group.name }}
+                </a>
+            </div>
         </div>
     </div>
     <div class="card mt-5">
@@ -76,16 +86,16 @@
         <span class="card-footer text-muted small">
             {% if show_all %}
             All the submissions are shown for each user.
-            <a href="{% url 'sheet-results' sheet_id=object.sheet_id %}" class="ml-2">Show best</a>
+            <a href="{% url 'sheet-results' sheet_id=sheet.sheet_id %}" class="ml-2">Show best</a>
             {% else %}
             Only the best submissions are shown for each user.
-            <a href="{% url 'sheet-results-all' sheet_id=object.sheet_id %}" class="ml-2">Show all</a>
+            <a href="{% url 'sheet-results-all' sheet_id=sheet.sheet_id group_id=group.group_id %}" class="ml-2">Show all</a>
             {% endif %}
         </span>
     </div>
 
     {% if is_owner %}
-    <form method="post" action="{% url 'sheet-delete' sheet_id=object.sheet_id %}">
+    <form method="post" action="{% url 'sheet-delete' sheet_id=sheet.sheet_id %}">
         {% csrf_token %}
         <button class="btn btn-danger btn-sm align-middle" type="submit">
             DELETE
@@ -93,6 +103,8 @@
     </form>
     {% endif %}
 </div>
+
+{% endwith %}
 {% endblock %}
 
 {% block js_scripts %}
@@ -100,13 +112,16 @@
 $(document).ready(function() {
 
     $(".sheet-task-add").modalForm({
-        formURL: "{% url 'sheet-task-add' sheet_id=object.sheet_id %}"
+        formURL: "{% url 'sheet-task-add' sheet_id=assignation.sheet.sheet_id %}",
+        errorClass: ".is-invalid",
     });
 
     $(".sheet-description-update").modalForm({
-        formURL: "{% url 'sheet-description-update' sheet_id=object.sheet_id %}"
+        formURL: "{% url 'sheet-description-update' sheet_id=assignation.sheet.sheet_id %}",
+        errorClass: ".is-invalid",
     });
 
 });
 </script>
 {% endblock %}
+

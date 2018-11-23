@@ -30,10 +30,10 @@
     <div class="card mb-5">
         <h6 class="card-header">Your task sheets</h6>
         <div class="list-group list-group-flush">
-            {% for task_sheet_data in task_sheets %}
-            {% with task_sheet=task_sheet_data.task_sheet solved_count=task_sheet_data.solved_count %}
+            {% for assignation_data in assignations %}
+            {% with task_sheet=assignation_data.assignation.sheet solved_count=assignation_data.solved_count group=assignation_data.assignation.group %}
             <a class="list-group-item list-group-item-action"
-               href="{% url 'sheet-results' sheet_id=task_sheet.sheet_id %}">
+               href="{% url 'sheet-results' group_id=group.group_id sheet_id=task_sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
                     <span class="flex-grow-1">
                         <strong class="d-block">{{ task_sheet.title }}</strong>

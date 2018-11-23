@@ -5,8 +5,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from info import models
-
+from data.models import Submission
 
 class SubmissionIdColumn(tables.Column):
     def render(self, record):
@@ -28,7 +27,7 @@ class ResultsTable(tables.Table):
 
     class Meta:
         template_name = 'django_tables2/bootstrap-responsive.html'
-        model = models.data_models.Submission
+        model = Submission
         exclude = ['id', 'language', 'exec_time', 'memory_used']
         sequence = ('submission_id', 'author', 'task', 'source_size', 'verdict', 'score', 'submitted_on')
 

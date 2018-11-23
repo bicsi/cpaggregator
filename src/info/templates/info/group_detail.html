@@ -73,18 +73,18 @@
         </h6>
 
         <div class="list-group list-group-flush">
-            {% for sheet in group.assigned_sheets.all %}
+            {% for assignment in group.assignment_set.all %}
             <a class="list-group-item list-group-item-action"
-               href="{% url 'sheet-results' sheet_id=sheet.sheet_id %}">
+               href="{% url 'sheet-results' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
                     <span class="flex-grow-1">
-                        <strong class="d-block">{{ sheet.title }}</strong>
-                        {% with task_count=sheet.tasks.all|length %}
+                        <strong class="d-block">{{ assignment.sheet.title }}</strong>
+                        {% with task_count=assignment.sheet.tasks.all|length %}
                         <span class="small text-primary">{{ task_count }} task{{ task_count|pluralize }}</span>
                         {% endwith %}
                     </span>
                     <span class="small text-muted align-self-start">
-                        {{ sheet.created_at|date:"M d Y" }}
+                        {{ assignment.assigned_at|date:"M d Y" }}
                     </span>
                 </div>
             </a>
@@ -103,11 +103,13 @@
 $(document).ready(function() {
 
     $(".add-members").modalForm({
-        formURL: "{% url 'group-member-add' group_id=group.group_id %}"
+        formURL: "{% url 'group-member-add' group_id=group.group_id %}",
+        errorClass: ".is-invalid",
     });
 
     $(".create-sheet").modalForm({
-        formURL: "{% url 'sheet-create' group_id=group.group_id %}"
+        formURL: "{% url 'sheet-create' group_id=group.group_id %}",
+        errorClass: ".is-invalid",
     });
 
 });

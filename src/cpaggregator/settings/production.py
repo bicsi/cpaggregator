@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'betterforms',
     'bootstrap4',
     'bootstrap_modal_forms',
     'markdownx',

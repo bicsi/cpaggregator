@@ -59,12 +59,11 @@ class UserProfile(models.Model):
             return "%s %s" % (self.first_name, self.last_name)
         return self.username
 
-    def get_task_sheets(self):
-        task_sheets = []
-        task_sheets.extend(self.assigned_sheets.all())
+    def get_assigned_sheets(self):
+        assignations = []
         for group in self.assigned_groups.all():
-            task_sheets.extend(group.assigned_sheets.all())
-        return set(task_sheets)
+            assignations.extend(group.assignment_set.all())
+        return set(assignations)
 
     def get_solved_tasks(self):
         tasks = []
