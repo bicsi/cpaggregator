@@ -64,6 +64,7 @@ class SheetCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
         model = TaskSheet
         fields = ['title', 'sheet_id']
 
+
 class AssignmentCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
     class Meta:
         model = Assignment
@@ -72,7 +73,8 @@ class AssignmentCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelFo
             'assigned_on': SelectDateWidget(),
         }
 
-class AssignmentSheetCreateMultiForm(PopRequestMixin, CreateUpdateAjaxMixin, multiform.MultiModelForm):
+
+class AssignmentSheetCreateMultiForm(multiform.MultiModelForm):
     form_classes = {
         'sheet': SheetCreateForm,
         'assignment': AssignmentCreateForm,

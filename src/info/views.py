@@ -121,8 +121,8 @@ class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View)
     def post(self, request, *args, **kwargs):
         group = self.get_object()
         if group.author == request.user.profile:
-            user = get_object_or_404(UserProfile, username=request.POST.get('member_username', ''))
-            group.members.remove(user)
+            user = get_object_or_404(User, username=request.POST.get('member_username', ''))
+            group.members.remove(user.profile)
         return redirect('group-detail', group_id=group.group_id)
 
 
@@ -155,16 +155,15 @@ class SheetCreateView(LoginRequiredMixin, PassRequestMixin,
     assignment = None
     sheet = None
 
-    def get_form_kwargs(self):
-        kwargs = super(SheetCreateView, self).get_form_kwargs()
+    def form_valid(self, form):
 
         self.group = UserGroup.objects.get(group_id=self.kwargs['group_id'])
-        self.sheet = TaskSheet(author=self.request.user.profile)
-        kwargs.update(instance={
-            'assignment': Assignment(group=self.group, sheet=self.sheet),
-            'sheet': self.sheet,
-        })
-        return kwargs
+        self.sheet = form['sheet'].save()
+        assignment = form['assignment'].save(commit=False)
+        assignment.sheet = self.sheet
+        assignment.group = self.group
+        assignment.save()
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse_lazy('sheet-results', kwargs=dict(
