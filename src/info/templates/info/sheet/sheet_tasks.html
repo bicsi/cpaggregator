@@ -1,0 +1,45 @@
+<div class="card mt-5">
+    <h6 class="card-header">Tasks
+        {% if is_owner %}
+        <a href="#" class="badge badge-secondary ml-2 sheet-task-add">Add</a>
+        {% endif %}
+    </h6>
+    <div class="list-group list-group-flush">
+        {% for task_status in tasks %}
+        {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
+        <a class="list-group-item list-group-item-action"
+           href="{{ task.get_url }}">
+            <div class="d-flex align-items-center">
+                {% with task.judge as judge %}
+                {% include 'accounts/judge_label.html' %}
+                {% endwith %}
+                <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                {% if verdict_for_user %}
+                    {% if verdict_for_user == 'AC' %}
+                    <span class="text-success">
+                        <i class="fas fa-check" style="width: 16px"></i>
+                    </span>
+                    {% else %}
+                    <span class="text-danger">
+                        <i class="fas fa-times" style="width: 16px"></i>
+                    </span>
+                    {% endif %}
+                {% endif %}
+                {% if is_owner %}
+                <form style="display: inline-block; float: right"
+                      class="ml-3"
+                      method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
+                    <input type="hidden" value="{{ task.task_id }}" name="task_id" />
+                    <button class="btn btn-danger btn-sm align-middle" type="submit">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </a>
+        {% endwith %}
+        {% endfor %}
+    </div>
+</div>

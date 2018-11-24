@@ -1,0 +1,13 @@
+<h1 class="mt-5">{{ sheet.title }}</h1>
+{% if sheet.description and sheet.description|length > 0 %}
+    <div class="description">
+        {{ sheet.formatted_description|safe }}
+    </div>
+    {% if is_owner %}
+        <a href="#" class="sheet-description-update">Edit description</a>
+    {% endif %}
+{% else %}
+    {% if is_owner %}
+        <a href="#" class="sheet-description-update">Add description</a>
+    {% endif %}
+{% endif %}

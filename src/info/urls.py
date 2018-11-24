@@ -22,16 +22,19 @@ urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('group/<group_id>/', include([
         path('', views.GroupDetailView.as_view(), name='group-detail'),
-        path('delete-member', views.GroupMemberDeleteView.as_view(), name='group-member-delete'),
-        path('add-member', views.GroupMemberCreateView.as_view(), name='group-member-add'),
-        path('create-sheet', views.SheetCreateView.as_view(), name='sheet-create'),
+        path('delete-member/', views.GroupMemberDeleteView.as_view(), name='group-member-delete'),
+        path('add-member/', views.GroupMemberCreateView.as_view(), name='group-member-add'),
+        path('create-assignment/', views.AssignmentCreateView.as_view(), name='assignment-create'),
         path('sheet/<sheet_id>/', include([
                 path('', views.ResultsDetailView.as_view(), name='sheet-results'),
                 path('all/', views.ResultsDetailView.as_view(show_all=True), name='sheet-results-all'),
             ])),
     ])),
+    path('create-sheet/', views.SheetCreateView.as_view(), name='sheet-create'),
     path('sheet/<sheet_id>/', include([
+        path('', views.SheetDetailView.as_view(), name='sheet-detail'),
         path('add-task/', views.SheetTaskCreateView.as_view(), name='sheet-task-add'),
+        path('delete-task/', views.SheetTaskDeleteView.as_view(), name='sheet-task-delete'),
         path('delete/', views.SheetDeleteView.as_view(), name='sheet-delete'),
         path('update-description/', views.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),

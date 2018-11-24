@@ -9,7 +9,7 @@ from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
 from . import forms
 from info.models import TaskSheet, Assignment
-from data.models import UserProfile, UserHandle, UserGroup, Task, User
+from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
 
 from info.tables import ResultsTable
 from django.contrib.messages.views import SuccessMessageMixin
@@ -79,9 +79,9 @@ class ResultsDetailView(generic.DetailView):
     table = None
     submissions = None
     show_all = False
-    context_object_name = 'assignation'
+    context_object_name = 'assignment'
 
-    def get_object(self):
+    def get_object(self, **kwargs):
         obj = Assignment.objects.get(group__group_id=self.kwargs['group_id'],
                                      sheet__sheet_id=self.kwargs['sheet_id'])
         if self.show_all:
@@ -108,9 +108,47 @@ class ResultsDetailView(generic.DetailView):
         context['show_all'] = self.show_all
         context['is_owner'] = self.object.sheet.is_owned_by(self.request.user)
 
-        print(context)
-
         return context
+
+
+class SheetDetailView(generic.DetailView):
+    template_name = 'info/sheet_detail.html'
+    model = TaskSheet
+    context_object_name = 'sheet'
+    submissions = None
+    show_all = False
+    table = None
+
+    def get_object(self, **kwargs):
+        obj = TaskSheet.objects.get(sheet_id=self.kwargs['sheet_id'])
+
+        if self.show_all:
+            self.submissions = Submission.objects \
+                .filter(author__user__user=self.request.user) \
+                .filter(task__in=obj.tasks.all())
+        else:
+            self.submissions = Submission.best \
+                .filter(author__user__user=self.request.user) \
+                .filter(task__in=obj.tasks.all())
+
+        self.table = ResultsTable(self.submissions)
+        return obj
+
+    def get_context_data(self, **kwargs):
+        # Map task to verdict of current user.
+        verdict_for_user_dict = {
+            submission.task: submission.verdict for submission in
+            self.submissions.filter(author__user__user=self.request.user)
+        }
+        # Build tasks as a dict.
+        tasks = [{'task': task, 'verdict_for_user': verdict_for_user_dict.get(task)}
+                 for task in self.object.tasks.all()]
+        kwargs['tasks'] = tasks
+        kwargs['show_all'] = self.show_all
+        kwargs['is_owner'] = self.object.is_owned_by(self.request.user)
+        kwargs['table'] = self.table
+
+        return super(SheetDetailView, self).get_context_data(**kwargs)
 
 
 class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
@@ -123,7 +161,22 @@ class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View)
         if group.author == request.user.profile:
             user = get_object_or_404(User, username=request.POST.get('member_username', ''))
             group.members.remove(user.profile)
-        return redirect('group-detail', group_id=group.group_id)
+        return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
+
+
+class SheetTaskDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
+    model = TaskSheet
+    slug_field = 'sheet_id'
+    slug_url_kwarg = 'sheet_id'
+
+    def post(self, request, *args, **kwargs):
+        sheet = self.get_object()
+        if sheet.is_owned_by(request.user):
+            task = get_object_or_404(Task,
+                        task_id=request.POST.get('task_id', ''),
+                        judge__judge_id=request.POST.get('judge_id', ''))
+            sheet.tasks.remove(task)
+        return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
 class GroupMemberCreateView(LoginRequiredMixin, PassRequestMixin,
@@ -146,29 +199,47 @@ class GroupMemberCreateView(LoginRequiredMixin, PassRequestMixin,
         return redirect('group-detail', group_id=group.group_id)
 
 
-class SheetCreateView(LoginRequiredMixin, PassRequestMixin,
-                      SuccessMessageMixin, generic.FormView):
-    model = TaskSheet
+class AssignmentCreateView(LoginRequiredMixin, PassRequestMixin,
+                           SuccessMessageMixin, generic.FormView):
     form_class = forms.AssignmentSheetCreateMultiForm
-    template_name = 'info/create_sheet.html'
-    group = None
+    template_name = 'info/assignment_create.html'
     assignment = None
+
+    def form_valid(self, form):
+        group = UserGroup.objects.get(group_id=self.kwargs['group_id'])
+        sheet = form['sheet'].save()
+        sheet = TaskSheet.objects.get(sheet_id=sheet.sheet_id)
+        sheet.author = self.request.user.profile
+        sheet.save()
+        print(sheet, sheet.author, sheet.sheet_id)
+
+        assignment = form['assignment'].save(commit=False)
+        assignment.sheet = sheet
+        assignment.group = group
+
+        assignment.save()
+
+        self.assignment = assignment
+        return redirect('sheet-results',
+                        group_id=self.assignment.group.group_id,
+                        sheet_id=self.assignment.sheet.sheet_id)
+
+class SheetCreateView(LoginRequiredMixin, PassRequestMixin, generic.FormView):
+    model = TaskSheet
+    form_class = forms.SheetCreateForm
+    template_name = 'info/sheet_create.html'
     sheet = None
 
     def form_valid(self, form):
-
-        self.group = UserGroup.objects.get(group_id=self.kwargs['group_id'])
-        self.sheet = form['sheet'].save()
-        assignment = form['assignment'].save(commit=False)
-        assignment.sheet = self.sheet
-        assignment.group = self.group
-        assignment.save()
+        sheet = form.save()
+        sheet = TaskSheet.objects.get(sheet_id=sheet.sheet_id)
+        sheet.author = self.request.user.profile
+        sheet.save()
+        self.sheet = sheet
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse_lazy('sheet-results', kwargs=dict(
-                            group_id=self.group.group_id,
-                            sheet_id=self.sheet.sheet_id))
+        return reverse_lazy('sheet-detail', kwargs=dict(sheet_id=self.sheet.sheet_id))
 
 
 class SheetTaskCreateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin, generic.FormView):
@@ -227,7 +298,11 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
         context['groups_owned'] = UserGroup.objects.filter(author=self.request.user.profile).all()
-        print(context['groups_owned'])
+        context['sheets'] = [{
+            'sheet': sheet,
+            'solved_count': Submission.best.filter(task__in=sheet.tasks.all(),
+                author__user__user=self.request.user, verdict='AC').count()
+        } for sheet in TaskSheet.objects.filter(author=self.request.user.profile).all()]
         context['assignations'] = [{
             'assignation': assignation,
             'solved_count': len(assignation.get_best_submissions().filter(

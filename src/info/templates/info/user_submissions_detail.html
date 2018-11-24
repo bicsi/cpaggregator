@@ -8,16 +8,6 @@
 
 {% block body_content %}
 
-{% if object.user == user %}
-<div class="modal fade" tabindex="-1" role="dialog" id="modal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content px-3">
-
-        </div>
-    </div>
-</div>
-{% endif %}
-
 {% if not object.user %}
 <div class="alert alert-info small" role="alert">
     <div class="container">

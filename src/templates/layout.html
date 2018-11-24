@@ -70,6 +70,12 @@
 	</nav>
 
 	<div class="wrapper {% block wrapper_class %}{% endblock %} mt-3">
+		<div class="modal fade" tabindex="-1" role="dialog" id="modal">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content px-3">
+				</div>
+			</div>
+		</div>
         {% block body_content %}{% endblock %}
 	</div>
 

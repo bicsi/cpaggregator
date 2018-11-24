@@ -9,13 +9,6 @@
 {% block body_content %}
 {% with request.user as user %}
 
-<div class="modal fade" tabindex="-1" role="dialog" id="modal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content px-3">
-        </div>
-    </div>
-</div>
-
 <div class="container">
     <div class="my-5">
         <h1>{{ group }}</h1>
@@ -68,7 +61,7 @@
         <h6 class="card-header">
             Assigned sheets
             {% if is_owner %}
-            <a href="#" class="badge badge-secondary small pull-right create-sheet">Add</a>
+            <a href="#" class="badge badge-secondary small pull-right create-assignment">Add</a>
             {% endif %}
         </h6>
 
@@ -107,8 +100,8 @@ $(document).ready(function() {
         errorClass: ".is-invalid",
     });
 
-    $(".create-sheet").modalForm({
-        formURL: "{% url 'sheet-create' group_id=group.group_id %}",
+    $(".create-assignment").modalForm({
+        formURL: "{% url 'assignment-create' group_id=group.group_id %}",
         errorClass: ".is-invalid",
     });
 
