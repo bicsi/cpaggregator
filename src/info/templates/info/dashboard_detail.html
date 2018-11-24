@@ -55,10 +55,10 @@
         </div>
         <div class="card-footer">
             <span class="small text-muted">
-                {% if task_sheets|length <= 0 %}
+                {% if sheets|length <= 0 %}
                 No task sheets.
                 {% else %}
-                {{ task_sheets|length }} task sheet{{ task_sheets|length|pluralize }}
+                {{ sheets|length }} task sheet{{ sheets|length|pluralize }}
                 {% endif %}
             </span>
         </div>
@@ -91,10 +91,10 @@
         </div>
         <div class="card-footer">
             <span class="small text-muted">
-                {% if task_sheets|length <= 0 %}
+                {% if assignations|length <= 0 %}
                 No task sheets.
                 {% else %}
-                {{ task_sheets|length }} task sheet{{ task_sheets|length|pluralize }}
+                {{ assignations|length }} task sheet{{ assignations|length|pluralize }}
                 {% endif %}
             </span>
         </div>
