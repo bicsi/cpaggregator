@@ -287,6 +287,8 @@ class GroupDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         if self.request.user.is_authenticated:
             kwargs['is_owner'] = self.request.user.profile == self.object.author
+        kwargs['active_assignments'] = Assignment.active.filter(group=self.object)
+        kwargs['future_assignments'] = Assignment.future.filter(group=self.object)
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 
@@ -307,7 +309,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             'assignation': assignation,
             'solved_count': len(assignation.get_best_submissions().filter(
                 author__user__user=self.request.user, verdict='AC').all()),
-        } for assignation in self.request.user.profile.get_assigned_sheets()]
+        } for assignation in Assignment.active.filter(group__in=self.request.user.profile.assigned_groups.all())]
 
         return context
 

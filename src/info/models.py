@@ -5,6 +5,7 @@ from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
 from data.models import UserGroup, Submission, Task, UserProfile
+from . import managers
 
 
 class TaskSheet(models.Model):
@@ -31,6 +32,11 @@ class Assignment(models.Model):
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
+
+    # Managers.
+    objects = models.Manager()  # The default manager.
+    active = managers.ActiveAssignmentManager()
+    future = managers.FutureAssignmentManager()
 
     def get_all_users(self):
         return self.group.members.all()
