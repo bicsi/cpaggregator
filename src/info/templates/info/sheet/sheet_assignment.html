@@ -5,7 +5,7 @@
     <div class="card-body">
         <div>
             <i style="width: 24px" class="fas fa-calendar-alt text-secondary text-center"></i>
-            <span class="ml-2">{{ assignment.assigned_on|date:"M d, Y HH;" }}</span>
+            <span class="ml-2">{{ assignment.assigned_on|date:"M d, Y H:m" }}</span>
             <span class="text-muted small ml-2">({{ assignment.assigned_on|naturaltime }})</span>
         </div>
         <div class="mt-1">
