@@ -98,12 +98,6 @@ $(document).ready(function() {
         formURL: "{% url 'update-profile' username=profile.username %}",
         errorClass: ".is-invalid",
     });
-
-    $(".create-handle").modalForm({
-        formURL: "{% url 'create-handle' %}",
-        errorClass: ".is-invalid",
-    });
-
 });
 
 new Vue({

@@ -38,6 +38,13 @@
 </div>
 
 <script>
+$(document).ready(function() {
+  $(".create-handle").modalForm({
+    formURL: "{% url 'create-handle' %}",
+    errorClass: ".is-invalid",
+  });
+});
+
 new Vue({
   delimiters: ["[[", "]]"],
   el: "#profile-handles-panel",

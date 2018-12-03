@@ -17,7 +17,6 @@
 $(document).ready(function() {
   $(".sheet-description-update").modalForm({
     formURL: "{% url 'sheet-description-update' sheet_id=sheet.sheet_id %}",
-    modalID: "#modal-lg",
     errorClass: ".is-invalid",
   });
 });
