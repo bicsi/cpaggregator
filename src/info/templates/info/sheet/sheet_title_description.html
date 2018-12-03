@@ -1,5 +1,4 @@
 <h1 class="mt-5">{{ sheet.title }}</h1>
-<h5>Author: {{ sheet.author.username }}</h5>
 {% if sheet.description and sheet.description|length > 0 %}
     <div class="description">
         {{ sheet.formatted_description|safe }}
