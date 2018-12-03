@@ -33,20 +33,3 @@
 
 {% endwith %}
 {% endblock %}
-
-{% block js_scripts %}
-<script type="text/javascript">
-$(document).ready(function() {
-
-    $(".sheet-task-add").modalForm({
-        formURL: "{% url 'sheet-task-add' sheet_id=assignment.sheet.sheet_id %}"
-    });
-
-    $(".sheet-description-update").modalForm({
-        formURL: "{% url 'sheet-description-update' sheet_id=assignment.sheet.sheet_id %}"
-    });
-
-});
-</script>
-{% endblock %}
-

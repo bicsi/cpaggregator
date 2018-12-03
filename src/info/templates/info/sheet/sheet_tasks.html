@@ -1,9 +1,19 @@
-<div class="card mt-5">
-    <h6 class="card-header">Tasks
+<div class="card mt-5" id="sheet-task-panel">
+    <div class="card-header d-flex align-items-center">
+        <h6 class="d-inline flex-grow-1 mb-0">Tasks</h6>
         {% if is_owner %}
-        <a href="#" class="badge badge-secondary ml-2 sheet-task-add">Add</a>
+        <a v-show="editMode" v-cloak class="badge badge-secondary mx-2 sheet-task-add" href="#!">
+            <i class="fa fa-plus mr-1"></i>Add
+        </a>
+        <a @click="toggleEditMode" href="#!" class="badge badge-secondary badge-pill py-1">
+            <span v-if="!editMode"><i class="fas fa-pen mr-1"></i>Edit</span>
+        </a>
+        <a @click="toggleEditMode" href="#!" class="badge badge-success badge-pill py-1" v-cloak>
+            <span v-if="editMode">Done</span>
+        </a>
         {% endif %}
-    </h6>
+    </div>
+    {% if tasks %}
     <div class="list-group list-group-flush">
         {% for task_status in tasks %}
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
@@ -14,32 +24,64 @@
                 {% include 'accounts/judge_label.html' %}
                 {% endwith %}
                 <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
-                {% if verdict_for_user %}
-                    {% if verdict_for_user == 'AC' %}
-                    <span class="text-success">
-                        <i class="fas fa-check" style="width: 16px"></i>
-                    </span>
-                    {% else %}
-                    <span class="text-danger">
-                        <i class="fas fa-times" style="width: 16px"></i>
-                    </span>
+                <div v-cloak>
+                    <div v-if="!editMode" class="d-inline">
+                    {% if verdict_for_user %}
+                        {% if verdict_for_user == 'AC' %}
+                        <span class="text-success">
+                            <i class="fas fa-check" style="width: 16px"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-danger">
+                            <i class="fas fa-times" style="width: 16px"></i>
+                        </span>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-                {% if is_owner %}
-                <form style="display: inline-block; float: right"
-                      class="ml-3"
-                      method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
-                    {% csrf_token %}
-                    <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
-                    <input type="hidden" value="{{ task.task_id }}" name="task_id" />
-                    <button class="btn btn-danger btn-sm align-middle" type="submit">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </form>
-                {% endif %}
+                    </div>
+                    {% if is_owner %}
+                    <form v-cloak v-show="editMode"
+                          class="ml-3"
+                          method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
+                        {% csrf_token %}
+                        <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
+                        <input type="hidden" value="{{ task.task_id }}" name="task_id" />
+                        <button class="btn btn-danger btn-sm btn-xs-adjust align-middle my-0" type="submit">
+                            <strong>Delete</strong>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
             </div>
         </a>
         {% endwith %}
         {% endfor %}
     </div>
+    {% else %}
+    <div class="card-body small text-muted">
+        There are no tasks in this task sheet (yet).
+        {% if is_owner %}
+        <a class="sheet-task-add" href="#!">
+            Add a task
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
+<script>
+$(document).ready(function() {
+  $(".sheet-task-add").modalForm({
+    formURL: "{% url 'sheet-task-add' sheet_id=sheet.sheet_id %}",
+    errorClass: ".is-invalid",
+  });
+});
+new Vue({
+  delimiters: ["[[", "]]"],
+  el: "#sheet-task-panel",
+  data: {
+    editMode: false,
+  },
+  methods: {
+    toggleEditMode: function() { this.editMode = !this.editMode; }
+  }
+});
+</script>

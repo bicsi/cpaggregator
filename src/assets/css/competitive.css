@@ -1,3 +1,12 @@
 .full-textareas textarea {
     height: 100%;
 }
+
+.btn-xs-adjust {
+    line-height: 1.3;
+}
+
+[v-cloak] {
+  display: none;
+  margin: 0;
+}

@@ -1,4 +1,5 @@
 <h1 class="mt-5">{{ sheet.title }}</h1>
+<h5>Author: {{ sheet.author.username }}</h5>
 {% if sheet.description and sheet.description|length > 0 %}
     <div class="description">
         {{ sheet.formatted_description|safe }}
@@ -11,3 +12,13 @@
         <a href="#" class="sheet-description-update">Add description</a>
     {% endif %}
 {% endif %}
+
+<script>
+$(document).ready(function() {
+  $(".sheet-description-update").modalForm({
+    formURL: "{% url 'sheet-description-update' sheet_id=sheet.sheet_id %}",
+    modalID: "#modal-lg",
+    errorClass: ".is-invalid",
+  });
+});
+</script>

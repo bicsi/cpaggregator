@@ -26,6 +26,9 @@ class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
     slug_url_kwarg = 'username'
     slug_field = 'username'
 
+    def get_object(self, queryset=None):
+        return User.objects.get(username=self.kwargs['username']).profile
+
     def get_queryset(self):
         return super(ProfileUpdateView, self).get_queryset() \
             .filter(user=self.request.user)
@@ -68,9 +71,14 @@ class UserSubmissionsDetailView(generic.DetailView):
     template_name = 'info/user_submissions_detail.html'
     model = UserProfile
     slug_url_kwarg = 'username'
+    context_object_name = 'profile'
 
     def get_object(self, queryset=None):
         return UserProfile.objects.get(user__username=self.kwargs['username'])
+
+    def get_context_data(self, **kwargs):
+        kwargs['is_owner'] = self.object.user == self.request.user
+        return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
 
 class ResultsDetailView(generic.DetailView):
@@ -223,6 +231,7 @@ class AssignmentCreateView(LoginRequiredMixin, PassRequestMixin,
         return redirect('sheet-results',
                         group_id=self.assignment.group.group_id,
                         sheet_id=self.assignment.sheet.sheet_id)
+
 
 class SheetCreateView(LoginRequiredMixin, PassRequestMixin, generic.FormView):
     model = TaskSheet

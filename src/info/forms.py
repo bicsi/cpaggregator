@@ -42,6 +42,7 @@ class ProfileUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm)
         model = UserProfile
         fields = ['avatar']
 
+
 class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
     judge = forms.ModelChoiceField(queryset=Judge.objects)
     task_id = forms.CharField(
