@@ -8,13 +8,6 @@
 {% block body_content %}
 {% with sheet=assignment.sheet group=assignment.group %}
 
-<div class="modal fade" tabindex="-1" role="dialog" id="modal">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content px-3">
-        </div>
-    </div>
-</div>
-
 <div class="container">
     {% include "info/sheet/sheet_title_description.html" %}
     {% include "info/sheet/sheet_assignment.html" %}
