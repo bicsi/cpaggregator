@@ -71,7 +71,6 @@
 $(document).ready(function() {
   $(".sheet-task-add").modalForm({
     formURL: "{% url 'sheet-task-add' sheet_id=sheet.sheet_id %}",
-    modalID: "#modal-md",
     errorClass: ".is-invalid",
   });
 });
