@@ -1,23 +1,13 @@
 import datetime
 import heapq
 
+from scraper.scrapers.codeforces.parsers import parse_tag
 from scraper.utils import get_page
 import json
 
 CODEFORCES_JUDGE_ID = 'cf'
 
 
-def __parse_verdict(verdict_text):
-    verdict_dict = {
-        'OK': 'AC',
-        'COMPILATION_ERROR': 'CE',
-        'RUNTIME_ERROR': 'RE',
-        'TIME_LIMIT_EXCEEDED': 'TLE',
-        'MEMORY_LIMIT_EXCEEDED': 'MLE',
-    }
-    if verdict_text in verdict_dict:
-        return verdict_dict[verdict_text]
-    return 'WA'
 
 
 def scrape_submissions_for_task(task_id, count=200):
@@ -79,6 +69,32 @@ def scrape_submissions_for_task(task_id, count=200):
         id_from += count
 
 
-def scrape_submissions_for_tasks(task_ids):
-    submissions = [scrape_submissions_for_task(task_id) for task_id in task_ids]
-    return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
+def scrape_task_info(task_ids):
+    """
+    Scrapes task information for given task ids.
+    :param task_ids: the id of the tasks
+    :return: task information, in dict format
+    """
+    page_url = "http://codeforces.com/api/problemset.problems"
+    response = get_page(page_url)
+    json_data = json.loads(response.text)
+    if json_data['status'] != 'OK':
+        raise Exception('Expected status: OK; got: %s' % json_data['status'])
+
+    for task_data in json_data['result']['problems']:
+        tags = []
+        for tag_data in task_data['tags']:
+            tag = parse_tag(tag_data)
+            if tag:
+                tags.append(tag)
+
+        task_id = '_'.join([str(task_data['contestId']), task_data['index']])
+        if task_id not in task_ids:
+            continue
+
+        yield {
+            'judge_id': CODEFORCES_JUDGE_ID,
+            'task_id': task_id,
+            'title': task_data['name'],
+            'tags': tags,
+        }

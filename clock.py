@@ -48,6 +48,9 @@ def scrape_codeforces_submissions_a():
     print('Scraping codeforces submissions...')
     subprocess.call('python ./src/manage.py scrape_submissions --tasks cf:* --from_days=0 --to_days=300000',
                     shell=True, close_fds=True)
+    print('Scraping codeforces tasks...')
+    subprocess.call('python ./src/manage.py scrape_task_info --tasks cf:*',
+                    shell=True, close_fds=True)
 
 
 @scheduler.scheduled_job('interval', minutes=5)

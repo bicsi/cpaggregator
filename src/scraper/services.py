@@ -59,6 +59,9 @@ def scrape_task_info(db, task):
     elif judge_id == 'csa':
         task_infos = csacademy_scraper.scrape_task_info(task_ids)
 
+    elif judge_id == 'cf':
+        task_infos = codeforces_scraper.scrape_task_info(task_ids)
+
     else:
         print("Judge id not recognized: %s" % judge_id)
         return

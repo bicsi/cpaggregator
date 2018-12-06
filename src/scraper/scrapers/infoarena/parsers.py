@@ -7,7 +7,7 @@ TAG_DICT = {
     "Structuri de Date": "data_structures",
     "Geometrie": "geometry",
     "Matematica": "math",
-    "Grafuri": "graph_theory",
+    "Grafuri": "graphs",
     "Sortare": "sorting",
 }
 
