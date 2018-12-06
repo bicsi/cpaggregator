@@ -41,6 +41,9 @@ def scrape_csacademy_submissions_a():
     print('Scraping csacademy submissions...')
     subprocess.call('python ./src/manage.py scrape_submissions --tasks csa:* --from_days=0 --to_days=300000',
                     shell=True, close_fds=True)
+    print('Scraping csacademy tasks...')
+    subprocess.call('python ./src/manage.py scrape_task_info --tasks csa:*',
+                    shell=True, close_fds=True)
 
 
 @scheduler.scheduled_job('interval', minutes=30)

@@ -170,39 +170,17 @@ def scrape_submissions_for_tasks(tasks):
 
 def scrape_task_info(tasks):
     csrftoken = get_csrftoken()
-    task_name_dict = get_task_name_dict(csrftoken)
+    response = requests.post('https://csacademy.com/contest/archive/?',
+                             headers=__get_headers(csrftoken),
+                             cookies=__get_cookies(csrftoken))
+    json_data = json.loads(response.text)
 
-    for task_name in tasks:
-        task_id = task_name_dict[task_name]['id']
-
-        cookies = {
-            'G_ENABLED_IDPS': 'google',
-            'crossSessionId': 'z8tsh21l6owdportbjkgqwmm6jmg6hsd',
-            'csrftoken': csrftoken,
-        }
-
-        headers = {
-            'Pragma': 'no-cache',
-            'Origin': 'https://csacademy.com',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36',
-            'Content-Type': 'multipart/form-data; boundary=----WebKitFormBoundaryEPqiSFV99dhitVjj',
-            'Accept': '*/*',
-            'Cache-Control': 'no-cache',
-            'x-requested-with': 'XMLHttpRequest',
-            'Connection': 'keep-alive',
-            'x-csrftoken': csrftoken,
-            'Referer': 'https://csacademy.com/contest/interview-archive/task/{}/'.format(task_name),
-        }
-
-        data = '$------WebKitFormBoundaryEPqiSFV99dhitVjj\\r\\nContent-Disposition: form-data; ' \
-            'name="contestTaskId"\\r\\n\\r\\n{}\\r\\n------WebKitFormBoundaryEPqiSFV99dhitVjj--\\r\\n'.format(task_id)
-
-        response = requests.post('https://csacademy.com/contest/get_contest_task/',
-                                 headers=headers, data=data,
-                                 cookies=cookies)
-        json_data = json.loads(response.text)
-        print(json_data)
-    return []
-
+    for task_data in json_data['state']['contesttask']:
+        task_name = task_data['name']
+        if task_name in tasks:
+            yield {
+                'judge_id': CSACADEMY_JUDGE_ID,
+                'task_id': task_name,
+                'title': task_data['longName'],
+                'tags': [],
+            }
