@@ -86,7 +86,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(
             user=instance,
-            username=get_random_string(length=32),
             first_name=instance.first_name,
             last_name=instance.last_name)
 
