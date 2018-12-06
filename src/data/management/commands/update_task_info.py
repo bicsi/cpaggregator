@@ -24,8 +24,11 @@ def _update_task_info(db, task):
         return
 
     task.name = mongo_task_info['title']
-    task.time_limit_ms = mongo_task_info['time_limit']
-    task.memory_limit_kb = mongo_task_info['memory_limit']
+    if 'time_limit' in mongo_task_info:
+        task.time_limit_ms = mongo_task_info['time_limit']
+    if 'memory_limit' in mongo_task_info:
+        task.memory_limit_kb = mongo_task_info['memory_limit']
+
     for tag_id in mongo_task_info['tags']:
         try:
             tag = MethodTag.objects.get(tag_id=tag_id)
