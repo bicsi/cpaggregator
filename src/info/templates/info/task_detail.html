@@ -9,7 +9,7 @@
 {% block body_content %}
 
 <div class="container">
-    <div class="mr-1 my-5">
+    <div class="mr-1 mt-5">
         <h1>{{ task.name_or_id }}</h1>
         {% if best_submission_for_user %}
         <h5>Verdict:
@@ -30,7 +30,7 @@
     </div>
     <div class="row">
         <div class="col col-lg-6 col-12">
-            <div class="card">
+            <div class="card mt-5">
                 <h6 class="card-header">Task information</h6>
                 <div class="card-body">
                     <h4 class="card-title">{{ task.name_or_id }}</h4>
@@ -63,7 +63,7 @@
             </div>
         </div>
         <div class="col col-lg-6 col-12">
-            <div class="card">
+            <div class="card mt-5">
                 <h6 class="card-header">Users who solved this task</h6>
                 <div class="card-body">
                     {% for ac_submission in accepted_submissions.all %}
