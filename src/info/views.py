@@ -291,6 +291,24 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
     context_object_name = 'task_list'
     model = Task
+    ordering = ['name', 'task_id']
+
+    def get_context_data(self, *args, **kwargs):
+        kwargs['task_count'] = self.get_queryset().count()
+        context = super(TaskListView, self).get_context_data(*args, **kwargs)
+        task_list = context.pop('task_list')
+        # Map task to verdict of current user.
+        verdict_for_user_dict = {
+            submission.task: submission.verdict for submission in
+            Submission.best \
+                .filter(author__user__user=self.request.user,
+                        task__in=task_list)
+        }
+        context['task_list'] = [{
+            'task': task,
+            'verdict_for_user': verdict_for_user_dict.get(task),
+        } for task in task_list]
+        return context
 
 
 class GroupDetailView(generic.DetailView):
