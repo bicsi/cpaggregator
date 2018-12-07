@@ -18,7 +18,7 @@
         {% for task_status in tasks %}
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
         <a class="list-group-item list-group-item-action"
-           href="{{ task.get_url }}">
+           href="{{ task.get_url }}" target="_blank">
             <div class="d-flex align-items-center">
                 {% with task.judge as judge %}
                 {% include 'accounts/judge_label.html' %}
