@@ -69,5 +69,13 @@ def update_tasks():
     subprocess.call('python ./src/manage.py update_task_info',
                     shell=True, close_fds=True)
 
+
+@scheduler.scheduled_job('interval', minutes=5)
+def compute_statistics():
+    print('Computing statistics...')
+    subprocess.call('python ./src/manage.py compute_task_statistics',
+                    shell=True, close_fds=True)
+
+
 print("SCHEDULER STARTING...")
 scheduler.start()

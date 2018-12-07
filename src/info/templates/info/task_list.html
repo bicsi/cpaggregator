@@ -21,7 +21,12 @@
                href="{{ task.get_url }}" target="_blank">
                 <div class="d-flex align-items-center">
                     {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
-                    <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                    <span class="ml-3 text-primary flex-grow-1">
+                        {{ task.name_or_id }}
+                        <span class="small text-muted text-monospace ml-2">
+                            {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
+                        </span>
+                    </span>
                     {% if verdict_for_user %}
                         {% if verdict_for_user == 'AC' %}
                         <span class="text-success">
