@@ -16,9 +16,11 @@
     <div class="list-group list-group-flush">
         {% for handle in profile.handles.all %}
         <div class="list-group-item p-2 d-flex align-items-center">
+            <span class="border border-light rounded">
             {% with handle.judge as judge %}
             {% include 'accounts/judge_label.html' %}
             {% endwith %}
+            </span>
 
             <a href="{{ handle.get_url }}" class="ml-3 small text-monospace flex-grow-1">
                 {{ handle.handle }}
@@ -27,7 +29,7 @@
             <form v-show="editMode"
                   method="post" action="{% url 'delete-handle' handle_id=handle.id %}">
                 {% csrf_token %}
-                <button class="btn btn-danger btn-sm btn-xs-adjust" type="submit">
+                <button class="btn submit-btn btn-danger btn-sm btn-xs-adjust">
                     <strong>Remove</strong>
                 </button>
             </form>

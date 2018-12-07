@@ -27,8 +27,8 @@
                         {{ task.judge.judge_id }}
                     </span>
                 </div>
-                <div class="py-1">
-                    <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                <span class="mx-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                <div class="mr-3">
                     <div v-cloak>
                         <div v-if="!editMode" class="d-inline">
                         {% if verdict_for_user %}
