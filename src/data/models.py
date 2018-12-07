@@ -25,7 +25,7 @@ class Judge(models.Model):
     objects = JudgeManager()
 
     def get_logo_url(self):
-        return 'img/judge_logos/%s.png' % self.judge_id
+        return f'img/judge_logos/{self.judge_id}.svg'
 
     def __str__(self):
         return self.name
