@@ -10,36 +10,39 @@
 
 <div class="container">
     <h1 class="my-5">Tasks</h1>
-    <div class="list-group">
-    {% for task_verdict in task_list %}
-        {% with task=task_verdict.task verdict_for_user=task_verdict.verdict_for_user %}
-        <a class="list-group-item list-group-item-action"
-           href="{{ task.get_url }}" target="_blank">
-            <div class="d-flex align-items-center">
-                {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
-                <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
-                {% if verdict_for_user %}
-                    {% if verdict_for_user == 'AC' %}
-                    <span class="text-success">
-                        <i class="fas fa-check" style="width: 16px"></i>
-                    </span>
-                    {% else %}
-                    <span class="text-danger">
-                        <i class="fas fa-times" style="width: 16px"></i>
-                    </span>
+    <div class="card mt-5" id="sheet-task-panel">
+        <div class="card-header d-flex align-items-center">
+            <h6 class="d-inline flex-grow-1 mb-0">Tasks</h6>
+        </div>
+        <div class="list-group list-group-flush">
+        {% for task_verdict in task_list %}
+            {% with task=task_verdict.task verdict_for_user=task_verdict.verdict_for_user %}
+            <a class="list-group-item list-group-item-action"
+               href="{{ task.get_url }}" target="_blank">
+                <div class="d-flex align-items-center">
+                    {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
+                    <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                    {% if verdict_for_user %}
+                        {% if verdict_for_user == 'AC' %}
+                        <span class="text-success">
+                            <i class="fas fa-check" style="width: 16px"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-danger">
+                            <i class="fas fa-times" style="width: 16px"></i>
+                        </span>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            </div>
-        </a>
-        {% endwith %}
-    {% empty %}
-        No tasks yet.
-    {% endfor %}
-    </ul>
+                </div>
+            </a>
+            {% endwith %}
+        {% endfor %}
+        </div>
+    </div>
     {% if is_paginated %}
         <div class="mx-auto d-flex flex-column align-items-center">
             <span class="small text-muted my-3">
-                {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ task_count }} tasks
+                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ task_count }} tasks
             </span>
             {% bootstrap_paginate page_obj previous_label="Previous" next_label="Next" %}
         </div>

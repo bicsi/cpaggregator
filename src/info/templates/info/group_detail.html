@@ -15,7 +15,7 @@
         <span class="text-muted">
             Created by
             {% with group.author.user as user %}
-            <a href="{% url 'profile' username=user.profile.username %}" class="badge badge-light">
+            <a href="{% url 'profile' username=user.profile.username %}" class="btn btn-sm btn-secondary mx-1 px-2">
                 {% include "accounts/thumbnail_profile.html" %}
             </a>
             {% endwith %}
