@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+{% load bootstrap_pagination %}
+
+{% block title_tag %}Tasks{% endblock %}
+
+{% block body_content %}
+
+<div class="container">
+    <h1 class="my-5">Tasks</h1>
+    <div class="list-group">
+    {% for task in task_list %}
+        <a class="list-group-item list-group-item-action d-flex align-items-center"
+           href="{{ task.get_url }}" target="_blank">
+            {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
+            <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+        </a>
+    {% empty %}
+        No tasks yet.
+    {% endfor %}
+    </ul>
+    {% if is_paginated %}
+        <div class="mx-auto mt-3">
+        {% bootstrap_paginate page_obj previous_label="Previous" next_label="Next" %}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

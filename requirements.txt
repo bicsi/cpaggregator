@@ -26,3 +26,4 @@ Pillow==4.1.1
 django-markdownx==2.0.27
 django-widget-tweaks==1.4.3
 django-betterforms==1.2
+django-bootstrap-pagination==1.7.0

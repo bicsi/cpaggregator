@@ -286,6 +286,13 @@ class SheetDeleteView(LoginRequiredMixin, generic.DeleteView):
             return super(SheetDeleteView, self).delete(request, *args, **kwargs)
 
 
+class TaskListView(LoginRequiredMixin, generic.ListView):
+    template_name = 'info/task_list.html'
+    paginate_by = 10
+    context_object_name = 'task_list'
+    model = Task
+
+
 class GroupDetailView(generic.DetailView):
     template_name = 'info/group_detail.html'
     model = UserGroup

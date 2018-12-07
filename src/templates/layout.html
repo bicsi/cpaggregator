@@ -48,9 +48,14 @@
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="navigation-2">
-				<ul class="navbar-nav navbar-right vertical-align ml-md-auto">
+				<ul class="navbar-nav navbar-right vertical-align mr-auto">
 					{% if user.is_authenticated %}
-					<li class="my-auto mr-3">
+					<li>
+						<a href="{% url 'task-list' %}" class="nav-link">Tasks</a>
+					</li>
+				</ul>
+				<ul class="navbar-nav navbar-right vertical-align">
+					<li class="my-auto mr-3 ">
 						<a href="{% url 'me' %}" class="badge badge-light text-primary nav-link">
                         {% with request.user as user %}
                             {% include "accounts/thumbnail_profile.html" %}

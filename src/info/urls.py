@@ -39,6 +39,7 @@ urlpatterns = [
         path('update-description/', views.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),
     ])),
+    path('task/', views.TaskListView.as_view(), name='task-list'),
     path('me/', views.MeDetailView.as_view(), name='me'),
     path('handle/<handle_id>/delete/', views.HandleDeleteView.as_view(), name='delete-handle'),
     path('handle/create/', views.HandleCreateView.as_view(), name='create-handle'),

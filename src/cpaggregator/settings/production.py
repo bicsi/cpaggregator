@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'betterforms',
+    'bootstrap_pagination',
     'bootstrap4',
     'bootstrap_modal_forms',
     'markdownx',
