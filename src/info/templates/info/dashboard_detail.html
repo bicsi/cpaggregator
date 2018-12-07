@@ -35,18 +35,17 @@
             <a class="list-group-item list-group-item-action"
                href="{% url 'sheet-detail' sheet_id=task_sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
-                    <span class="flex-grow-1">
-                        <strong class="d-block">{{ task_sheet.title }}</strong>
-                        {% if solved_count == task_sheet.tasks.all|length %}
-                        <span class="small text-success">
-                        {% else %}
-                        <span class="small text-secondary">
-                        {% endif %}
-                            {{ solved_count }} of {{ task_sheet.tasks.all|length }} tasks solved
-                        </span>
+                    {% if solved_count == task_sheet.tasks.all|length %}
+                    <span class="badge badge-success">
+                    {% else %}
+                    <span class="badge badge-secondary">
+                    {% endif %}
+                        {{ solved_count }}/{{ task_sheet.tasks.all|length }}
                     </span>
-                    <span class="small text-muted align-self-start">
+                    <strong class="flex-grow-1 ml-2">{{ task_sheet.title }}</strong>
+                    <span class="small text-muted">
                         {{ task_sheet.created_at|date:"M d Y" }}
+                    </span>
                     </span>
                 </div>
             </a>
@@ -71,20 +70,20 @@
             <a class="list-group-item list-group-item-action"
                href="{% url 'sheet-results' group_id=group.group_id sheet_id=task_sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
-                    <span class="flex-grow-1">
-                        <strong class="d-block">{{ task_sheet.title }}</strong>
-                        {% if solved_count == task_sheet.tasks.all|length %}
-                        <span class="small text-success">
-                        {% else %}
-                        <span class="small text-secondary">
-                        {% endif %}
-                            {{ solved_count }} of {{ task_sheet.tasks.all|length }} tasks solved
-                        </span>
+                    {% if solved_count == task_sheet.tasks.all|length %}
+                    <span class="badge badge-success">
+                    {% else %}
+                    <span class="badge badge-secondary">
+                    {% endif %}
+                        {{ solved_count }}/{{ task_sheet.tasks.all|length }}
                     </span>
-                    <span class="small text-muted align-self-start">
+                    <strong class="flex-grow-1 ml-2">{{ task_sheet.title }}</strong>
+                    <span class="small text-muted">
                         {{ task_sheet.created_at|date:"M d Y" }}
                     </span>
+                    </span>
                 </div>
+                <span class="small d-block mt-1">In {{group}}</span>
             </a>
             {% endwith %}
             {% endfor %}
