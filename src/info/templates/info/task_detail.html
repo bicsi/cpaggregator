@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+{% load humanize %}
+
+{% block title_tag %}{{ task.name_or_id }}{% endblock %}
+
+{% block body_content %}
+
+<div class="container">
+    <div class="mr-1 my-5">
+        <h1>{{ task.name_or_id }}</h1>
+        {% if best_submission_for_user %}
+        <h5>Verdict:
+            {% if best_submission_for_user.verdict == 'AC' %}
+            <span class="badge badge-success ml-1">
+                <i class="fa fa-check mr-1"></i>{{ best_submission_for_user.get_verdict_display }}
+            </span>
+            {% else %}
+            <span class="badge badge-danger ml-1">
+                <i class="fa fa-times mr-1"></i>
+                {{ best_submission_for_user.get_verdict_display }}
+            </span>
+            {% endif %}
+        </h5>
+        {% else %}
+        <h5 class="text-muted">Not tried yet</h5>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col col-lg-6 col-12">
+            <div class="card">
+                <h6 class="card-header">Task information</h6>
+                <div class="card-body">
+                    <h4 class="card-title">{{ task.name_or_id }}</h4>
+                    <h6 class="card-subtitle mb-4">
+                        Source: <span class="badge badge-light px-3">
+                        {% include "accounts/judge_label.html" with judge=task.judge %}
+                        {{ task.judge.name }}
+                        </span>
+                    </span></h6>
+                    <p class="card-text">
+                        Solved by <span class="badge badge-primary">
+                        {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
+                    </span> users (acceptance rate: <span class="badge badge-secondary">
+                        {% widthratio task.statistics.acceptance_rate 1 100 %}%</span>)
+                    </p>
+                    <p class="card-text">
+                        Mean number of submissions per user:
+                            <span class="badge badge-primary">
+                                {{ task.statistics.mean_submission_count|floatformat:2 }}
+                            </span>
+                    </p>
+
+                    <a href="{{ task.get_url }}" class="btn btn-primary mt-3 mr-2" target="_blank">
+                        <i class="fas fa-external-link-alt mr-1"></i> Go to task
+                    </a>
+                    <a href="#" class="btn btn-secondary mt-3">
+                        <i class="fa fa-star mr-1"></i> Add to favourites
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col col-lg-6 col-12">
+            <div class="card">
+                <h6 class="card-header">Users who solved this task</h6>
+                <div class="card-body">
+                    {% for ac_submission in accepted_submissions.all %}
+                    {% with author_profile=ac_submission.author.user %}
+                    <a class="badge badge-primary"
+                       href="{% url 'profile' username=author_profile.username %}">
+                        {{ author_profile.username }}
+                    </a>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+                <div class="card-footer small text-muted">
+                    {% with submission_count=accepted_submissions.count %}
+                    {{ submission_count }} user{{ submission_count|pluralize }}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

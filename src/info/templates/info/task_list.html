@@ -18,9 +18,12 @@
         {% for task_verdict in task_list %}
             {% with task=task_verdict.task verdict_for_user=task_verdict.verdict_for_user %}
             <a class="list-group-item list-group-item-action"
-               href="{{ task.get_url }}" target="_blank">
+               href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
                 <div class="d-flex align-items-center">
-                    {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
+
+                    <span class="border border-light rounded">
+                        {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
+                    </span>
                     <span class="ml-3 text-primary flex-grow-1">
                         {{ task.name_or_id }}
                         <span class="small text-muted text-monospace ml-2">

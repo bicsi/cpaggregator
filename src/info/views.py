@@ -311,6 +311,27 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+class TaskDetailView(LoginRequiredMixin, generic.DetailView):
+    template_name = 'info/task_detail.html'
+    context_object_name = 'task'
+    model = Task
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Task,
+            task_id=self.kwargs['task_id'],
+            judge__judge_id=self.kwargs['judge_id'],
+        )
+
+    def get_context_data(self, **kwargs):
+        task = self.object
+        kwargs['best_submission_for_user'] = Submission.best.filter(
+            task=task, author__user__user=self.request.user).first()
+        kwargs['accepted_submissions'] = Submission.best.filter(
+            task=task, verdict='AC')
+        return super(TaskDetailView, self).get_context_data(**kwargs)
+
+
 class GroupDetailView(generic.DetailView):
     template_name = 'info/group_detail.html'
     model = UserGroup

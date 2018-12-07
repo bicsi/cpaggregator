@@ -5,7 +5,7 @@
         <a v-show="editMode" v-cloak class="badge badge-secondary mx-2 sheet-task-add" href="#!">
             <i class="fa fa-plus mr-1"></i>Add
         </a>
-        <a @click="toggleEditMode" href="#!" class="badge badge-secondary badge-pill py-1">
+        <a @click="toggleEditMode" href="#!" class="badge badge-dark badge-pill py-1">
             <span v-if="!editMode"><i class="fas fa-pen mr-1"></i>Edit</span>
         </a>
         <a @click="toggleEditMode" href="#!" class="badge badge-success badge-pill py-1" v-cloak>
@@ -17,39 +17,45 @@
     <div class="list-group list-group-flush">
         {% for task_status in tasks %}
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
-        <a class="list-group-item list-group-item-action"
+        <a class="list-group-item list-group-item-action px-0 py-2"
            href="{{ task.get_url }}" target="_blank">
             <div class="d-flex align-items-center">
-                {% with task.judge as judge %}
-                {% include 'accounts/judge_label.html' %}
-                {% endwith %}
-                <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
-                <div v-cloak>
-                    <div v-if="!editMode" class="d-inline">
-                    {% if verdict_for_user %}
-                        {% if verdict_for_user == 'AC' %}
-                        <span class="text-success">
-                            <i class="fas fa-check" style="width: 16px"></i>
-                        </span>
-                        {% else %}
-                        <span class="text-danger">
-                            <i class="fas fa-times" style="width: 16px"></i>
-                        </span>
+                <div class="py-1 px-3 border-right border-light">
+                    {% include 'accounts/judge_label.html' with judge=task.judge %}
+                    <span class="text-uppercase text-center text-monospace small font-weight-bold d-inline-block"
+                          style="width: 2em">
+                        {{ task.judge.judge_id }}
+                    </span>
+                </div>
+                <div class="py-1">
+                    <span class="ml-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                    <div v-cloak>
+                        <div v-if="!editMode" class="d-inline">
+                        {% if verdict_for_user %}
+                            {% if verdict_for_user == 'AC' %}
+                            <span class="text-success">
+                                <i class="fas fa-check" style="width: 16px"></i>
+                            </span>
+                            {% else %}
+                            <span class="text-danger">
+                                <i class="fas fa-times" style="width: 16px"></i>
+                            </span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
+                        </div>
+                        {% if is_owner %}
+                        <form v-cloak v-show="editMode"
+                              class="ml-3"
+                              method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
+                            <input type="hidden" value="{{ task.task_id }}" name="task_id" />
+                            <button class="btn btn-danger btn-sm btn-xs-adjust align-middle my-0" type="submit">
+                                <strong>Delete</strong>
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
-                    {% if is_owner %}
-                    <form v-cloak v-show="editMode"
-                          class="ml-3"
-                          method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
-                        {% csrf_token %}
-                        <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
-                        <input type="hidden" value="{{ task.task_id }}" name="task_id" />
-                        <button class="btn btn-danger btn-sm btn-xs-adjust align-middle my-0" type="submit">
-                            <strong>Delete</strong>
-                        </button>
-                    </form>
-                    {% endif %}
                 </div>
             </div>
         </a>
