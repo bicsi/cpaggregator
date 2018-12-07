@@ -1,5 +1,5 @@
 from django.db import models
-
+import math
 from data.models import Task
 
 
@@ -11,9 +11,13 @@ class TaskStatistics(models.Model):
 
     @property
     def mean_submission_count(self):
+        if self.users_solved_count == 0:
+            return math.nan
         return self.submission_count / self.users_tried_count
 
     @property
     def acceptance_rate(self):
-        return self.users_solved_count / self.users_tried_count
+        if self.users_solved_count == 0:
+            return math.nan
+        return 100 * self.users_solved_count / self.users_tried_count
 

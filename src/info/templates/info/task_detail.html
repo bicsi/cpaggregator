@@ -44,7 +44,7 @@
                         Solved by <span class="badge badge-primary">
                         {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
                     </span> users (acceptance rate: <span class="badge badge-secondary">
-                        {% widthratio task.statistics.acceptance_rate 1 100 %}%</span>)
+                        {{ task.statistics.acceptance_rate|floatformat:0 }}%</span>)
                     </p>
                     <p class="card-text">
                         Average number of submissions per user:
