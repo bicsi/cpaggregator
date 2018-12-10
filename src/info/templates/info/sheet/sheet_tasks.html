@@ -17,7 +17,10 @@
     <div class="list-group list-group-flush">
         {% for task_status in tasks %}
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
+        {% with idx=forloop.counter0 %}
         <a class="list-group-item list-group-item-action px-0 py-2"
+           @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
+           title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
            href="{{ task.get_url }}" target="_blank">
             <div class="d-flex align-items-center">
                 <div class="py-1 px-3 border-right border-light">
@@ -27,7 +30,10 @@
                         {{ task.judge.judge_id }}
                     </span>
                 </div>
-                <span class="mx-3 text-primary flex-grow-1">{{ task.name_or_id }}</span>
+                <span class="mx-3 text-primary flex-grow-1">
+                    {{ task.name_or_id }}
+                    <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"></i>
+                </span>
                 <div class="mr-3">
                     <div v-cloak>
                         <div v-if="!editMode" class="d-inline">
@@ -60,6 +66,7 @@
             </div>
         </a>
         {% endwith %}
+        {% endwith %}
         {% endfor %}
     </div>
     {% else %}
@@ -85,6 +92,7 @@ new Vue({
   delimiters: ["[[", "]]"],
   el: "#sheet-task-panel",
   data: {
+    hoverIndex: null,
     editMode: false,
   },
   methods: {
