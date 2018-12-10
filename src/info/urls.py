@@ -41,8 +41,13 @@ urlpatterns = [
         path('update-description/', views.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),
     ])),
-    path('task/', views.TaskListView.as_view(), name='task-list'),
-    path('task/<judge_id>/<task_id>/', views.TaskDetailView.as_view(), name='task-detail'),
+    path('task/', include([
+        path('', views.TaskListView.as_view(), name='task-list'),
+        path('<judge_id>/<task_id>/', include([
+            path('', views.TaskDetailView.as_view(), name='task-detail'),
+            path('favorite/', views.FavoriteToggleView.as_view(), name='task-favorite'),
+        ])),
+    ])),
     path('me/', views.MeDetailView.as_view(), name='me'),
     path('handle/<handle_id>/delete/', views.HandleDeleteView.as_view(), name='delete-handle'),
     path('handle/create/', views.HandleCreateView.as_view(), name='handle-create'),

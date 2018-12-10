@@ -9,7 +9,7 @@ from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateR
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
 from . import forms
-from info.models import TaskSheet, Assignment
+from info.models import TaskSheet, Assignment, FavoriteTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
 
 from info.tables import ResultsTable
@@ -329,9 +329,12 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
                 .filter(author__user__user=self.request.user,
                         task__in=task_list)
         }
+        favorite_tasks = {favorite.task for favorite in
+                          self.request.user.profile.favorite_tasks.all()}
         context['task_list'] = [{
             'task': task,
             'verdict_for_user': verdict_for_user_dict.get(task),
+            'faved': task in favorite_tasks,
         } for task in task_list]
         return context
 
@@ -357,6 +360,8 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
         kwargs['user_has_handle'] = UserHandle.objects.filter(
             judge=task.judge, user=self.request.user.profile
         ).exists()
+        kwargs['is_favorited'] = self.request.user.profile.favorite_tasks.filter(
+            task=task).exists()
         return super(TaskDetailView, self).get_context_data(**kwargs)
 
 
@@ -427,3 +432,19 @@ class SheetDescriptionUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateVi
         if self.object.is_owned_by(self.request.user):
             return super(SheetDescriptionUpdateView, self).form_valid(form)
         return redirect('home')
+
+
+class FavoriteToggleView(LoginRequiredMixin, generic.View):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        task = get_object_or_404(
+            Task, judge__judge_id=self.kwargs['judge_id'],
+            task_id=self.kwargs['task_id'])
+
+        queryset = FavoriteTask.objects.filter(profile=user.profile, task=task)
+        if queryset.exists():
+            queryset.delete()
+        else:
+            FavoriteTask.objects.create(profile=user.profile, task=task)
+
+        return redirect('task-detail', judge_id=task.judge.judge_id, task_id=task.task_id)

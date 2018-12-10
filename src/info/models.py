@@ -61,4 +61,14 @@ class Assignment(models.Model):
         ordering = ['assigned_on']
 
 
+class FavoriteTask(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='favorite_users')
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='favorite_tasks')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('task', 'profile'),)
+
+
+
 
