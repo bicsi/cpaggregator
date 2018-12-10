@@ -43,7 +43,10 @@
                     <ul class="list-unstyled list-inline">
                         {% for task in profile.get_solved_tasks %}
                         <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name_or_id }}</a>
+                            <a class="badge badge-primary"
+                               href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
+                                {{ task.name_or_id }}
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
@@ -62,7 +65,10 @@
                     <ul class="list-unstyled list-inline">
                         {% for task in profile.get_unsolved_tasks %}
                         <li class="list-inline-item">
-                            <a class="badge badge-primary" href="{{ task.get_url }}">{{ task.name_or_id }}</a>
+                            <a class="badge badge-primary"
+                               href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
+                                {{ task.name_or_id }}
+                            </a>
                         </li>
                         {% endfor %}
                     </ul>
