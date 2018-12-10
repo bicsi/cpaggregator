@@ -1,14 +1,16 @@
 import os
 
-from pymongo import MongoClient
+from pymongo import MongoClient, InsertOne, UpdateOne, ReplaceOne
 from pymongo.errors import BulkWriteError
 
 
-def __insert_many_silent(coll, iterable, **kwargs):
-    try:
-        return len(coll.insert_many(iterable, **kwargs).inserted_ids)
-    except BulkWriteError as bwe:
-        return bwe.details["nInserted"]
+def __insert_many_silent(coll, iterable, unique_fields):
+    requests = []
+    for elem in iterable:
+        find_dict = {field: elem[field] for field in unique_fields}
+        requests.append(ReplaceOne(find_dict, elem, upsert=True))
+    result = coll.bulk_write(requests)
+    return result.inserted_count
 
 
 def get_db():
@@ -30,13 +32,17 @@ def insert_report(db, report_id, created_at, report):
 
 
 def insert_submissions(db, submissions):
-    coll = db["submissions"]
-    return __insert_many_silent(coll, submissions, ordered=False)
+    return __insert_many_silent(
+        coll=db["submissions"],
+        iterable=submissions,
+        unique_fields=['judge_id', 'submission_id'])
 
 
 def insert_handles(db, handles):
-    coll = db["handles"]
-    return __insert_many_silent(coll, handles, ordered=False)
+    return __insert_many_silent(
+        coll=db["handles"],
+        iterable=handles,
+        unique_fields=['judge_id', 'handle'])
 
 
 def find_submissions(db, date_range=None, **query_dict):
@@ -53,5 +59,7 @@ def find_submissions(db, date_range=None, **query_dict):
 
 
 def insert_tasks(db, tasks):
-    coll = db["tasks"]
-    return __insert_many_silent(coll, tasks, ordered=False)
+    return __insert_many_silent(
+        coll=db["tasks"],
+        iterable=tasks,
+        unique_fields=['judge_id', 'task_id'])
