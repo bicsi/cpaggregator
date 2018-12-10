@@ -8,6 +8,12 @@ import json
 CODEFORCES_JUDGE_ID = 'cf'
 
 
+def scrape_submissions_for_tasks(task_ids, count=200):
+    for task_id in task_ids:
+        for submission in scrape_submissions_for_task(task_id, count=count):
+            yield submission
+
+
 def scrape_submissions_for_task(task_id, count=200):
     contest_id = task_id.split('_')[0]
     page_url = "http://codeforces.com/api/contest.status"
@@ -104,18 +110,26 @@ def scrape_user_info(handles):
     :param handles: a list of codeforces handles
     """
     page_url = "http://codeforces.com/api/user.info"
-    for handle_chunk in split_into_chunks(handles, chunk_size=1000):
-        response = get_page(page_url, handles=';'.join(handle_chunk))
-        json_data = json.loads(response.text)
-        if json_data['status'] != 'OK':
-            raise Exception('Expected status: OK; got: %s' % json_data['status'])
+    for handle_chunk in split_into_chunks(handles, chunk_size=1):
+        try:
+            response = get_page(page_url, handles=';'.join(handle_chunk))
+            json_data = json.loads(response.text)
+            if json_data['status'] != 'OK':
+                raise Exception('Expected status: OK; got: %s' % json_data['status'])
 
-        for user_data in json_data['result']:
-            yield {
-                'judge_id': CODEFORCES_JUDGE_ID,
-                'handle': user_data['handle'],
-                'photo_url': 'https:' + user_data['titlePhoto'],
-                'rating': user_data['rating'],
-                'first_name': user_data['firstName'],
-                'last_name': user_data['lastName'],
-            }
+            for user_data in json_data['result']:
+                info = {
+                    'judge_id': CODEFORCES_JUDGE_ID,
+                    'handle': user_data['handle'],
+                }
+                if 'titlePhoto' in user_data:
+                    info['photo_url'] = 'https:' + user_data['titlePhoto']
+                if 'firstName' in user_data:
+                    info['first_name'] = user_data['firstName']
+                if 'lastName' in user_data:
+                    info['last_name'] = user_data['lastName']
+
+                yield info
+        except Exception as e:
+            print('EXCEPTION TRYING TO FETCH CHUNK: ')
+            print(e)

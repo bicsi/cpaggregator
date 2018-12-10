@@ -67,6 +67,22 @@ def write_tasks(db, tasks, chunk_size=100):
         total_inserted += num_inserted
     return total_inserted
 
+def write_handles(db, handles, chunk_size=100):
+    """
+    Writes a list of tasks to database.
+    :param db: Database instance.
+    :param chunk_size: how many tasks to be written at once
+    :param handles: list/generator of handle info
+    :return: the number of tasks inserted
+    """
+    total_inserted = 0
+    for chunk in split_into_chunks(handles, chunk_size):
+        print("Writing chunk to database...")
+        num_inserted = database.insert_handles(db, chunk)
+        print("%s tasks written to database." % num_inserted)
+        total_inserted += num_inserted
+    return total_inserted
+
 
 def write_report(db, report_id, report, created_at=datetime.utcnow()):
     """

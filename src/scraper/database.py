@@ -34,6 +34,11 @@ def insert_submissions(db, submissions):
     return __insert_many_silent(coll, submissions, ordered=False)
 
 
+def insert_handles(db, handles):
+    coll = db["handles"]
+    return __insert_many_silent(coll, handles, ordered=False)
+
+
 def find_submissions(db, date_range=None, **query_dict):
     coll = db["submissions"]
     if date_range is not None:

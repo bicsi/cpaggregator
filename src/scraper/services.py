@@ -2,7 +2,7 @@ import heapq
 from datetime import datetime, timedelta
 from itertools import takewhile
 
-from data.models import Task
+from data.models import Task, UserHandle
 from scraper import utils
 from scraper.scrapers.infoarena import utils as infoarena_scraper
 from scraper.scrapers.csacademy import utils as csacademy_scraper
@@ -16,6 +16,15 @@ def __expand_task(judge_id, task_id):
                     Task.objects.filter(judge__judge_id=judge_id)]
     print('Task ids:', task_ids)
     return task_ids
+
+
+def __expand_handle(judge_id, handle):
+    handles = [handle]
+    if handle == '*':
+        handles = [handle.handle for handle in
+                    UserHandle.objects.filter(judge__judge_id=judge_id)]
+    print('Handles:', handles)
+    return handles
 
 
 def scrape_submissions_for_task(db, task, from_date, to_date):
@@ -67,5 +76,19 @@ def scrape_task_info(db, task):
         return
 
     utils.write_tasks(db, task_infos)
+
+
+def scrape_handle_info(db, handle):
+    print('Scraping handle {} info...'.format(handle))
+    judge_id, handle_id = handle.split(':', 1)
+    handles = __expand_handle(judge_id, handle_id)
+
+    if judge_id == 'cf':
+        handle_infos = codeforces_scraper.scrape_user_info(handles)
+    else:
+        print("Judge id not recognized: %s" % judge_id)
+        return
+
+    utils.write_handles(db, handle_infos)
 
 
