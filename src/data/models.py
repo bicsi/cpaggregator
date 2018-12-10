@@ -52,6 +52,11 @@ class UserProfile(models.Model):
     def avatar_url_or_default(self):
         if self.avatar:
             return self.avatar.url
+
+        for handle in self.handles.all():
+            if handle.photo_url:
+                return handle.photo_url
+
         return static("img/user-avatar.svg")
 
     def get_display_name(self):
@@ -151,6 +156,7 @@ class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     handle = models.CharField(max_length=256)
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='handles')
+    photo_url = models.CharField(max_length=256, null=True, blank=True)
 
     class Meta:
         unique_together = (('judge', 'handle'),)
