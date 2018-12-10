@@ -5,9 +5,10 @@ from data.models import Task
 
 class TaskStatistics(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='statistics')
-    users_tried_count = models.IntegerField()
-    users_solved_count = models.IntegerField()
-    submission_count = models.IntegerField()
+    users_tried_count = models.IntegerField(default=0)
+    users_solved_count = models.IntegerField(default=0)
+    submission_count = models.IntegerField(default=0)
+    favorited_count = models.IntegerField(default=0)
 
     @property
     def mean_submission_count(self):

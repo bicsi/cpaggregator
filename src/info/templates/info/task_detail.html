@@ -60,6 +60,11 @@
                                 {{ task.statistics.mean_submission_count|floatformat:2 }}
                             </span>
                     </p>
+                    <p class="card-text">
+                        Favorited by <span class="badge badge-primary">
+                            {{ task.statistics.favorited_count }}
+                        </span> user{{ task.statistics.favorited_count|pluralize }}
+                    </p>
 
                     <a href="{{ task.get_url }}" class="btn btn-primary mt-3 mr-2" target="_blank">
                         <i class="fas fa-external-link-alt mr-1"></i> Go to task
