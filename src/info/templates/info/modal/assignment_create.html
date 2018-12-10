@@ -1,0 +1,10 @@
+{% extends "info/modal/generic_form_modal.html" %}
+{% load bootstrap4 %}
+{% block modal_title %}Create assignment{% endblock %}
+{% block action_text %}Create{% endblock %}
+{% block modal_body %}
+    {{ object }}
+    {% bootstrap_form form.sheet %}
+    {% bootstrap_form form.assignment %}
+{% endblock %}
+{% block submit_url %}{% url 'assignment-create' group_id=object.group_id %}{% endblock %}

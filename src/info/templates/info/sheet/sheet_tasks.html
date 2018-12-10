@@ -2,7 +2,9 @@
     <div class="card-header d-flex align-items-center">
         <h6 class="d-inline flex-grow-1 mb-0">Tasks</h6>
         {% if is_owner %}
-        <a v-show="editMode" v-cloak class="badge badge-secondary mx-2 sheet-task-add" href="#!">
+        <a v-show="editMode" v-cloak class="badge badge-secondary mx-2"
+           data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'sheet-task-add' sheet_id=sheet.sheet_id %}');">
             <i class="fa fa-plus mr-1"></i>Add
         </a>
         <a @click="toggleEditMode" href="#!" class="badge badge-dark badge-pill py-1">
@@ -73,7 +75,8 @@
     <div class="card-body small text-muted">
         There are no tasks in this task sheet (yet).
         {% if is_owner %}
-        <a class="sheet-task-add" href="#!">
+        <a data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'sheet-task-add' sheet_id=sheet.sheet_id %}');">
             Add a task
         </a>
         {% endif %}
@@ -81,13 +84,6 @@
     {% endif %}
 </div>
 <script>
-$(document).ready(function() {
-  $(".sheet-task-add").modalForm({
-    formURL: "{% url 'sheet-task-add' sheet_id=sheet.sheet_id %}",
-    errorClass: ".is-invalid",
-  });
-});
-
 new Vue({
   delimiters: ["[[", "]]"],
   el: "#sheet-task-panel",

@@ -3,7 +3,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.datetime_safe import datetime
 from django.views import generic
-from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
@@ -12,13 +12,11 @@ from info.models import TaskSheet, Assignment
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
 
 from info.tables import ResultsTable
-from django.contrib.messages.views import SuccessMessageMixin
-from bootstrap_modal_forms.mixins import PassRequestMixin
+from django_ajax.mixin import AJAXMixin
 
 
-class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
-                        SuccessMessageMixin, generic.UpdateView):
-    template_name = 'info/update_profile.html'
+class ProfileUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    template_name = 'info/modal/profile_update.html'
     success_message = 'Success: User was updated.'
     success_url = reverse_lazy('me')
     model = UserProfile
@@ -34,20 +32,17 @@ class ProfileUpdateView(LoginRequiredMixin, PassRequestMixin,
             .filter(user=self.request.user)
 
 
-class HandleCreateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin, generic.CreateView):
-    template_name = 'info/create_handle.html'
+class HandleCreateView(LoginRequiredMixin, AJAXMixin, generic.CreateView):
+    template_name = 'info/modal/handle_create.html'
     success_message = 'Success: Handle was created.'
     model = UserHandle
     success_url = reverse_lazy('me')
     form_class = HandleCreateForm
 
-    def form_invalid(self, form):
-        super(HandleCreateView, self).form_invalid(form)
-        return redirect(self.success_url)
-
-    def form_valid(self, form):
-        super(HandleCreateView, self).form_valid(form)
-        return redirect(self.success_url)
+    def get_form_kwargs(self):
+        kwargs = super(HandleCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 
 class HandleDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -187,14 +182,12 @@ class SheetTaskDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
-class GroupMemberCreateView(LoginRequiredMixin, PassRequestMixin,
-                            SuccessMessageMixin, generic.UpdateView):
+class GroupMemberAddView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
     model = UserGroup
     slug_field = 'group_id'
     slug_url_kwarg = 'group_id'
     form_class = forms.GroupMemberCreateForm
-    success_message = 'Success: Members were created.'
-    template_name = 'info/group_add_members.html'
+    template_name = 'info/modal/group_members_add.html'
 
     def form_valid(self, form):
         group = self.get_object()
@@ -207,71 +200,102 @@ class GroupMemberCreateView(LoginRequiredMixin, PassRequestMixin,
         return redirect('group-detail', group_id=group.group_id)
 
 
-class AssignmentCreateView(LoginRequiredMixin, PassRequestMixin,
-                           SuccessMessageMixin, generic.FormView):
+class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
     form_class = forms.AssignmentSheetCreateMultiForm
-    template_name = 'info/assignment_create.html'
-    assignment = None
+    template_name = 'info/modal/assignment_create.html'
+    group = None
+
+    def get_form_kwargs(self):
+        kwargs = super(AssignmentCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        print(kwargs)
+        return kwargs
+
+    def dispatch(self, request, *args, **kwargs):
+        self.group = get_object_or_404(UserGroup, group_id=kwargs['group_id'])
+        return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        print('GETTING CONTEXT DATA')
+        context = super(AssignmentCreateView, self).get_context_data(**kwargs)
+        context['object'] = self.group
+        return context
 
     def form_valid(self, form):
-        group = UserGroup.objects.get(group_id=self.kwargs['group_id'])
-        sheet = form['sheet'].save()
-        sheet = TaskSheet.objects.get(sheet_id=sheet.sheet_id)
+        sheet = form['sheet'].save(commit=False)
         sheet.author = self.request.user.profile
         sheet.save()
-        print(sheet, sheet.author, sheet.sheet_id)
 
         assignment = form['assignment'].save(commit=False)
         assignment.sheet = sheet
-        assignment.group = group
+        assignment.group = self.group
 
         assignment.save()
 
-        self.assignment = assignment
         return redirect('sheet-results',
-                        group_id=self.assignment.group.group_id,
-                        sheet_id=self.assignment.sheet.sheet_id)
+                        group_id=assignment.group.group_id,
+                        sheet_id=assignment.sheet.sheet_id)
 
 
-class SheetCreateView(LoginRequiredMixin, PassRequestMixin, generic.FormView):
-    model = TaskSheet
-    form_class = forms.SheetCreateForm
-    template_name = 'info/sheet_create.html'
-    sheet = None
+class GroupCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
+    model = UserGroup
+    form_class = forms.GroupCreateForm
+    template_name = 'info/modal/group_create.html'
+    group = None
+
+    def get_form_kwargs(self):
+        kwargs = super(GroupCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
-        sheet = form.save()
-        sheet = TaskSheet.objects.get(sheet_id=sheet.sheet_id)
-        sheet.author = self.request.user.profile
-        sheet.save()
-        self.sheet = sheet
+        self.group = form.save()
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse_lazy('group-detail', kwargs=dict(group_id=self.group.group_id))
+
+
+class SheetCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
+    model = TaskSheet
+    form_class = forms.SheetCreateForm
+    template_name = 'info/modal/sheet_create.html'
+    sheet = None
+
+    def get_form_kwargs(self):
+        kwargs = super(SheetCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        self.sheet = form.save()
         return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse_lazy('sheet-detail', kwargs=dict(sheet_id=self.sheet.sheet_id))
 
 
-class SheetTaskCreateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin, generic.FormView):
+class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
+                       AJAXMixin, generic.FormView):
     form_class = forms.SheetTaskCreateForm
-    success_message = 'Success: Task was added.'
-    template_name = 'info/create_task.html'
-    sheet = None
+    template_name = 'info/modal/sheet_task_add.html'
+    object = None
 
-    def get_success_url(self):
-        return self.request.META.get('HTTP_REFERER', reverse_lazy('home'))
+    def get_context_data(self, **kwargs):
+        kwargs['object'] = self.object
+        return super(SheetTaskAddView, self).get_context_data(**kwargs)
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = get_object_or_404(TaskSheet, sheet_id=self.kwargs['sheet_id'])
+        return super(SheetTaskAddView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         task, _ = Task.objects.get_or_create(
             judge=form.cleaned_data['judge'],
             task_id=form.cleaned_data['task_id'],
         )
-        self.sheet.tasks.add(task)
-        return super(SheetTaskCreateView, self).form_valid(form)
-
-    def dispatch(self, request, *args, **kwargs):
-        sheet_id = kwargs['sheet_id']
-        self.sheet = get_object_or_404(TaskSheet.objects, sheet_id=sheet_id)
-        return super(SheetTaskCreateView, self).dispatch(request, *args, **kwargs)
+        self.object.tasks.add(task)
+        return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
 class SheetDeleteView(LoginRequiredMixin, generic.DeleteView):
@@ -369,8 +393,8 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
         return context
 
 
-class SheetDescriptionUpdateView(LoginRequiredMixin, PassRequestMixin, SuccessMessageMixin, generic.UpdateView):
-    template_name = 'info/sheet_description_update.html'
+class SheetDescriptionUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    template_name = 'info/modal/sheet_description_update.html'
     model = TaskSheet
     slug_url_kwarg = 'sheet_id'
     slug_field = 'sheet_id'
@@ -387,3 +411,4 @@ class SheetDescriptionUpdateView(LoginRequiredMixin, PassRequestMixin, SuccessMe
     def form_valid(self, form):
         if self.object.is_owned_by(self.request.user):
             return super(SheetDescriptionUpdateView, self).form_valid(form)
+        return redirect('home')

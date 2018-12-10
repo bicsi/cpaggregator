@@ -4,29 +4,18 @@
 {% load bootstrap4 %}
 {% load static from staticfiles %}
 
-{% block title_tag %}{{ group }}{% endblock %}
+{% block title_tag %}{{ group.name }}{% endblock %}
 
 {% block body_content %}
 {% with request.user as user %}
 
 <div class="container">
-    <div class="my-5">
-        <h1>{{ group }}</h1>
-        <span class="text-muted">
-            Created by
-            {% with group.author.user as user %}
-            <a href="{% url 'profile' username=user.profile.username %}" class="btn btn-sm btn-secondary mx-1 px-2">
-                {% include "accounts/thumbnail_profile.html" %}
-            </a>
-            {% endwith %}
-        </span>
-    </div>
+    {% include "info/group/group_main.html" %}
     {% with member_count=group.members.all|length %}
     <div class="card mb-5">
         <h6 class="card-header">
             Members
             {% if is_owner %}
-            <a href="#" class="badge badge-secondary small pull-right add-members">Add</a>
             {% endif %}
         </h6>
 
@@ -58,12 +47,7 @@
     {% endwith %}
     {% with sheet_count=active_assignments|length %}
     <div class="card mb-5">
-        <h6 class="card-header">
-            Assigned sheets
-            {% if is_owner %}
-            <a href="#" class="badge badge-secondary small pull-right create-assignment">Add</a>
-            {% endif %}
-        </h6>
+        <h6 class="card-header">Assigned sheets</h6>
 
         <div class="list-group list-group-flush">
             {% for assignment in active_assignments %}
@@ -90,12 +74,7 @@
     {% if is_owner %}
     {% with sheet_count=future_assignments|length %}
     <div class="card mb-5">
-        <h6 class="card-header">
-            Future sheets
-            {% if is_owner %}
-            <a href="#" class="badge badge-secondary small pull-right create-assignment">Add</a>
-            {% endif %}
-        </h6>
+        <h6 class="card-header">Future sheets</h6>
 
         <div class="list-group list-group-flush">
             {% for assignment in future_assignments %}

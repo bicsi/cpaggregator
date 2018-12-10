@@ -13,10 +13,10 @@
     {% include "info/sheet/sheet_results.html" %}
 
     {% if is_owner %}
-    <form method="post" action="{% url 'sheet-delete' sheet_id=sheet.sheet_id %}">
+    <form class="mt-5" method="post" action="{% url 'sheet-delete' sheet_id=sheet.sheet_id %}">
         {% csrf_token %}
         <button class="btn btn-danger btn-sm align-middle" type="submit">
-            DELETE
+            DELETE SHEET
         </button>
     </form>
     {% endif %}

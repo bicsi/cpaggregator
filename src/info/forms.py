@@ -1,35 +1,39 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from bootstrap_modal_forms.mixins import PopRequestMixin, CreateUpdateAjaxMixin
 from django.forms import SelectDateWidget
 
-from data.models import UserProfile, UserHandle, Task, Judge
+from data.models import UserProfile, UserHandle, Task, Judge, UserGroup
 from info.models import TaskSheet, Assignment
 from betterforms import multiform
 
+from info.utils import slugify_unique
 
-class UserUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+
+class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name']
 
 
-class HandleCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+class HandleCreateForm(forms.ModelForm):
     class Meta:
         model = UserHandle
         fields = ['judge', 'handle']
 
-    def save(self, *args, **kwargs):
-        kwargs['commit'] = False
-        obj = super(HandleCreateForm, self).save(*args, **kwargs)
-        if self.request:
-            obj.user = self.request.user.profile
-        obj.save()
-        return obj
+    def __init__(self, **kwargs):
+        self.user = kwargs.pop('user')
+        super(HandleCreateForm, self).__init__(**kwargs)
+
+    def save(self, commit=True):
+        handle = super(HandleCreateForm, self).save(commit=False)
+        handle.user = self.user.profile
+        if commit:
+            handle.save()
+        return handle
 
 
-class GroupMemberCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
+class GroupMemberCreateForm(forms.Form):
     usernames = forms.CharField(label='Usernames (separated by comma)', max_length=256)
 
     def __init__(self, *args, **kwargs):
@@ -37,13 +41,13 @@ class GroupMemberCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
         super(GroupMemberCreateForm, self).__init__(*args, **kwargs)
 
 
-class ProfileUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['avatar']
 
 
-class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
+class SheetTaskCreateForm(forms.Form):
     judge = forms.ModelChoiceField(queryset=Judge.objects)
     task_id = forms.CharField(
         label='Task id',
@@ -51,7 +55,7 @@ class SheetTaskCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.Form):
         max_length=256)
 
 
-class SheetDescriptionUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+class SheetDescriptionUpdateForm(forms.ModelForm):
     class Meta:
         fields = ['title', 'description']
         model = TaskSheet
@@ -60,19 +64,59 @@ class SheetDescriptionUpdateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.M
         }
 
 
-class SheetCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+class GroupCreateForm(forms.ModelForm):
+    class Meta:
+        model = UserGroup
+        fields = ['name']
+        help_texts = {
+            'name': 'Choose a name for the group.'
+        }
+
+    def __init__(self, **kwargs):
+        self.user = kwargs.pop('user')
+        super(GroupCreateForm, self).__init__(**kwargs)
+
+    def save(self, commit=True):
+        group = super(GroupCreateForm, self).save(commit=False)
+        group.group_id = slugify_unique(UserGroup, group.name, 'group_id')
+        group.author = self.user.profile
+        if commit:
+            group.save()
+        return group
+
+
+class SheetCreateForm(forms.ModelForm):
     class Meta:
         model = TaskSheet
-        fields = ['title', 'sheet_id']
+        fields = ['title']
+        help_texts = {
+            'title': "Example: \"Dynamic Programming super-tasks\"."
+        }
+    def __init__(self, **kwargs):
+        print(kwargs)
+        self.user = kwargs.pop('user')
+        super(SheetCreateForm, self).__init__(**kwargs)
+
+    def save(self, commit=True):
+        sheet = super(SheetCreateForm, self).save(commit=False)
+        sheet.sheet_id = slugify_unique(TaskSheet, sheet.title, 'sheet_id')
+        sheet.author = self.user.profile
+        if commit:
+            sheet.save()
+        return sheet
 
 
-class AssignmentCreateForm(PopRequestMixin, CreateUpdateAjaxMixin, forms.ModelForm):
+class AssignmentCreateForm(forms.ModelForm):
     class Meta:
         model = Assignment
         fields = ['assigned_on']
         widgets = {
             'assigned_on': SelectDateWidget(),
         }
+
+    def __init__(self, **kwargs):
+        user = kwargs.pop('user')
+        super(AssignmentCreateForm, self).__init__(**kwargs)
 
 
 class AssignmentSheetCreateMultiForm(multiform.MultiModelForm):

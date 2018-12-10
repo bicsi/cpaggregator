@@ -22,18 +22,7 @@
     <h1 class="my-5">{{ profile.get_display_name }}</h1>
     <div class="row">
         <div class="col col-md-4 col-12">
-            <div class="card mx-auto mb-3" style="max-width: 24rem;">
-                <img class="card-img-top" src="{{ profile.avatar_url_or_default }}" alt="{{ profile.username }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ profile.get_display_name }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">@{{ profile.username }}</h6>
-                    <p>Joined on: {{ profile.created_at|date:"M d, Y"}}</p>
-                    {% if profile.user == user %}
-                    <button class="btn btn-secondary update-profile">Update profile</button>
-                    {% endif %}
-                </div>
-            </div>
-
+            {% include 'info/profile/profile_main.html' %}
             {% include 'info/profile/profile_handles.html' %}
         </div>
         <div class="col col-md-8 col-12">
@@ -94,28 +83,4 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
-
-{% block js_scripts %}
-<script type="text/javascript">
-$(document).ready(function() {
-
-    $(".update-profile").modalForm({
-        formURL: "{% url 'update-profile' username=profile.username %}",
-        errorClass: ".is-invalid",
-    });
-});
-
-new Vue({
-  delimiters: ["[[", "]]"],
-  el: "#user-handle-panel",
-  data: {
-    editMode: false,
-  },
-  methods: {
-    toggleEditMode: function() { this.editMode = !this.editMode; }
-  }
-});
-
-</script>
 {% endblock %}

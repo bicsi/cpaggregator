@@ -85,9 +85,7 @@
 	</nav>
 	<div class="wrapper page-wrapper {% block wrapper_class %}{% endblock %} mt-3">
 		<div class="modal fade" tabindex="-1" role="dialog" id="modal">
-			<div class="modal-dialog modal-lg" role="document">
-				<div class="modal-content px-3">
-				</div>
+			<div class="modal-dialog modal-lg" id="modal-dialog" role="document">
 			</div>
 		</div>
         {% block body_content %}{% endblock %}
@@ -100,7 +98,43 @@
 			</div>
 		</div>
 	</footer>
+	<script type="text/javascript">
+		function loadModalForm(url) {
+			$.ajax({
+				url: url,
+				type: 'GET',
+				success: function(data, textStatus, jqXHR) {
+					if (data.status == 200) {
+						$('#modal .modal-dialog').html(data.content);
+					}
+				}
+			})
+			$('#modal .modal-dialog').html
+		}
+		function genericLoadDialog(form_selector, matchString, type) {
+			$.ajax({
+				url: $(form_selector).attr('action'),
+				type: 'POST',
+				data:  $(form_selector).serialize(),
+				success: function(data, textStatus, jqXHR) {
+					console.log(data);
+					if (data.status == 500) {
+						$("body").html(data.content);
+						return false;
+					}
+					if (data.status == 302) {
+						window.location = data.content;
+					} else {
+						$('#modal .modal-dialog').html(data.content);
+						return false;
+					}
+				},
+			})
+		}
+	</script>
 	{% block js_scripts %}{% endblock %}
 </body>
+
+
 
 </html>

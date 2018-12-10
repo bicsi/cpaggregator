@@ -2,7 +2,9 @@
     <div class="card-header d-flex align-items-center">
         <h6 class="d-inline flex-grow-1 mb-0">Accounts</h6>
         {% if is_owner %}
-        <a v-show="editMode" class="badge badge-secondary mx-2 create-handle" href="#!">
+        <a v-show="editMode" class="badge badge-secondary mx-2"
+           data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'handle-create' %}');">
             <i class="fa fa-plus mr-1"></i>Add
         </a>
         <a @click="toggleEditMode" href="#!" class="badge badge-dark badge-pill py-1">
@@ -40,13 +42,6 @@
 </div>
 
 <script>
-$(document).ready(function() {
-  $(".create-handle").modalForm({
-    formURL: "{% url 'create-handle' %}",
-    errorClass: ".is-invalid",
-  });
-});
-
 new Vue({
   delimiters: ["[[", "]]"],
   el: "#profile-handles-panel",

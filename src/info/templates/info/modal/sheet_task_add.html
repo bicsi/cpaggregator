@@ -1,0 +1,4 @@
+{% extends "info/modal/generic_form_modal.html" %}
+{% block modal_title %}Add task{% endblock %}
+{% block action_text %}Add{% endblock %}
+{% block submit_url %}{% url 'sheet-task-add' sheet_id=object.sheet_id %}{% endblock %}

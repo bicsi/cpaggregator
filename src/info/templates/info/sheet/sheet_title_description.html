@@ -4,19 +4,16 @@
         {{ sheet.formatted_description|safe }}
     </div>
     {% if is_owner %}
-        <a href="#" class="sheet-description-update">Edit description</a>
+        <a data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'sheet-description-update' sheet_id=sheet.sheet_id %}');">
+            Edit description
+        </a>
     {% endif %}
 {% else %}
     {% if is_owner %}
-        <a href="#" class="sheet-description-update">Add description</a>
+        <a data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'sheet-description-update' sheet_id=sheet.sheet_id %}');">
+            Add description
+        </a>
     {% endif %}
 {% endif %}
-
-<script>
-$(document).ready(function() {
-  $(".sheet-description-update").modalForm({
-    formURL: "{% url 'sheet-description-update' sheet_id=sheet.sheet_id %}",
-    errorClass: ".is-invalid",
-  });
-});
-</script>
