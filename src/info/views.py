@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.datetime_safe import datetime
@@ -314,8 +315,8 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
     template_name = 'info/task_list.html'
     paginate_by = 10
     context_object_name = 'task_list'
-    model = Task
-    ordering = ['name', 'task_id']
+    queryset = Task.objects.order_by(
+        F('statistics__users_solved_count').desc(nulls_last=True))
 
     def get_context_data(self, *args, **kwargs):
         kwargs['task_count'] = self.get_queryset().count()
