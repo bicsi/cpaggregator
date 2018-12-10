@@ -24,7 +24,8 @@
             <a class="list-group-item list-group-item-action"
                href="{% url 'profile' username=member.username %}">
                 <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
+                    {% include "accounts/thumbnail_profile.html" with user=member.user hide_username=True %}
+                    <div class="flex-grow-1 ml-2">
                         <strong>{{ member.get_display_name }}</strong>
                         <span class="small text-muted ml-1">@{{ member.username }}</span>
                     </div>
