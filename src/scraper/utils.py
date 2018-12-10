@@ -1,5 +1,5 @@
 import urllib
-from datetime import datetime
+from datetime import datetime, time
 import requests
 
 from scraper import database
@@ -27,10 +27,21 @@ def get_page(page_url, **query_dict):
     if len(query_dict) > 0:
         query_string = urllib.parse.urlencode(query_dict)
         page_url += "?" + query_string
-    print("GET: %s" % page_url)
-    page = requests.get(page_url)
+
+    page = None
+    for tries in range(10):
+        print("GET: %s" % page_url)
+        page = requests.get(page_url)
+        if page.status_code == 492:
+            print('Too many requests. Sleeping for 10 seconds...')
+            time.sleep(10)
+        else:
+            break
+
+    assert page
     if page.status_code != 200:
         raise Exception("Request failed. Status code: %d" % page.status_code)
+
     return page
 
 
@@ -67,6 +78,7 @@ def write_tasks(db, tasks, chunk_size=100):
         total_inserted += num_inserted
     return total_inserted
 
+
 def write_handles(db, handles, chunk_size=100):
     """
     Writes a list of tasks to database.
@@ -79,7 +91,7 @@ def write_handles(db, handles, chunk_size=100):
     for chunk in split_into_chunks(handles, chunk_size):
         print("Writing chunk to database...")
         num_inserted = database.insert_handles(db, chunk)
-        print("%s tasks written to database." % num_inserted)
+        print("%s handles written to database." % num_inserted)
         total_inserted += num_inserted
     return total_inserted
 
