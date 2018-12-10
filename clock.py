@@ -54,6 +54,9 @@ def scrape_codeforces_submissions_a():
     print('Scraping codeforces tasks...')
     subprocess.call('python ./src/manage.py scrape_task_info --tasks cf:*',
                     shell=True, close_fds=True)
+    print('Scraping codeforces handles...')
+    subprocess.call('python ./src/manage.py scrape_handle_info --handles cf:*',
+                    shell=True, close_fds=True)
 
 
 @scheduler.scheduled_job('interval', minutes=5)
@@ -67,6 +70,13 @@ def update_users():
 def update_tasks():
     print('Updating tasks...')
     subprocess.call('python ./src/manage.py update_task_info',
+                    shell=True, close_fds=True)
+
+
+@scheduler.scheduled_job('interval', minutes=30)
+def update_handles():
+    print('Updating handles...')
+    subprocess.call('python ./src/manage.py update_handle',
                     shell=True, close_fds=True)
 
 
