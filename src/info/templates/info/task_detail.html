@@ -8,7 +8,15 @@
 
 {% block body_content %}
 
+
 <div class="container">
+    {% if not user_has_handle %}
+    <div class="alert alert-info text-center" role="alert">
+      You currently have not linked any account on <span class="font-weight-bold">{{ task.judge.name }}</span>.
+      <a class="font-weight-bold" href="{% url 'me' %}">Go to your profile</a> to add one.
+    </div>
+    {% endif %}
+
     <div class="mr-1 mt-5">
         <h1>{{ task.name_or_id }}</h1>
         {% if best_submission_for_user %}

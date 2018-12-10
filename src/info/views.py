@@ -354,6 +354,9 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
             task=task, author__user__user=self.request.user).first()
         kwargs['accepted_submissions'] = Submission.best.filter(
             task=task, verdict='AC')
+        kwargs['user_has_handle'] = UserHandle.objects.filter(
+            judge=task.judge, user=self.request.user.profile
+        ).exists()
         return super(TaskDetailView, self).get_context_data(**kwargs)
 
 
