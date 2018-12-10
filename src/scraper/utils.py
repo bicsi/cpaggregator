@@ -5,7 +5,7 @@ import requests
 from scraper import database
 
 
-def __split_into_chunks(iterable, chunk_size):
+def split_into_chunks(iterable, chunk_size):
     buffer = []
     for elem in iterable:
         buffer.append(elem)
@@ -43,7 +43,7 @@ def write_submissions(db, submissions, chunk_size=100):
     :return: the number of submissions inserted
     """
     total_inserted = 0
-    for chunk in __split_into_chunks(submissions, chunk_size):
+    for chunk in split_into_chunks(submissions, chunk_size):
         print("Writing chunk to database...")
         num_inserted = database.insert_submissions(db, chunk)
         print("%s submissions written to database." % num_inserted)
@@ -60,7 +60,7 @@ def write_tasks(db, tasks, chunk_size=100):
     :return: the number of tasks inserted
     """
     total_inserted = 0
-    for chunk in __split_into_chunks(tasks, chunk_size):
+    for chunk in split_into_chunks(tasks, chunk_size):
         print("Writing chunk to database...")
         num_inserted = database.insert_tasks(db, chunk)
         print("%s tasks written to database." % num_inserted)

@@ -1,13 +1,11 @@
 import datetime
 import heapq
 
-from scraper.scrapers.codeforces.parsers import parse_tag
-from scraper.utils import get_page
+from scraper.scrapers.codeforces.parsers import parse_tag, parse_verdict
+from scraper.utils import get_page, split_into_chunks
 import json
 
 CODEFORCES_JUDGE_ID = 'cf'
-
-
 
 
 def scrape_submissions_for_task(task_id, count=200):
@@ -59,7 +57,7 @@ def scrape_submissions_for_task(task_id, count=200):
                 task_id=task_id,
                 submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
                 language=submission_data['programmingLanguage'],
-                verdict=__parse_verdict(submission_data['verdict']),
+                verdict=parse_verdict(submission_data['verdict']),
                 author_id=author_id,
                 time_exec=submission_data['timeConsumedMillis'],
                 memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
@@ -98,3 +96,26 @@ def scrape_task_info(task_ids):
             'title': task_data['name'],
             'tags': tags,
         }
+
+
+def scrape_user_info(handles):
+    """
+    Scrapes user information from the website.
+    :param handles: a list of codeforces handles
+    """
+    page_url = "http://codeforces.com/api/user.info"
+    for handle_chunk in split_into_chunks(handles, chunk_size=1000):
+        response = get_page(page_url, handles=';'.join(handle_chunk))
+        json_data = json.loads(response.text)
+        if json_data['status'] != 'OK':
+            raise Exception('Expected status: OK; got: %s' % json_data['status'])
+
+        for user_data in json_data['result']:
+            yield {
+                'judge_id': CODEFORCES_JUDGE_ID,
+                'handle': user_data['handle'],
+                'photo_url': 'https:' + user_data['titlePhoto'],
+                'rating': user_data['rating'],
+                'first_name': user_data['firstName'],
+                'last_name': user_data['lastName'],
+            }
