@@ -73,6 +73,7 @@
 
     {% if is_owner %}
     {% with sheet_count=future_assignments|length %}
+    {% if sheet_count > 0 %}
     <div class="card mb-5">
         <h6 class="card-header">Future sheets</h6>
 
@@ -96,7 +97,17 @@
         </div>
         <span class="card-footer text-muted small">{{ sheet_count }} sheet{{ sheet_count|pluralize }}</span>
     </div>
+    {% endif %}
     {% endwith %}
+    {% endif %}
+
+    {% if is_owner %}
+    <form class="mt-5" method="post" action="{% url 'group-delete' group_id=group.group_id %}">
+        {% csrf_token %}
+        <button class="btn btn-danger btn-sm align-middle" type="submit">
+            DELETE GROUP
+        </button>
+    </form>
     {% endif %}
 </div>
 

@@ -371,6 +371,17 @@ class GroupDetailView(generic.DetailView):
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 
+class GroupDeleteView(generic.DeleteView):
+    slug_url_kwarg = 'group_id'
+    slug_field = 'group_id'
+    success_url = reverse_lazy('home')
+    model = UserGroup
+
+    def get_queryset(self):
+        return super(GroupDeleteView, self).get_queryset() \
+            .filter(author=self.request.user.profile)
+
+
 class DashboardView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'info/dashboard_detail.html'
     model = UserProfile

@@ -29,6 +29,7 @@ urlpatterns = [
                 path('', views.ResultsDetailView.as_view(), name='sheet-results'),
                 path('all/', views.ResultsDetailView.as_view(show_all=True), name='sheet-results-all'),
             ])),
+        path('delete/', views.GroupDeleteView.as_view(), name='group-delete'),
     ])),
     path('create-group/', views.GroupCreateView.as_view(), name='group-create'),
     path('create-sheet/', views.SheetCreateView.as_view(), name='sheet-create'),
