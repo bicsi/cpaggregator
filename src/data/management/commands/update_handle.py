@@ -29,6 +29,8 @@ def _update_handle(db, handle):
 
     if 'photo_url' in mongo_handle_info:
         handle.photo_url = mongo_handle_info['photo_url']
+    else:
+        handle.photo_url = None
 
     handle.save()
 

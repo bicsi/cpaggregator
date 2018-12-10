@@ -122,7 +122,7 @@ def scrape_user_info(handles):
                     'judge_id': CODEFORCES_JUDGE_ID,
                     'handle': user_data['handle'],
                 }
-                if 'titlePhoto' in user_data:
+                if 'titlePhoto' in user_data and not user_data['titlePhoto'].endswith('no-title.jpg'):
                     info['photo_url'] = 'https:' + user_data['titlePhoto']
                 if 'firstName' in user_data:
                     info['first_name'] = user_data['firstName']
