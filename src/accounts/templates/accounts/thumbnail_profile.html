@@ -3,7 +3,7 @@
 <div>
     <img class="rounded-circle border border-light" src="{{ user.profile.avatar_url_or_default }}"
         width="24" height="24" alt="{{ user.profile.username }}"
-         title="{{ user.profile.username }}" style="background-color: white">
+         title="{{ user.profile.username }}" style="background-color: white; object-fit: cover">
     {% if not hide_username %}
     <span class="my-0 ml-2">{{ user.profile.get_display_name }}</span>
     {% endif %}

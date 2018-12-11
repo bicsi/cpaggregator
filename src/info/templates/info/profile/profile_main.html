@@ -1,5 +1,9 @@
 <div class="card mx-auto mb-3" style="max-width: 24rem;">
-    <img class="card-img-top" src="{{ profile.avatar_url_or_default }}" alt="{{ profile.username }}">
+    <div class="square">
+        <img src="{{ profile.avatar_url_or_default }}"
+             alt="{{ profile.username }}"
+             style="position: absolute; height: 100%; width: 100%; object-fit: cover">
+    </div>
     <div class="card-body">
         <h5 class="card-title">{{ profile.get_display_name }}</h5>
         <h6 class="card-subtitle mb-2 text-muted">@{{ profile.username }}</h6>
