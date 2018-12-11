@@ -104,8 +104,8 @@ def save_user_profile(sender, instance, **kwargs):
 
 
 class UserGroup(models.Model):
-    group_id = models.CharField(max_length=256)
-    name = models.CharField(max_length=256, unique=True)
+    group_id = models.CharField(max_length=256, unique=True)
+    name = models.CharField(max_length=256)
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
     created_at = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(UserProfile, related_name='groups_owned', null=True, on_delete=models.SET_NULL)

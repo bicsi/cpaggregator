@@ -14,10 +14,23 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="submit-btn btn btn-primary" data-toggle="modal"
-                onclick="genericLoadDialog('#modal-form', 'invalid_form');">
+        <button type="button" class="submit-btn btn btn-primary" data-toggle="modal">
             {% block action_text %}Save{% endblock %}
         </button>
       </div>
     </form>
 </div>
+<script>
+
+$('document').ready(function() {
+  $('#modal-form .submit-btn').click(function(e) {
+    genericLoadDialog('#modal-form', 'invalid_form');
+  });
+  $('#modal-form').bind('keypress', function(e) {
+    if (e.keyCode == 13) {
+       e.preventDefault();
+       genericLoadDialog('#modal-form', 'invalid_form');
+    }
+  });
+});
+</script>

@@ -115,21 +115,3 @@
 </div>
 {% endwith %}
 {% endblock %}
-
-
-{% block js_scripts %}
-<script type="text/javascript">
-$(document).ready(function() {
-
-    $(".create-sheet").modalForm({
-        formURL: "{% url 'sheet-create' %}",
-        errorClass: ".is-invalid",
-    });
-    $(".create-group").modalForm({
-        formURL: "{% url 'group-create' %}",
-        errorClass: ".is-invalid",
-    });
-
-});
-</script>
-{% endblock %}

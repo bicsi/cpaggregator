@@ -114,22 +114,3 @@
 
 {% endwith %}
 {% endblock %}
-
-{% block js_scripts %}
-<script type="text/javascript">
-$(document).ready(function() {
-
-    $(".add-members").modalForm({
-        formURL: "{% url 'group-member-add' group_id=group.group_id %}",
-        errorClass: ".is-invalid",
-    });
-
-    $(".create-assignment").modalForm({
-        formURL: "{% url 'assignment-create' group_id=group.group_id %}",
-        errorClass: ".is-invalid",
-    });
-
-});
-
-</script>
-{% endblock %}

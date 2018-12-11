@@ -113,7 +113,7 @@
 			})
 			$('#modal .modal-dialog').html
 		}
-		function genericLoadDialog(form_selector, matchString, type) {
+		function genericLoadDialog(form_selector, matchString) {
 			$.ajax({
 				url: $(form_selector).attr('action'),
 				type: 'POST',
