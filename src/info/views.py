@@ -82,17 +82,14 @@ class ResultsDetailView(generic.DetailView):
     model = Assignment
     table = None
     submissions = None
-    show_all = False
+    show_results = None
+    show_submissions = None
     context_object_name = 'assignment'
 
     def get_object(self, **kwargs):
         obj = Assignment.objects.get(group__group_id=self.kwargs['group_id'],
                                      sheet__sheet_id=self.kwargs['sheet_id'])
-        if self.show_all:
-            self.submissions = obj.get_all_submissions()
-        else:
-            self.submissions = obj.get_best_submissions()
-
+        self.submissions = obj.get_best_submissions()
         self.table = ResultsTable(self.submissions)
         return obj
 
@@ -108,9 +105,32 @@ class ResultsDetailView(generic.DetailView):
         # Build tasks as a dict.
         tasks = [{'task': task, 'verdict_for_user': verdict_for_user_dict.get(task)}
                  for task in self.object.sheet.tasks.all()]
+
+        # Send results data.
+        results_data = []
+        for user in self.object.group.members.all():
+            user_submissions = []
+            found_one_submission = False
+            for task in tasks:
+                submission = self.object.get_best_submissions() \
+                    .filter(author__user=user, task=task['task'])
+                if submission.exists():
+                    user_submissions.append(submission.first())
+                    found_one_submission = True
+                else:
+                    user_submissions.append(None)
+            if found_one_submission:
+                results_data.append({
+                    'user': user,
+                    'results': user_submissions,
+                })
+        print(results_data)
+
         context['tasks'] = tasks
-        context['show_all'] = self.show_all
         context['is_owner'] = self.object.sheet.is_owned_by(self.request.user)
+        context['results'] = results_data
+        context['show_results'] = self.show_results
+        context['show_submissions'] = self.show_submissions
 
         return context
 
@@ -233,7 +253,7 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
 
         assignment.save()
 
-        return redirect('sheet-results',
+        return redirect('group-sheet-detail',
                         group_id=assignment.group.group_id,
                         sheet_id=assignment.sheet.sheet_id)
 

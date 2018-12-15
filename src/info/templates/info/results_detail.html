@@ -10,9 +10,34 @@
 
 <div class="container">
     {% include "info/sheet/sheet_title_description.html" %}
+    {% if not show_submissions %}
+    <a class="btn btn-primary"
+       href="{% url 'group-sheet-submissions' group_id=group.group_id sheet_id=sheet.sheet_id %}">
+        View submissions
+    </a>
+    {% else %}
+    <a class="btn btn-secondary disabled">
+        Viewing submissions
+    </a>
+    {% endif %}
+    {% if not show_results %}
+    <a class="btn btn-primary"
+       href="{% url 'group-sheet-results' group_id=group.group_id sheet_id=sheet.sheet_id %}">
+        View results
+    </a>
+    {% else %}
+    <a class="btn btn-secondary disabled">
+        Viewing results
+    </a>
+    {% endif %}
     {% include "info/sheet/sheet_assignment.html" %}
     {% include "info/sheet/sheet_tasks.html" %}
+    {% if show_results %}
     {% include "info/sheet/sheet_results.html" %}
+    {% endif %}
+    {% if show_submissions %}
+    {% include "info/sheet/sheet_submissions.html" %}
+    {% endif %}
 
     {% if is_owner %}
     <form method="post" class="mt-5" action="{% url 'sheet-delete' sheet_id=sheet.sheet_id %}">

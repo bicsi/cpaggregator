@@ -3,14 +3,59 @@
 
 <div class="card mt-5">
     <h6 class="card-header">Results</h6>
-    {% if table.data %}
-    {% render_table table %}
-    <span class="card-footer text-muted small">
-        Only the best submissions are shown for each user.
-    </span>
+    {% if results|length > 0 %}
+    <div class="table-container table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">User \ Task</th>
+              {% for task_verdict in tasks %}
+              <th scope="col" class="text-center text-truncate">
+                  <span>
+                  {% include 'accounts/judge_label.html' with judge=task_verdict.task.judge %}
+                  {{ task_verdict.task.name_or_id }}
+                  </span>
+              </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for data_row in results %}
+            {% with user=data_row.user %}
+            <tr>
+              <th scope="row" class="text-truncate">
+                  <a class="no-underline" href="{% url 'profile' username=user.username %}">
+                  {% include "accounts/thumbnail_profile.html" with user=user.user %}
+                  </a>
+              </th>
+              {% for submission in data_row.results %}
+              <td class="text-center">
+                  {% if submission %}
+                  <a href="#!" tabindex="0" data-toggle="popover"
+                     data-trigger="focus" data-html="true" data-placement="top"
+                     title="Submission <a href='{{ submission.get_url }}'>#{{ submission.submission_id }}</a>"
+                     data-content="Submitted on: {{ submission.submitted_on|date:'M d, Y H:m'}} <br/> Verdict: {{ submission.get_verdict_display }}">
+                    {% if submission.verdict == 'AC' %}
+                    <i class="fas fa-check text-success"></i>
+                    {% else %}
+                    <i class="fas fa-times text-danger"></i>
+                    {% endif %}
+                  {% endif %}
+                  </a>
+              </td>
+              {% endfor %}
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
     {% else %}
     <div class="card-body small text-muted">
         There are no submissions for this sheet.
     </div>
     {% endif %}
+    <div class="card-footer text-muted small">
+        Only users which have submitted to at least one of the tasks are shown here.
+    </div>
 </div>

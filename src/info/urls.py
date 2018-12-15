@@ -26,8 +26,18 @@ urlpatterns = [
         path('add-member/', views.GroupMemberAddView.as_view(), name='group-member-add'),
         path('create-assignment/', views.AssignmentCreateView.as_view(), name='assignment-create'),
         path('sheet/<sheet_id>/', include([
-                path('', views.ResultsDetailView.as_view(), name='sheet-results'),
-                path('all/', views.ResultsDetailView.as_view(show_all=True), name='sheet-results-all'),
+                path('', views.ResultsDetailView.as_view(
+                    show_results=False,
+                    show_submissions=True,
+                ), name='group-sheet-detail'),
+                path('results/', views.ResultsDetailView.as_view(
+                    show_results=True,
+                    show_submissions=False,
+                ), name='group-sheet-results'),
+                path('submissions/', views.ResultsDetailView.as_view(
+                    show_results=False,
+                    show_submissions=True,
+                ), name='group-sheet-submissions'),
             ])),
         path('delete/', views.GroupDeleteView.as_view(), name='group-delete'),
     ])),

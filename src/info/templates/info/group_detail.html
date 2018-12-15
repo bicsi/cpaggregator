@@ -53,7 +53,7 @@
         <div class="list-group list-group-flush">
             {% for assignment in active_assignments %}
             <a class="list-group-item list-group-item-action"
-               href="{% url 'sheet-results' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
+               href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
                     <span class="flex-grow-1">
                         <strong class="d-block">{{ assignment.sheet.title }}</strong>
@@ -81,7 +81,7 @@
         <div class="list-group list-group-flush">
             {% for assignment in future_assignments %}
             <a class="list-group-item list-group-item-action"
-               href="{% url 'sheet-results' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
+               href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
                 <div class="d-flex align-items-center">
                     <span class="flex-grow-1">
                         <strong class="d-block">{{ assignment.sheet.title }}</strong>

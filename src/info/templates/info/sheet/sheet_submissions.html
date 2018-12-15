@@ -1,0 +1,16 @@
+{% load render_table from django_tables2 %}
+{% load bootstrap4 %}
+
+<div class="card mt-5">
+    <h6 class="card-header">Submissions</h6>
+    {% if table.data %}
+    {% render_table table %}
+    <span class="card-footer text-muted small">
+        Only the best submissions are shown for each user.
+    </span>
+    {% else %}
+    <div class="card-body small text-muted">
+        There are no submissions for this sheet.
+    </div>
+    {% endif %}
+</div>

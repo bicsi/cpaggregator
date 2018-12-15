@@ -23,7 +23,7 @@
         <a class="list-group-item list-group-item-action px-0 py-2"
            @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
            title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
-           href="{{ task.get_url }}" target="_blank">
+           href="{{ task.get_url }}" target="_blank" v-cloak>
             <div class="d-flex align-items-center">
                 <div class="py-1 px-3 border-right border-light">
                     {% include 'accounts/judge_label.html' with judge=task.judge %}

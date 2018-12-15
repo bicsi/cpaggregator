@@ -17,3 +17,7 @@
   overflow: hidden;
   position: relative;
 }
+
+.no-underline {
+  text-decoration: none !important
+}

@@ -10,7 +10,7 @@
 <div class="container">
     {% include "info/sheet/sheet_title_description.html" %}
     {% include "info/sheet/sheet_tasks.html" %}
-    {% include "info/sheet/sheet_results.html" %}
+    {% include "info/sheet/sheet_submissions.html" %}
 
     {% if is_owner %}
     <form class="mt-5" method="post" action="{% url 'sheet-delete' sheet_id=sheet.sheet_id %}">
