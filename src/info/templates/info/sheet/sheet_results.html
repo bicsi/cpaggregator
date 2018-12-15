@@ -10,7 +10,7 @@
             <tr>
               <th scope="col">User \ Task</th>
               {% for task_verdict in tasks %}
-              <th scope="col" class="text-center text-truncate">
+              <th scope="col" class="text-center text-truncate" style="min-width: 7em">
                   <span>
                   {% include 'accounts/judge_label.html' with judge=task_verdict.task.judge %}
                   {{ task_verdict.task.name_or_id }}
@@ -29,7 +29,7 @@
                   </a>
               </th>
               {% for submission in data_row.results %}
-              <td class="text-center">
+              <td class="text-center" style="min-width: 7em">
                   {% if submission %}
                   <a href="#!" tabindex="0" data-toggle="popover"
                      data-trigger="focus" data-html="true" data-placement="top"
@@ -40,8 +40,8 @@
                     {% else %}
                     <i class="fas fa-times text-danger"></i>
                     {% endif %}
-                  {% endif %}
                   </a>
+                  {% endif %}
               </td>
               {% endfor %}
             </tr>
