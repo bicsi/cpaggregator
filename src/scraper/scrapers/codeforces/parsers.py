@@ -2,6 +2,8 @@ TAG_DICT = {
     'graphs': 'graphs',
     'graph matchings': 'graphs',
     'shortest paths': 'graphs',
+    'dfs and similar': 'graphs',
+    '2-sat': 'graphs',
     'bitmasks': 'bitmask',
     'constructive algorithms': 'constructive',
     'greedy': 'greedy',
@@ -9,9 +11,14 @@ TAG_DICT = {
     'chinese remainder theorem': 'number_theory',
     'number theory': 'number_theory',
     'math': 'math',
+    'matrices': 'math',
+    'probabilities': 'math',
+    'games': 'math',
     'trees': 'trees',
     'data structures': 'data_structures',
+    'dsu': 'data_structures',
     'implementation': 'implementation',
+    'expression parsing': 'implementation',
     'strings': 'strings',
     'string suffix structures': 'strings',
     'geometry': 'geometry',
@@ -20,6 +27,7 @@ TAG_DICT = {
     'dp': 'dp',
     'flows': 'flow',
     'sortings': 'sorting',
+    'combinatorics': 'combinatorics',
 }
 
 VERDICT_DICT = {

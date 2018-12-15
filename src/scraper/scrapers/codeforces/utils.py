@@ -96,12 +96,13 @@ def scrape_task_info(task_ids):
         if task_id not in task_ids:
             continue
 
-        yield {
+        task_info = {
             'judge_id': CODEFORCES_JUDGE_ID,
             'task_id': task_id,
             'title': task_data['name'],
             'tags': tags,
         }
+        yield task_info
 
 
 def scrape_user_info(handles):
