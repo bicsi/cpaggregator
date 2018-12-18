@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_ajax',
+    'mathfilters',
     'markdownx',
     'betterforms',
     'bootstrap_pagination',

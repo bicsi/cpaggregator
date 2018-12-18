@@ -53,6 +53,12 @@ class Assignment(models.Model):
             task__in=self.sheet.tasks.all(),
         ).order_by('submitted_on')
 
+    def is_active(self):
+        return self.assigned_on < timezone.now()
+
+    def is_future(self):
+        return not self.is_active()
+
     def __str__(self):
         return '{} assigned to {}'.format(self.sheet, self.group)
 

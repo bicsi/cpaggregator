@@ -3,6 +3,7 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap4 %}
 {% load static from staticfiles %}
+{% load mathfilters %}
 
 {% block title_tag %}Dashboard{% endblock %}
 
@@ -16,23 +17,121 @@
     <a class="btn btn-secondary mb-5"
        data-toggle="modal" href="#modal"
        onclick="loadModalForm('{% url 'sheet-create' %}');">Create a sheet</a>
-    {% if groups_owned|length > 0 %}
-    <div class="card mb-5">
-        <h6 class="card-header">Your groups</h6>
-        <div class="list-group list-group-flush">
-            {% for group in groups_owned %}
-            <a class="list-group-item list-group-item-action"
-               href="{% url 'group-detail' group_id=group.group_id %}">
-                <div class="d-flex align-items-center">
-                    <span class="flex-grow-1">
-                        <strong class="d-block">{{ group }}</strong>
+
+    {% if owned_groups_data|length > 0 %}
+    <h3 class="mt-3">Groups you manage</h3>
+    <hr/>
+     <div class="row">
+        {% for group_data in owned_groups_data %}
+         <div class="col-sm-6 col-md-4 p-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    {{ group_data.group.name }}
+                </h5>
+                <p class="card-text">
+                    {% with members_count=group_data.group.members.count %}
+                    {{ members_count }} member{{ members_count|pluralize }}
+                    {% endwith %}
+                </p>
+                <p class="card-text text-primary">
+                    {{ group_data.assignment_count }} assignment{{ group_data.assignment_count|pluralize }}
+                </p>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for assignment_data in group_data.assignments %}
+                <a class="list-group-item list-group-item-action d-flex align-items-center"
+                   href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
+                    <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
+                    {% if assignment_data.assignment.is_future %}
+                    <span class="badge badge-pill badge-light ml-2">Future</span>
+                    {% endif %}
+                    <span class="badge badge-pill badge-info ml-2">
+                        {{ assignment_data.task_count }} tasks
                     </span>
-                </div>
-            </a>
-            {% endfor %}
+                </a>
+                {% endfor %}
+                {% with shown_assignments=group_data.assignments|length %}
+                {% if shown_assignments < group_data.assignment_count %}
+                <li class="list-group-item text-muted">
+                    and {{ group_data.assignment_count|sub:shown_assignments }} more...
+                </li>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="card-body" style="flex: 0 0 auto">
+                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
+                   class="card-link">Go to group</a>
+                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
+                   class="card-link">Add assignment</a>
+            </div>
         </div>
+         </div>
+        {% endfor %}
     </div>
     {% endif %}
+
+    {% if assigned_groups_data|length > 0 %}
+    <h3 class="mt-3">Assigned to you</h3>
+    <hr/>
+     <div class="row">
+        {% for group_data in assigned_groups_data %}
+         <div class="col-sm-6 col-md-4 p-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    {{ group_data.group.name }}
+                </h5>
+                <p class="card-text">
+                    {% with other_members_count=group_data.group.members.count|sub:1 %}
+                    {% with request.user as user %}
+                        {% include "accounts/thumbnail_profile.html" with hide_username=True img_dim=16 %}
+                    {% endwith %}
+                    <strong>You</strong> and {{ other_members_count }} other user{{ other_members_count|pluralize }}
+                    are members of this group.
+                    {% endwith %}
+                </p>
+                <p class="card-text text-primary">
+                    {{ group_data.assignment_count }} assignment{{ group_data.assignment_count|pluralize }}
+                </p>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for assignment_data in group_data.assignments %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                   href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
+                    {{ assignment_data.assignment.sheet }}
+                    {% if assignment_data.solved_count == assignment_data.task_count %}
+                    <span class="badge badge-pill badge-success">
+                    {% else %}
+                    <span class="badge badge-pill badge-secondary">
+                    {% endif %}
+                        {{ assignment_data.solved_count }}/{{ assignment_data.task_count }} solved
+                    </span>
+                </a>
+                {% endfor %}
+                {% with shown_assignments=group_data.assignments|length %}
+                {% if shown_assignments < group_data.assignment_count %}
+                <li class="list-group-item text-muted">
+                    and {{ group_data.assignment_count|sub:shown_assignments }} more...
+                </li>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="card-body" style="flex: 0 0 auto">
+                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
+                   class="card-link">Go to group</a>
+            </div>
+        </div>
+         </div>
+         {% empty %}
+         <p class="mx-3">You are not a member of any groups yet.</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if sheets|length > 0 %}
+    <h3 class="mt-3">Your task sheets</h3>
+    <hr/>
     <div class="card mb-5">
         <h6 class="card-header">Your task sheets</h6>
         <div class="list-group list-group-flush">
@@ -72,46 +171,7 @@
             </span>
         </div>
     </div>
-    <div class="card mb-5">
-        <h6 class="card-header">Assigned to you</h6>
-        <div class="list-group list-group-flush">
-            {% for assignation_data in assignations %}
-            {% with task_sheet=assignation_data.assignation.sheet solved_count=assignation_data.solved_count group=assignation_data.assignation.group %}
-            <a class="list-group-item list-group-item-action"
-               href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=task_sheet.sheet_id %}">
-                <div class="d-flex align-items-center">
-                    <span class="flex-grow-1">
-                        <strong class="mr-2">
-                            {{ task_sheet.title }}
-                        </strong>
-                        {% if solved_count == task_sheet.tasks.all|length %}
-                        <span class="badge badge-pill badge-success">
-                        {% else %}
-                        <span class="badge badge-pill badge-secondary">
-                        {% endif %}
-                            {{ solved_count }}/{{ task_sheet.tasks.all|length }} solved
-                        </span>
-                    </span>
-                    <span class="small text-muted">
-                        {{ task_sheet.created_at|date:"M d Y" }}
-                    </span>
-                    </span>
-                </div>
-                <span class="small d-block mt-1">In {{group}}</span>
-            </a>
-            {% endwith %}
-            {% endfor %}
-        </div>
-        <div class="card-footer">
-            <span class="small text-muted">
-                {% if assignations|length <= 0 %}
-                No task sheets.
-                {% else %}
-                {{ assignations|length }} task sheet{{ assignations|length|pluralize }}
-                {% endif %}
-            </span>
-        </div>
-    </div>
+    {% endif %}
 </div>
 {% endwith %}
 {% endblock %}

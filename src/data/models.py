@@ -108,7 +108,7 @@ class UserGroup(models.Model):
     name = models.CharField(max_length=256)
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
     created_at = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(UserProfile, related_name='groups_owned', null=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(UserProfile, related_name='owned_groups', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.name
