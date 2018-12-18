@@ -27,14 +27,17 @@
         <div class="card h-100">
             <div class="card-body flex-grow-0">
                 <h5 class="card-title">
-                    {{ group_data.group.name }}
+                    <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
+                        <i class="fas fa-users mr-1 fa-xs"></i>
+                        {{ group_data.group.name }}
+                    </a>
                 </h5>
                 <p class="card-text">
                     {% with members_count=group_data.group.members.count %}
                     {{ members_count }} member{{ members_count|pluralize }}
                     {% endwith %}
                 </p>
-                <p class="card-text text-primary">
+                <p class="card-text text-secondary">
                     {{ group_data.assignment_count }} assignment{{ group_data.assignment_count|pluralize }}
                 </p>
             </div>
@@ -79,8 +82,12 @@
          <div class="col-sm-6 col-md-4 p-3">
         <div class="card h-100">
             <div class="card-body flex-grow-0">
+
                 <h5 class="card-title">
-                    {{ group_data.group.name }}
+                    <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
+                        <i class="fas fa-users mr-1 fa-xs"></i>
+                        {{ group_data.group.name }}
+                    </a>
                 </h5>
                 <p class="card-text">
                     {% with other_members_count=group_data.group.members.count|sub:1 %}
@@ -91,7 +98,7 @@
                     are members of this group.
                     {% endwith %}
                 </p>
-                <p class="card-text text-primary">
+                <p class="card-text text-secondary">
                     {{ group_data.assignment_count }} assignment{{ group_data.assignment_count|pluralize }}
                 </p>
             </div>
