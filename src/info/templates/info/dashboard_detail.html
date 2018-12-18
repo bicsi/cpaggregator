@@ -38,9 +38,9 @@
                     {{ group_data.assignment_count }} assignment{{ group_data.assignment_count|pluralize }}
                 </p>
             </div>
-            <div class="list-group list-group-flush flex-grow-1 align-items-center">
+            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-center">
                 {% for assignment_data in group_data.assignments %}
-                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                <a class="list-group-item list-group-item-action d-flex align-items-center"
                    href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
                     <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
                     {% if assignment_data.assignment.is_future %}
