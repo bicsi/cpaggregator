@@ -9,17 +9,24 @@
 {% block body_content %}
 
 <div class="container">
-    <h1 class="my-5">Users</h1>
+    <h1 class="my-5">Hall of fame</h1>
     <div class="card mt-5" id="sheet-task-panel">
         <div class="card-header d-flex align-items-center">
-            <h6 class="d-inline flex-grow-1 mb-0">Tasks</h6>
+            <h6 class="d-inline flex-grow-1 mb-0">Users</h6>
         </div>
         <div class="list-group list-group-flush">
         {% for profile in profile_list %}
-            <a class="list-group-item list-group-item-action"
+            <a class="list-group-item list-group-item-action d-flex align-items-center"
                href="{% url 'profile' username=profile.username %}">
-                <span class="text-primary font-weight-bold mr-3">{{ profile.statistics.rank }}</span>
+                <span class="font-weight-bold mr-3">
+                    {{ profile.statistics.rank }}
+                </span>
+                <span class="flex-grow-1">
                 {% include "accounts/thumbnail_profile.html" with user=profile.user %}
+                </span>
+                <span class="text-success font-weight-bold">
+                    <i class="fas fa-xs fa-check mr-1"></i>{{ profile.statistics.tasks_solved_count }}
+                </span>
             </a>
         {% endfor %}
         </div>
