@@ -529,9 +529,9 @@ class GroupLeaveView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
         group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
-        if group.visibility == 'PUBLIC':
-            group.members.remove(user.profile)
-            group.save()
+        group.members.remove(user.profile)
+        group.save()
+        
         return redirect('group-detail', group_id=group.group_id)
 
 
