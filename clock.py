@@ -85,6 +85,8 @@ def compute_statistics():
     print('Computing statistics...')
     subprocess.call('python ./src/manage.py compute_task_statistics',
                     shell=True, close_fds=True)
+    subprocess.call('python ./src/manage.py compute_user_statistics',
+                    shell=True, close_fds=True)
 
 
 print("SCHEDULER STARTING...")
