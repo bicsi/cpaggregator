@@ -531,7 +531,7 @@ class GroupLeaveView(LoginRequiredMixin, generic.View):
         group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
         group.members.remove(user.profile)
         group.save()
-        
+
         return redirect('group-detail', group_id=group.group_id)
 
 
