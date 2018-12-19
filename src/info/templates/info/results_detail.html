@@ -10,26 +10,25 @@
 
 <div class="container">
     {% include "info/sheet/sheet_title_description.html" %}
-    {% if not show_submissions %}
-    <a class="btn btn-primary"
-       href="{% url 'group-sheet-submissions' group_id=group.group_id sheet_id=sheet.sheet_id %}">
-        View submissions
-    </a>
-    {% else %}
-    <a class="btn btn-secondary disabled">
-        Viewing submissions
-    </a>
-    {% endif %}
-    {% if not show_results %}
-    <a class="btn btn-primary"
-       href="{% url 'group-sheet-results' group_id=group.group_id sheet_id=sheet.sheet_id %}">
-        View results
-    </a>
-    {% else %}
-    <a class="btn btn-secondary disabled">
-        Viewing results
-    </a>
-    {% endif %}
+    <div class="btn-group" role="group" aria-label="Viewing mode">
+        {% if show_results %}
+        <a class="btn btn-primary"
+           href="{% url 'group-sheet-submissions' group_id=group.group_id sheet_id=sheet.sheet_id %}">
+            View submissions
+        </a>
+        <a class="btn btn-secondary disabled">
+            Viewing results
+        </a>
+        {% else %}
+        <a class="btn btn-secondary disabled">
+            Viewing submissions
+        </a>
+        <a class="btn btn-primary"
+           href="{% url 'group-sheet-results' group_id=group.group_id sheet_id=sheet.sheet_id %}">
+            View results
+        </a>
+        {% endif %}
+    </div>
     {% include "info/sheet/sheet_assignment.html" %}
     {% include "info/sheet/sheet_tasks.html" %}
     {% if show_results %}

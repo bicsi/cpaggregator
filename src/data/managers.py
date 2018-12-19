@@ -20,3 +20,9 @@ class JudgeManager(models.Manager):
     def get_queryset(self):
         return super(JudgeManager, self).get_queryset() \
             .filter(judge_id__in=['csa', 'cf', 'ia'])
+
+
+class PublicGroupManager(models.Manager):
+    def get_queryset(self):
+        return super(PublicGroupManager, self).get_queryset() \
+            .filter(visibility='PUBLIC')

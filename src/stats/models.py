@@ -1,6 +1,6 @@
 from django.db import models
 import math
-from data.models import Task
+from data.models import Task, UserProfile
 
 
 class TaskStatistics(models.Model):
@@ -22,3 +22,9 @@ class TaskStatistics(models.Model):
             return math.nan
         return 100 * self.users_solved_count / self.users_tried_count
 
+
+class UserStatistics(models.Model):
+    user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='statistics')
+    tasks_solved_count = models.IntegerField(default=0)
+    tasks_tried_count = models.IntegerField(default=0)
+    rank = models.IntegerField(null=True)

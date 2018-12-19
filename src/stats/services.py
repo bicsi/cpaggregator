@@ -1,5 +1,5 @@
-from data.models import Submission
-from .models import TaskStatistics
+from data.models import Submission, UserProfile
+from .models import TaskStatistics, UserStatistics
 
 
 def compute_task_statistics(task):
@@ -19,3 +19,36 @@ def compute_task_statistics(task):
         submission_count=submission_count,
         favorited_count=favorited_count,
     ))
+
+
+def compute_user_statistics():
+    """
+    Computes UserStatistic objects,
+    which it saves to the database
+    """
+    def make_user_stat(user):
+        submissions = Submission.best.filter(author__in=user.handles.all())
+
+        tasks_solved_count = submissions.filter(verdict='AC').count()
+        tasks_tried_count = submissions.count()
+
+        return UserStatistics(
+            user=user,
+            tasks_solved_count=tasks_solved_count,
+            tasks_tried_count=tasks_tried_count,
+        )
+    # Make statistics.
+    user_statistics = [make_user_stat(user) for user in UserProfile.objects.all()]
+
+    # Compute ranks.
+    old_best = -1
+    current_rank = 1
+    for statistic in sorted(user_statistics, key=lambda stat: stat.tasks_solved_count, reverse=True):
+        if statistic.tasks_solved_count < old_best:
+            current_rank += 1
+        old_best = statistic.tasks_solved_count
+        statistic.rank = current_rank
+
+    # Save.
+    for statistic in user_statistics:
+        statistic.save()

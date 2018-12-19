@@ -359,6 +359,17 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+class RankListView(generic.ListView):
+    template_name = 'info/rank_list.html'
+    paginate_by = 10
+    context_object_name = 'profile_list'
+    queryset = UserProfile.objects.order_by('statistics__rank')
+
+    def get_context_data(self, **kwargs):
+        kwargs['user_count'] = UserProfile.objects.count()
+        return super(RankListView, self).get_context_data(**kwargs)
+
+
 class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     template_name = 'info/task_detail.html'
     context_object_name = 'task'
@@ -393,10 +404,14 @@ class GroupDetailView(generic.DetailView):
     context_object_name = 'group'
 
     def get_context_data(self, **kwargs):
+        kwargs['assignments'] = list(Assignment.active.filter(group=self.object).order_by('-assigned_on').all())
         if self.request.user.is_authenticated:
-            kwargs['is_owner'] = self.request.user.profile == self.object.author
-        kwargs['active_assignments'] = Assignment.active.filter(group=self.object)
-        kwargs['future_assignments'] = Assignment.future.filter(group=self.object)
+            is_owner = self.object.is_owned_by(self.request.user)
+            if is_owner:
+                kwargs['assignments'] = list(Assignment.future.filter(group=self.object).order_by('-assigned_on').all()) \
+                                        + kwargs['assignments']
+            kwargs['is_owner'] = is_owner
+            kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=self.object.id).exists()
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 
@@ -417,6 +432,15 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
+
+        context['public_groups_data'] = [{
+            "group": group,
+            "assignments": [{
+                "assignment": assignment,
+                "task_count": assignment.sheet.tasks.count(),
+            } for assignment in Assignment.active.filter(group=group).order_by('-assigned_on')[:3]],
+            "assignment_count": Assignment.active.filter(group=group).count(),
+        } for group in UserGroup.public.all()]
 
         context['owned_groups_data'] = [{
             "group": group,
@@ -489,3 +513,39 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
             FavoriteTask.objects.create(profile=user.profile, task=task)
 
         return redirect('task-detail', judge_id=task.judge.judge_id, task_id=task.task_id)
+
+
+class GroupJoinView(LoginRequiredMixin, generic.View):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
+        if group.visibility == 'PUBLIC':
+            group.members.add(user.profile)
+            group.save()
+        return redirect('group-detail', group_id=group.group_id)
+
+
+class GroupLeaveView(LoginRequiredMixin, generic.View):
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
+        if group.visibility == 'PUBLIC':
+            group.members.remove(user.profile)
+            group.save()
+        return redirect('group-detail', group_id=group.group_id)
+
+
+class GroupUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    template_name = 'info/modal/group_update.html'
+    model = UserGroup
+    slug_url_kwarg = 'group_id'
+    slug_field = 'group_id'
+    form_class = forms.GroupUpdateForm
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER', reverse_lazy('home'))
+
+    def form_valid(self, form):
+        if self.object.is_owned_by(self.request.user):
+            return super(GroupUpdateView, self).form_valid(form)
+        return redirect('home')

@@ -1,24 +1,59 @@
 <div class="my-5">
     <h1>{{ group.name }}</h1>
-    <div class="text-muted">
+    <div class="text-muted d-flex align-items-center">
         Created by
         {% with group.author.user as user %}
         <a href="{% url 'profile' username=user.profile.username %}"
-           class="btn btn-sm btn-white mx-1 px-2">
+           class="btn btn-sm btn-white ml-3">
             {% include "accounts/thumbnail_profile.html" %}
+        </a>
+        <span class="text-light mx-3">|</span>
+        <a data-toggle="tooltip" data-placement="right"
+           title="
+           {% if group.visibility == 'PRIVATE' %}
+                Everybody can see the group. Members have to be manually added by the owner.
+           {% elif group.visibility == 'PUBLIC' %}
+                Everybody can see and join this group.
+           {% endif %}" href="#!"
+           class="badge badge-info">
+            <i class="fas fa-xs fa-globe-americas"></i> {{ group.get_visibility_display }}
         </a>
         {% endwith %}
     </div>
+    <div class="mt-2">{{ group.formatted_description|safe }}</div>
     {% if is_owner %}
-    <a class="btn btn-primary mt-3"
-    data-toggle="modal" href="#modal"
-           onclick="loadModalForm('{% url 'assignment-create' group_id=group.group_id %}');">
-        Add an assignment
-    </a>
-    <a class="btn btn-secondary mt-3 ml-2"
-    data-toggle="modal" href="#modal"
-           onclick="loadModalForm('{% url 'group-member-add' group_id=group.group_id %}');">
-        Add members
-    </a>
+    <div class="btn-group my-2" aria-label="Moderate group">
+        <a class="btn btn-primary my-2"
+        data-toggle="modal" href="#modal"
+               onclick="loadModalForm('{% url 'assignment-create' group_id=group.group_id %}');">
+            Add an assignment
+        </a>
+        <a class="btn btn-secondary my-2"
+        data-toggle="modal" href="#modal"
+               onclick="loadModalForm('{% url 'group-member-add' group_id=group.group_id %}');">
+            Add members
+        </a>
+        <a class="btn btn-secondary my-2"
+        data-toggle="modal" href="#modal"
+               onclick="loadModalForm('{% url 'group-update' group_id=group.group_id %}');">
+            Edit details
+        </a>
+    </div>
+    {% endif %}
+    {% if group.visibility == 'PUBLIC' and not is_user_member %}
+    <form action="{% url 'group-join' group_id=group.group_id %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+            <button class="btn btn-primary submit-btn">Join group</button>
+        </div>
+    </form>
+    {% endif %}
+    {% if is_user_member %}
+    <form action="{% url 'group-leave' group_id=group.group_id %}" method="post">
+        {% csrf_token %}
+        <div class="mb-2">
+            <button class="btn btn-danger submit-btn">Leave group</button>
+        </div>
+    </form>
     {% endif %}
 </div>

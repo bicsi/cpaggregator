@@ -6,7 +6,10 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 
-from data.managers import BestSubmissionManager, JudgeManager
+from markdownx.models import MarkdownxField
+from markdownx.utils import markdownify
+
+from . import managers
 
 VERDICT_CHOICES = [
     ("AC", "Accepted"),
@@ -17,12 +20,17 @@ VERDICT_CHOICES = [
     ("WA", "Wrong Answer"),
 ]
 
+VISIBILITY_CHOICES = [
+    ("PUBLIC", "Public"),
+    ("PRIVATE", "Private"),
+]
+
 
 class Judge(models.Model):
     judge_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
     homepage = models.CharField(max_length=256)
-    objects = JudgeManager()
+    objects = managers.JudgeManager()
 
     def get_logo_url(self):
         return f'img/judge_logos/{self.judge_id}.svg'
@@ -109,6 +117,25 @@ class UserGroup(models.Model):
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
     created_at = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(UserProfile, related_name='owned_groups', null=True, on_delete=models.SET_NULL)
+    visibility = models.CharField(max_length=256, choices=VISIBILITY_CHOICES, default='PRIVATE')
+    description = MarkdownxField(blank=True, null=True)
+
+    # Model managers.
+    objects = models.Manager()  # The default manager.
+    public = managers.PublicGroupManager()
+
+    @property
+    def formatted_description(self):
+        if not self.description:
+            return ""
+        return markdownify(self.description)
+
+    @property
+    def short_description(self):
+        return self.description
+
+    def is_owned_by(self, user):
+        return user.is_superuser or user.profile == self.author
 
     def __str__(self):
         return self.name
@@ -189,7 +216,7 @@ class Submission(models.Model):
 
     # Managers.
     objects = models.Manager()  # The default manager.
-    best = BestSubmissionManager()
+    best = managers.BestSubmissionManager()
 
     def get_url(self):
         if self.task.judge.judge_id == 'csa':

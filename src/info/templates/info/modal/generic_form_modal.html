@@ -26,11 +26,13 @@ $('document').ready(function() {
   $('#modal-form .submit-btn').click(function(e) {
     genericLoadDialog('#modal-form', 'invalid_form');
   });
-  $('#modal-form').bind('keypress', function(e) {
+
+  $('#modal-form input').bind('keypress', function(e) {
     if (e.keyCode == 13) {
        e.preventDefault();
        genericLoadDialog('#modal-form', 'invalid_form');
     }
   });
+
 });
 </script>

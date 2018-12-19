@@ -11,9 +11,10 @@
 
 	<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
 	<!-- fonts -->
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
-		  integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css"
+		  integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP"
 		  crossorigin="anonymous">
+
 	<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -54,6 +55,9 @@
 					{% if user.is_authenticated %}
 					<li>
 						<a href="{% url 'task-list' %}" class="nav-link">Tasks</a>
+					</li>
+					<li>
+						<a href="{% url 'rank-list' %}" class="nav-link">Hall of fame</a>
 					</li>
 				</ul>
 				<ul class="navbar-nav navbar-right vertical-align">
@@ -102,6 +106,9 @@
 	<script type="text/javascript">
 		$(function () {
 		  $('[data-toggle="popover"]').popover()
+		})
+		$(function () {
+		  $('[data-toggle="tooltip"]').tooltip()
 		})
 		function loadModalForm(url) {
 			$.ajax({

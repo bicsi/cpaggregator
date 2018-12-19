@@ -67,7 +67,7 @@ class SheetDescriptionUpdateForm(forms.ModelForm):
 class GroupCreateForm(forms.ModelForm):
     class Meta:
         model = UserGroup
-        fields = ['name']
+        fields = ['name', 'visibility']
         help_texts = {
             'name': 'Choose a name for the group.'
         }
@@ -124,3 +124,12 @@ class AssignmentSheetCreateMultiForm(multiform.MultiModelForm):
         'sheet': SheetCreateForm,
         'assignment': AssignmentCreateForm,
     }
+
+
+class GroupUpdateForm(forms.ModelForm):
+    class Meta:
+        fields = ['name', 'visibility', 'description']
+        model = UserGroup
+        help_texts = {
+            'description': 'You can write your description using Markdown.',
+        }

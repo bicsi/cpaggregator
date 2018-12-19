@@ -1,0 +1,35 @@
+{% with member_count=group.members.all|length %}
+<div class="card mb-5">
+    <h6 class="card-header">
+        Members
+        {% if is_owner %}
+        {% endif %}
+    </h6>
+
+    <div class="list-group list-group-flush">
+        {% for member in group.members.all %}
+        <a class="list-group-item list-group-item-action"
+           href="{% url 'profile' username=member.username %}">
+            <div class="d-flex align-items-center">
+                {% include "accounts/thumbnail_profile.html" with user=member.user hide_username=True %}
+                <div class="flex-grow-1 ml-2">
+                    <strong>{{ member.get_display_name }}</strong>
+                    <span class="small text-muted ml-1">@{{ member.username }}</span>
+                </div>
+                {% if is_owner %}
+                <form style="display: inline-block; float: right"
+                      method="post" action="{% url 'group-member-delete' group_id=group.group_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ member.username }}" name="member_username" />
+                    <button class="btn btn-danger btn-sm align-middle" type="submit">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    <span class="card-footer text-muted small">{{ member_count }} member{{ member_count|pluralize }}</span>
+</div>
+{% endwith %}

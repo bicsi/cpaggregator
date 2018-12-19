@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+{% load bootstrap_pagination %}
+
+{% block title_tag %}Users{% endblock %}
+
+{% block body_content %}
+
+<div class="container">
+    <h1 class="my-5">Users</h1>
+    <div class="card mt-5" id="sheet-task-panel">
+        <div class="card-header d-flex align-items-center">
+            <h6 class="d-inline flex-grow-1 mb-0">Tasks</h6>
+        </div>
+        <div class="list-group list-group-flush">
+        {% for profile in profile_list %}
+            <a class="list-group-item list-group-item-action"
+               href="{% url 'profile' username=profile.username %}">
+                <span class="text-primary font-weight-bold mr-3">{{ profile.statistics.rank }}</span>
+                {% include "accounts/thumbnail_profile.html" with user=profile.user %}
+            </a>
+        {% endfor %}
+        </div>
+    </div>
+    {% if is_paginated %}
+        <div class="mx-auto d-flex flex-column align-items-center">
+            <span class="small text-muted my-3">
+                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ user_count }} users
+            </span>
+            {% bootstrap_paginate page_obj previous_label="Previous" next_label="Next" %}
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

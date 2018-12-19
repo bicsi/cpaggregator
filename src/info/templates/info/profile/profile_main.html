@@ -7,6 +7,10 @@
     <div class="card-body">
         <h5 class="card-title">{{ profile.get_display_name }}</h5>
         <h6 class="card-subtitle mb-2 text-muted">@{{ profile.username }}</h6>
+        {% if profile.statistics %}
+        <h6>Rank: {{ profile.statistics.rank }}</h6>
+        {% endif %}
+
         <p>Joined on: {{ profile.created_at|date:"M d, Y"}}</p>
         {% if profile.user == user %}
         <a class="btn btn-secondary"

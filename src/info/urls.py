@@ -20,8 +20,12 @@ from info import views
 
 urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('rank/', views.RankListView.as_view(), name='rank-list'),
     path('group/<group_id>/', include([
         path('', views.GroupDetailView.as_view(), name='group-detail'),
+        path('join/', views.GroupJoinView.as_view(), name='group-join'),
+        path('leave/', views.GroupLeaveView.as_view(), name='group-leave'),
+        path('update/', views.GroupUpdateView.as_view(), name='group-update'),
         path('delete-member/', views.GroupMemberDeleteView.as_view(), name='group-member-delete'),
         path('add-member/', views.GroupMemberAddView.as_view(), name='group-member-add'),
         path('create-assignment/', views.AssignmentCreateView.as_view(), name='assignment-create'),
