@@ -69,7 +69,8 @@ class GroupCreateForm(forms.ModelForm):
         model = UserGroup
         fields = ['name', 'visibility']
         help_texts = {
-            'name': 'Choose a name for the group.'
+            'name': 'Choose a name for the group.',
+            'visibility': 'You can always change the visibility in the future.',
         }
 
     def __init__(self, **kwargs):

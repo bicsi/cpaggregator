@@ -11,12 +11,6 @@
 {% with request.user as user %}
 <div class="container">
     <h1 class="my-5">Dashboard</h1>
-    <a class="btn btn-secondary mb-5"
-       data-toggle="modal" href="#modal"
-       onclick="loadModalForm('{% url 'group-create' %}');">Create a group</a>
-    <a class="btn btn-secondary mb-5"
-       data-toggle="modal" href="#modal"
-       onclick="loadModalForm('{% url 'sheet-create' %}');">Create a sheet</a>
 
     {% if public_groups_data|length > 0 %}
     <h3 class="mt-3">Public groups</h3>

@@ -61,15 +61,29 @@
 					</li>
 				</ul>
 				<ul class="navbar-nav navbar-right vertical-align">
-					<li class="my-auto mr-3 ">
-						<a href="{% url 'me' %}" class="nav-link text-white">
-                        {% with request.user as user %}
-                            {% include "accounts/thumbnail_profile.html" %}
-                        {% endwith %}
+					<li class="nav-item dropdown font-weight-bold">
+						<a id="navbar-user-dropdown" href="#" class="nav-link dropdown-toggle"
+						   role="button" data-toggle="dropdown" aria-haspopup="true"
+						   aria-expanded="false">
+                        {% include "accounts/thumbnail_profile.html" with user=request.user %}
 						</a>
-					</li>
-					<li>
-						<a href="{% url 'logout' %}" class="nav-link">Log out</a>
+						<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbar-user-dropdown">
+							<a class="dropdown-item"
+							   data-toggle="modal" href="#modal"
+							   onclick="loadModalForm('{% url 'group-create' %}');">
+								<i class="fas fa-xs fa-plus"></i>
+								<span class="mx-2">Create a group</span>
+							</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="{% url 'me' %}">
+								<i class="fas fa-xs fa-user-alt"></i>
+								<span class="mx-2">Profile</span>
+							</a>
+							<a href="{% url 'logout' %}" class="dropdown-item">
+								<i class="fas fa-xs fa-sign-out-alt"></i>
+								<span class="mx-2">Log out</span>
+							</a>
+						</div>
 					</li>
 					{% else %}
 					<li>
