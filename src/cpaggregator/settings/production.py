@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(
 SECRET_KEY = '9n03926ncnffiw(6np41+zv9pv@q=vda4o_sgit&**(u*9ckr1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['competitive.herokuapp.com']
 
