@@ -116,14 +116,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, '..', 'assets')]
-
-MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'media')
-MEDIA_URL = '/media/'
-
 
 # SSL Settings for Heroku.
 CORS_REPLACE_HTTPS_REFERER = True
@@ -138,5 +130,13 @@ SECURE_FRAME_DENY = True
 
 # Activate Django-Heroku.
 django_heroku.settings(locals())
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/2.0/howto/static-files/
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, '..', 'assets')]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'media')
+MEDIA_URL = '/media/'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
