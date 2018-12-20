@@ -2,6 +2,7 @@ import django
 import django_heroku
 
 import os
+import os
 
 """
 Django settings for cpaggregator project.
@@ -146,3 +147,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'media')
 MEDIA_URL = '/media/'
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
+
+CELERY_BROKER_URL = os.environ['REDIS_URL']

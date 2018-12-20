@@ -152,3 +152,6 @@ SECURE_FRAME_DENY = False
 
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
+# Celery settings.
+CELERY_BROKER_URL = 'redis://localhost'
+

@@ -28,3 +28,5 @@ django-betterforms==1.2
 django-bootstrap-pagination==1.7.0
 djangoajax==3.0.3
 django-mathfilters==0.4.0
+celery==4.2.1
+redis=3.0.1

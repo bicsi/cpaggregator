@@ -3,10 +3,12 @@ from datetime import datetime, timedelta
 from itertools import takewhile
 
 from data.models import Task, UserHandle
-from scraper import utils
+from scraper import utils, database
 from scraper.scrapers.infoarena import utils as infoarena_scraper
 from scraper.scrapers.csacademy import utils as csacademy_scraper
 from scraper.scrapers.codeforces import utils as codeforces_scraper
+
+from celery import shared_task
 
 
 def __expand_task(judge_id, task_id):
@@ -14,7 +16,6 @@ def __expand_task(judge_id, task_id):
     if task_id == '*':
         task_ids = [task.task_id for task in
                     Task.objects.filter(judge__judge_id=judge_id)]
-    print('Task ids:', task_ids)
     return task_ids
 
 
@@ -27,11 +28,7 @@ def __expand_handle(judge_id, handle):
     return handles
 
 
-def scrape_submissions_for_task(db, task, from_date, to_date):
-    print('Scraping submissions for task: %s...' % task)
-    judge_id, task_id = task.split(':', 1)
-    task_ids = __expand_task(judge_id, task_id)
-
+def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
     if judge_id == 'ia':
         if len(task_ids) == 1:
             submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
@@ -54,6 +51,31 @@ def scrape_submissions_for_task(db, task, from_date, to_date):
 
     submissions_to_write = takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
     utils.write_submissions(db, submissions_to_write, chunk_size=1000)
+
+
+@shared_task
+def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
+    db = database.get_db()
+
+    print("TASKS", tasks)
+
+    from_date = datetime.now() - timedelta(days=from_days)
+    to_date = datetime.now() - timedelta(days=to_days)
+
+    print('Scraping submissions between:')
+    print(to_date)
+    print(from_date)
+
+    task_dict = {}
+    for task in tasks:
+        judge_id, task_id = task.split(':', 1)
+        task_ids = __expand_task(judge_id, task_id)
+        task_dict[judge_id] = task_dict.get(judge_id, []) + task_ids
+
+    for judge_id, task_ids in task_dict.items():
+        print(f'Scraping task submissions from judge {judge_id}:')
+        print(task_ids)
+        __scrape_submissions_for_tasks(db, judge_id, list(set(task_ids)), from_date, to_date)
 
 
 def scrape_task_info(db, task):
@@ -92,5 +114,3 @@ def scrape_handle_info(db, handle):
         return
 
     utils.write_handles(db, handle_infos)
-
-

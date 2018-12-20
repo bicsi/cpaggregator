@@ -8,4 +8,4 @@ class Command(BaseCommand):
     help = 'Updates the users with submissions for the available tasks.'
 
     def handle(self, *args, **options):
-        services.update_tasks_info(Task.objects.all())
+        services.update_all_tasks_info()

@@ -15,14 +15,8 @@ class Command(BaseCommand):
         parser.add_argument('--tasks', nargs='+')
 
     def handle(self, *args, **options):
-        db = database.get_db()
-        tasks = options['tasks']
-        print("TASKS", tasks)
-        from_date = datetime.datetime.now() - datetime.timedelta(days=options['from_days'])
-        to_date = datetime.datetime.now() - datetime.timedelta(days=options['to_days'])
-        print('Scraping submissions between:')
-        print(to_date)
-        print(from_date)
-
-        for task in tasks:
-            services.scrape_submissions_for_task(db, task, from_date, to_date)
+        services.scrape_submissions_for_tasks(
+            options['tasks'],
+            options['from_days'],
+            options['to_days']
+        )

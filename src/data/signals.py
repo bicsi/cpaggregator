@@ -5,6 +5,8 @@ from django.dispatch import receiver
 from data import services
 from data.models import UserProfile, Task, UserHandle
 
+import celery
+
 """
     User and UserProfile signals.
 """
@@ -34,11 +36,16 @@ def save_user_profile(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def create_task(sender, instance, created, **kwargs):
-    print('SIGNAL')
     if created:
-        print('Created new task: updating info...')
-        services.update_tasks_info([instance])
+        task_id = ":".join([instance.judge.judge_id, instance.task_id])
 
+        print(f'Created new task {task_id}: updating info async...')
+        services.update_tasks_info.si(task_id).apply_async()
+        print('Scraping submissions and updating users async...')
+        celery.chain(
+            services.scraper_services.scrape_submissions_for_tasks.si(task_id),
+            services.update_all_users.si(),
+        ).apply_async()
 
 """
     Handle signals.
@@ -49,7 +56,9 @@ def create_task(sender, instance, created, **kwargs):
 def create_handle(sender, instance, created, **kwargs):
     if created:
         print('Created new handle: updating info...')
-        services.update_handles([instance])
-        services.update_users([instance.user])
+        celery.chain(
+            services.update_handles.si(':'.join([instance.judge.judge_id, instance.handle])),
+            services.update_users.si(instance.user.user.username),
+        ).apply_async()
 
 

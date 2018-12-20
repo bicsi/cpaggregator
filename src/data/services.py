@@ -2,9 +2,11 @@ import math
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
-from data.models import MethodTag, Task, Submission
+from data.models import MethodTag, Task, Submission, UserProfile, UserHandle
 from scraper.database import get_db
 import scraper.services as scraper_services
+
+from celery import shared_task
 
 
 def __update_task_info(db, task):
@@ -117,19 +119,72 @@ def __update_user(db, user):
                 print('Submission %s failed. Error: %s' % (mongo_submission['submission_id'], e))
 
 
-def update_tasks_info(tasks):
+@shared_task
+def update_tasks_info(*tasks):
     db = get_db()
+    print(f'update_tasks_info got called with {tasks}')
     for task in tasks:
-        __update_task_info(db, task)
+        try:
+            judge_id, task_id = task.split(':', 1)
+            task_obj = Task.objects.get(judge__judge_id=judge_id, task_id=task_id)
+            __update_task_info(db, task_obj)
+        except Exception as e:
+            print(f'ERROR: {e}')
 
 
-def update_handles(handles):
+@shared_task
+def update_all_tasks_info():
     db = get_db()
-    for handle in handles:
+    print(f'update_all_tasks_info got called')
+    for task in Task.objects.all():
+        try:
+            __update_task_info(db, task)
+        except Exception as e:
+            print(f'ERROR: {e}')
+            print(f'DELETING TASK: {task}')
+            task.delete()
+
+
+@shared_task
+def update_handles(*handles):
+    db = get_db()
+    print(f'update_handles got called with {handles}')
+
+    if handles:
+        for handle in handles:
+            try:
+                judge_id, handle_id = handle.split(':', 1)
+                handle_obj = UserHandle.objects.get(judge__judge_id=judge_id, handle=handle_id)
+                __update_handle(db, handle_obj)
+            except Exception as e:
+                print(f'ERROR: {e}')
+
+
+@shared_task
+def update_all_handles():
+    db = get_db()
+    print(f'update_all_handles got called')
+
+    for handle in UserHandle.objects.all():
         __update_handle(db, handle)
 
 
-def update_users(users):
+@shared_task
+def update_users(*usernames):
     db = get_db()
-    for user in users:
+    print(f'update_users got called with {usernames}')
+
+    for username in usernames:
+        try:
+            user = UserProfile.objects.get(user__username=username)
+            __update_user(db, user)
+        except Exception as e:
+            print(f'ERROR: {e}')
+
+
+@shared_task
+def update_all_users():
+    db = get_db()
+    print(f'update_all_users got called')
+    for user in UserProfile.objects.all():
         __update_user(db, user)

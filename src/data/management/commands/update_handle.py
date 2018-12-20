@@ -8,4 +8,4 @@ class Command(BaseCommand):
     help = 'Updates the handles with scraped info.'
 
     def handle(self, *args, **options):
-        services.update_handles(UserHandle.objects.all())
+        services.update_all_handles()

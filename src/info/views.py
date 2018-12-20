@@ -124,7 +124,6 @@ class ResultsDetailView(generic.DetailView):
                     'user': user,
                     'results': user_submissions,
                 })
-        print(results_data)
 
         context['tasks'] = tasks
         context['is_owner'] = self.object.sheet.is_owned_by(self.request.user)
