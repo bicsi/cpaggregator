@@ -417,7 +417,8 @@ class GroupDetailView(generic.DetailView):
                 'assignment': assignment,
                 'solved_count': Submission.best.filter(
                     author__in=self.request.user.profile.handles.all(),
-                    task__in=assignment.sheet.tasks.all()).count()
+                    task__in=assignment.sheet.tasks.all(),
+                    verdict='AC').count()
             } for assignment in assignments]
         else:
             kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments]

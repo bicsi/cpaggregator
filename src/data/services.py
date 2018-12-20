@@ -61,8 +61,9 @@ def __update_handle(db, handle):
         scraper_services.scrape_handle_info(db, ":".join([handle.judge.judge_id, handle.handle]))
 
     if not mongo_handle_info:
+        print("ERROR: handle info not found.")
         return
-    
+
     if 'photo_url' in mongo_handle_info:
         handle.photo_url = mongo_handle_info['photo_url']
     else:
