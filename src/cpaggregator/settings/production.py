@@ -22,6 +22,7 @@ BASE_DIR = os.path.dirname(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 # Application definition
 
