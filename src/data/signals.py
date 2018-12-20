@@ -34,6 +34,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def create_task(sender, instance, created, **kwargs):
+    print('SIGNAL')
     if created:
         print('Created new task: updating info...')
         services.update_tasks_info([instance])
@@ -45,7 +46,7 @@ def create_task(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=UserHandle)
-def create_task(sender, instance, created, **kwargs):
+def create_handle(sender, instance, created, **kwargs):
     if created:
         print('Created new handle: updating info...')
         services.update_handles([instance])
