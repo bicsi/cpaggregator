@@ -1,23 +1,42 @@
+{% load humanize %}
+
 {% with sheet_count=assignments|length %}
 <div class="card mb-5">
     <h6 class="card-header">Assignments</h6>
 
     <div class="list-group list-group-flush">
-        {% for assignment in assignments %}
+        {% for assignment_data in assignments %}
+        {% with assignment=assignment_data.assignment solved_count=assignment_data.solved_count %}
+        {% with task_count=assignment.sheet.tasks.count %}
         <a class="list-group-item list-group-item-action"
            href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
             <div class="d-flex align-items-center">
                 <strong class="flex-grow-1">{{ assignment.sheet.title }}</strong>
+                {% if is_user_member %}
+                    <span class="badge badge-pill
+                        {% if solved_count == task_count %}
+                        badge-success
+                        {% else %}
+                        badge_secondary
+                        {% endif %}">
+                        {{ solved_count }}/{{ task_count }} solved
+                    </span>
+                {% endif %}
                 {% if assignment.is_future %}
                 <span class="badge badge-info">Future</span>
                 {% endif %}
             </div>
+            {% if not is_user_member %}
             <div>
-                {% with task_count=assignment.sheet.tasks.all|length %}
                 <span class="small text-primary">{{ task_count }} task{{ task_count|pluralize }}</span>
-                {% endwith %}
+            </div>
+            {% endif %}
+            <div class="text-muted small">
+                {{ assignment.assigned_on|naturaltime }}
             </div>
         </a>
+        {% endwith %}
+        {% endwith %}
         {% endfor %}
     </div>
     <span class="card-footer text-muted small">{{ sheet_count }} sheet{{ sheet_count|pluralize }}</span>

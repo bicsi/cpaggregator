@@ -404,14 +404,24 @@ class GroupDetailView(generic.DetailView):
     context_object_name = 'group'
 
     def get_context_data(self, **kwargs):
-        kwargs['assignments'] = list(Assignment.active.filter(group=self.object).order_by('-assigned_on').all())
+        assignments = list(Assignment.active.filter(group=self.object).order_by('-assigned_on').all())
         if self.request.user.is_authenticated:
             is_owner = self.object.is_owned_by(self.request.user)
             if is_owner:
-                kwargs['assignments'] = list(Assignment.future.filter(group=self.object).order_by('-assigned_on').all()) \
-                                        + kwargs['assignments']
+                assignments = list(Assignment.future.filter(group=self.object).order_by('-assigned_on').all()) \
+                                        + assignments
             kwargs['is_owner'] = is_owner
             kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=self.object.id).exists()
+
+            kwargs['assignments'] = [{
+                'assignment': assignment,
+                'solved_count': Submission.best.filter(
+                    author__in=self.request.user.profile.handles.all(),
+                    task__in=assignment.sheet.tasks.all()).count()
+            } for assignment in assignments]
+        else:
+            kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments]
+
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 
