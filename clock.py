@@ -91,3 +91,4 @@ def compute_statistics():
 
 print("SCHEDULER STARTING...")
 scheduler.start()
+subprocess.call('celery -A cpaggregator.celery worker -l DEBUG -E --workdir src')
