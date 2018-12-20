@@ -1,4 +1,11 @@
 {% extends "info/modal/generic_form_modal.html" %}
+
+{% load bootstrap4 %}
+
 {% block modal_title %}Add a handle{% endblock %}
 {% block action_text %}Add{% endblock %}
+{% block modal_body %}
+    {% bootstrap_form form %}
+    <span class="text-muted">Note: it may take up to ten minutes for your submissions to be updated.</span>
+{% endblock %}
 {% block submit_url %}{% url 'handle-create' %}{% endblock %}

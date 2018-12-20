@@ -15,6 +15,7 @@
         </a>
         {% endif %}
     </div>
+    {% if profile.handles.exists %}
     <div class="list-group list-group-flush">
         {% for handle in profile.handles.all %}
         <div class="list-group-item p-2 d-flex align-items-center">
@@ -39,6 +40,9 @@
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <div class="card-body small text-muted">No accounts have been linked yet.</div>
+    {% endif %}
 </div>
 
 <script>
