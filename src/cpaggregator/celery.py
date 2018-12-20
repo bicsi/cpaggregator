@@ -6,3 +6,4 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cpaggregator.settings')
 app = Celery('cpaggregator')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
+

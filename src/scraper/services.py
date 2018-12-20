@@ -114,3 +114,24 @@ def scrape_handle_info(db, handle):
         return
 
     utils.write_handles(db, handle_infos)
+
+
+@shared_task
+def scrape_tasks_info():
+    db = database.get_db()
+    for task in Task.objects.all():
+        try:
+            scrape_task_info(db, ':'.join([task.judge.judge_id, task.task_id]))
+        except Exception as e:
+            print(f'ERROR: Could not parse task: {task}. {e}')
+
+
+@shared_task
+def scrape_handles_info():
+    db = database.get_db()
+    for handle in UserHandle.objects.all():
+        try:
+            scrape_handle_info(db, ':'.join([handle.judge.judge_id, handle.handle]))
+        except Exception as e:
+            print(f'ERROR: Could not parse handle: {handle}. {e}')
+

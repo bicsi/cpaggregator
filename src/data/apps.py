@@ -5,5 +5,5 @@ class DataConfig(AppConfig):
     name = 'data'
 
     def ready(self):
-        print('READY???')
-        from data import signals
+        print('READY??')
+        from data import signals, tasks
