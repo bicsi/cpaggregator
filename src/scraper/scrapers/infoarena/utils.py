@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
 
 from scraper.utils import get_page
-from . import parsers
+from scraper.scrapers.infoarena import parsers
 
 SCRAPER_LIMIT = 1000 * 1000 * 1000
 INFOARENA_JUDGE_ID = "ia"
+USER_WITH_DEFAULT_AVATAR = 'florinas'
 
 
 def __scrape_paginated_table_rows(page_url, from_page, to_page, results_per_page, table_css_selector, **query_dict):
@@ -109,3 +110,55 @@ def scrape_task_info(task_id):
         'memory_limit': parsers.parse_memory_limit(memory_limit),
         'tags': tags,
     }
+
+
+def scrape_user_info(handles):
+    """
+    Scrapes user information for given handles.
+    :param handles: the handles of infoarena users
+    :return: user information, in dict format
+    """
+    def __get_avatar_url(handle):
+        return "https://www.infoarena.ro/avatar/full/" + handle
+
+    default_avatar = get_page(__get_avatar_url(USER_WITH_DEFAULT_AVATAR)).content
+
+    for handle in handles:
+        page_url = "https://www.infoarena.ro/utilizator/" + handle
+        page = get_page(page_url)
+        soup = BeautifulSoup(page.content, 'html.parser')
+
+        table = soup.select_one('table.compact')
+        cells = list(table.select('td'))
+
+        user_info = {
+            'judge_id': INFOARENA_JUDGE_ID,
+            'handle': handle,
+            'rating': int(cells[3].text),
+        }
+
+        # FIXME: This may not be right!?
+        full_name = cells[1].text
+        if len(full_name.split()) == 1:
+            user_info.update({
+                'first_name': full_name,
+                'last_name': None,
+            })
+        else:
+            first_name, last_name = full_name.rsplit(' ', 1)
+            user_info.update({
+                'first_name': first_name,
+                'last_name': last_name,
+            })
+
+        avatar_url = cells[0].find("a", href=True)['href']
+        if avatar_url.lower() != f'/avatar/full/{handle.lower()}':
+            raise Exception('Avatar url is not as expected.')
+
+        user_avatar = get_page(__get_avatar_url(handle)).content
+        if user_avatar == default_avatar:
+            user_info['photo_url'] = None
+        else:
+            user_info['photo_url'] = __get_avatar_url(handle)
+
+        yield user_info

@@ -1,11 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.crypto import get_random_string
-
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
@@ -61,9 +57,11 @@ class UserProfile(models.Model):
         if self.avatar:
             return self.avatar.url
 
-        for handle in self.handles.all():
-            if handle.photo_url:
-                return handle.photo_url
+        handle_dict = {handle.judge.judge_id: handle for handle in self.handles.all()}
+        judge_order = ['cf', 'ia', 'csa']
+        for judge_id in judge_order:
+            if judge_id in handle_dict and handle_dict[judge_id].photo_url:
+                return handle_dict[judge_id].photo_url
 
         return static("img/user-avatar.svg")
 
@@ -92,23 +90,6 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.get_display_name()
-
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        UserProfile.objects.create(
-            user=instance,
-            first_name=instance.first_name,
-            last_name=instance.last_name)
-
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    if hasattr(instance, 'profile') and instance.profile is not None:
-        instance.profile.save()
-    else:
-        UserProfile.objects.create(user=instance, username=instance.username)
 
 
 class UserGroup(models.Model):
@@ -156,6 +137,7 @@ class Task(models.Model):
     time_limit_ms = models.IntegerField(null=True, blank=True)
     memory_limit_kb = models.IntegerField(null=True, blank=True)
     tags = models.ManyToManyField(MethodTag, blank=True)
+    modified_at = models.DateTimeField(auto_now=True)
 
     def name_or_id(self):
         if self.name:
@@ -177,7 +159,6 @@ class Task(models.Model):
 
     def __str__(self):
         return "{}:{}".format(self.judge.judge_id, self.task_id)
-
 
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)

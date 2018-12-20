@@ -85,6 +85,8 @@ def scrape_handle_info(db, handle):
 
     if judge_id == 'cf':
         handle_infos = codeforces_scraper.scrape_user_info(handles)
+    elif judge_id == 'ia':
+        handle_infos = infoarena_scraper.scrape_user_info(handles)
     else:
         print("Judge id not recognized: %s" % judge_id)
         return

@@ -22,18 +22,18 @@
                         {{ solved_count }}/{{ task_count }} solved
                     </span>
                 {% endif %}
+            </div>
+            <div class="text-muted small">
+                {{ assignment.assigned_on|naturaltime }}
                 {% if assignment.is_future %}
-                <span class="badge badge-info">Future</span>
+                <span class="badge badge-info ml-1">Future</span>
                 {% endif %}
             </div>
             {% if not is_user_member %}
-            <div>
-                <span class="small text-primary">{{ task_count }} task{{ task_count|pluralize }}</span>
+            <div class="mt-2 badge badge-info">
+                {{ task_count }} task{{ task_count|pluralize }}
             </div>
             {% endif %}
-            <div class="text-muted small">
-                {{ assignment.assigned_on|naturaltime }}
-            </div>
         </a>
         {% endwith %}
         {% endwith %}
