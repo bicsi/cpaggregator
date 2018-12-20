@@ -140,7 +140,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, '..', 'static')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, '..', 'assets')]
 # Ensure STATIC_ROOT exists.
 os.makedirs(STATIC_ROOT, exist_ok=True)
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'cpaggregator.storage.WhiteNoiseStaticFilesStorage'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, '..', 'media')
 MEDIA_URL = '/media/'
