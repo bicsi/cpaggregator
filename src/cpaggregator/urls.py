@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('info.urls')),
     path('', views.HomeView.as_view(), name='home'),
+    path('', include('contact.urls')),
     path('account/', include('accounts.urls')),
     path('markdownx/', include('markdownx.urls')),
 ]

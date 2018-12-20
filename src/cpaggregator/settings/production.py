@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'info',
     'scraper',
     'stats',
+    'contact',
 ]
 
 DATABASES = {

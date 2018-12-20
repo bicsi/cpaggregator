@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+
+{% block title_tag %}Feedback{% endblock %}
+
+{% block body_content %}
+<div class="container">
+    <h1 class="my-5">Leave Feedback</h1>
+    <p><strong>Found a bug?</strong> <span class="text-primary">Please don't abuse it!</span> </p>
+    <p>Do you think there's something in particular that can be <strong>made better</strong>?</p>
+    <p>If any of these apply, don't hesitate to contact me through this form.</p>
+    <div class="card mt-5">
+        <h6 class="card-header">Leave feedback</h6>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <button class="btn btn-primary submit-btn">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
