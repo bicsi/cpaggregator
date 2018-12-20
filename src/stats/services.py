@@ -32,11 +32,14 @@ def compute_user_statistics():
         tasks_solved_count = submissions.filter(verdict='AC').count()
         tasks_tried_count = submissions.count()
 
-        return UserStatistics(
+        statistic, _ = UserStatistics.objects.get_or_create(
             user=user,
-            tasks_solved_count=tasks_solved_count,
-            tasks_tried_count=tasks_tried_count,
-        )
+            defaults=dict(
+                tasks_solved_count=tasks_solved_count,
+                tasks_tried_count=tasks_tried_count,
+            ))
+        return statistic
+
     # Make statistics.
     user_statistics = [make_user_stat(user) for user in UserProfile.objects.all()]
 
@@ -51,4 +54,4 @@ def compute_user_statistics():
 
     # Save.
     for statistic in user_statistics:
-        statistic.save()
+        statistic.save(force_update=True)
