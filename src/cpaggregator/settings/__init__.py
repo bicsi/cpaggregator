@@ -41,11 +41,11 @@ CELERY_BEAT_SCHEDULE = {
         'args': ('ia:*', 'csa:*', 'cf:*'),
     },
     'scrape-tasks-info': {
-        'schedule': 10,
+        'schedule': 60 * 60,
         'task': 'scraper.services.scrape_tasks_info',
     },
     'scrape-handles-info': {
-        'schedule': 10,
+        'schedule': 60 * 60,
         'task': 'scraper.services.scrape_handles_info',
     },
     # Stats services cronjobs.
