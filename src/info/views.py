@@ -182,7 +182,7 @@ class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View)
 
     def post(self, request, *args, **kwargs):
         group = self.get_object()
-        if group.author == request.user.profile:
+        if group.is_owned_by(request.user):
             user = get_object_or_404(User, username=request.POST.get('member_username', ''))
             group.members.remove(user.profile)
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
@@ -212,7 +212,7 @@ class GroupMemberAddView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
 
     def form_valid(self, form):
         group = self.get_object()
-        if group.author == self.request.user.profile:
+        if group.is_owned_by(self.request.user):
             users = []
             for username in map(str.strip, form.cleaned_data['usernames'].split(',')):
                 for user in User.objects.filter(username=username):
@@ -233,7 +233,8 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
-        self.group = get_object_or_404(UserGroup, group_id=kwargs['group_id'])
+        self.group = get_object_or_404(UserGroup, group_id=kwargs['group_id'],
+                                       author=self.request.user.profile)
         return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -514,7 +515,8 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
         task = get_object_or_404(
-            Task, judge__judge_id=self.kwargs['judge_id'],
+            Task,
+            judge__judge_id=self.kwargs['judge_id'],
             task_id=self.kwargs['task_id'])
 
         queryset = FavoriteTask.objects.filter(profile=user.profile, task=task)
@@ -529,10 +531,12 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
 class GroupJoinView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
-        group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
-        if group.visibility == 'PUBLIC':
-            group.members.add(user.profile)
-            group.save()
+        group = get_object_or_404(
+            UserGroup,
+            group_id=self.kwargs['group_id'],
+            visibility='PUBLIC')
+        group.members.add(user.profile)
+        group.save()
         return redirect('group-detail', group_id=group.group_id)
 
 
