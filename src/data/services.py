@@ -60,6 +60,9 @@ def __update_handle(db, handle):
         print('Redirecting to scraper...')
         scraper_services.scrape_handle_info(db, ":".join([handle.judge.judge_id, handle.handle]))
 
+    if not mongo_handle_info:
+        return
+    
     if 'photo_url' in mongo_handle_info:
         handle.photo_url = mongo_handle_info['photo_url']
     else:
