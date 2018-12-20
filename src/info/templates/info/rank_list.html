@@ -36,7 +36,7 @@
             <span class="small text-muted my-3">
                 Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ user_count }} users
             </span>
-            {% bootstrap_paginate page_obj previous_label="Previous" next_label="Next" %}
+            {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
         </div>
     {% endif %}
 </div>
