@@ -78,7 +78,11 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
     # Make user id to username map. We use usernames. :)
     user_id_to_username = {}
     for user in eval_jobs['publicuser']:
-        user_id_to_username.update({user['id']: user['username']})
+        username = user['username']
+        user_id = user['id']
+        if username:
+            username = username.lower()
+        user_id_to_username.update({user_id, username})
 
     # Parse submissions.
     for eval_job in reversed(eval_jobs['evaljob']):
@@ -92,7 +96,7 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
             submission_id=submission_id,
             submitted_on=datetime.datetime.utcfromtimestamp(eval_job['timeSubmitted']),
             task_id=task_name.lower(),
-            author_id=user_id_to_username[eval_job['userId']].lower(),
+            author_id=user_id_to_username[eval_job['userId']],
             source_size=len(eval_job['sourceText']),
             verdict='CE',
         )
