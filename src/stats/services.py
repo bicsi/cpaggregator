@@ -50,11 +50,13 @@ def compute_user_statistics():
     # Compute ranks.
     old_best = -1
     current_rank = 1
+    next_rank = 1
     for statistic in sorted(user_statistics, key=lambda stat: stat.tasks_solved_count, reverse=True):
         if statistic.tasks_solved_count < old_best:
-            current_rank += 1
+            current_rank = next_rank
         old_best = statistic.tasks_solved_count
         statistic.rank = current_rank
+        next_rank += 1
 
     # Save.
     for statistic in user_statistics:
