@@ -49,8 +49,8 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
             submission = dict(
                 judge_id=INFOARENA_JUDGE_ID,
                 submission_id=row[0].find("a", href=True)['href'].split('/')[-1],
-                author_id=row[1].find("a", href=True)['href'].split('/')[-1],
-                task_id=row[2].find("a", href=True)['href'].split('/')[-1],
+                author_id=row[1].find("a", href=True)['href'].split('/')[-1].lower(),
+                task_id=row[2].find("a", href=True)['href'].split('/')[-1].lower(),
                 source_size=parsers.parse_source_size(row[4].find("a").text),
                 submitted_on=parsers.parse_date(row[5].text),
                 verdict=parsers.parse_verdict(verdict_text),
@@ -104,7 +104,7 @@ def scrape_task_info(task_id):
 
     return {
         'judge_id': INFOARENA_JUDGE_ID,
-        'task_id': task_id,
+        'task_id': task_id.lower(),
         'title': title,
         'time_limit': parsers.parse_time_limit(time_limit),
         'memory_limit': parsers.parse_memory_limit(memory_limit),
@@ -133,7 +133,7 @@ def scrape_user_info(handles):
 
         user_info = {
             'judge_id': INFOARENA_JUDGE_ID,
-            'handle': handle,
+            'handle': handle.lower(),
             'rating': int(cells[3].text),
         }
 

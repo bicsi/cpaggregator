@@ -91,8 +91,8 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
             judge_id=CSACADEMY_JUDGE_ID,
             submission_id=submission_id,
             submitted_on=datetime.datetime.utcfromtimestamp(eval_job['timeSubmitted']),
-            task_id=task_name,
-            author_id=user_id_to_username[eval_job['userId']],
+            task_id=task_name.lower(),
+            author_id=user_id_to_username[eval_job['userId']].lower(),
             source_size=len(eval_job['sourceText']),
             verdict='CE',
         )
@@ -180,7 +180,7 @@ def scrape_task_info(tasks):
         if task_name in tasks:
             yield {
                 'judge_id': CSACADEMY_JUDGE_ID,
-                'task_id': task_name,
+                'task_id': task_name.lower(),
                 'title': task_data['longName'],
                 'tags': [],
             }

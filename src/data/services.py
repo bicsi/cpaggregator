@@ -15,8 +15,8 @@ def __update_task_info(db, task):
     mongo_task_info = None
     for tries in range(3):
         mongo_task_info = db['tasks'].find_one({
-            'judge_id': task.judge.judge_id,
-            'task_id': task.task_id,
+            'judge_id': task.judge.judge_id.lower(),
+            'task_id': task.task_id.lower(),
         })
         if mongo_task_info:
             break
@@ -52,8 +52,8 @@ def __update_handle(db, handle):
     mongo_handle_info = None
     for tries in range(3):
         mongo_handle_info = db['handles'].find_one({
-            'judge_id': handle.judge.judge_id,
-            'handle': handle.handle,
+            'judge_id': handle.judge.judge_id.lower(),
+            'handle': handle.handle.lower(),
         })
         if mongo_handle_info:
             break
@@ -81,8 +81,8 @@ def __update_user(db, user):
         judge = user_handle.judge
         # Get all submissions from mongodb.
         mongo_submissions = db['submissions'].find(dict(
-            judge_id=judge.judge_id,
-            author_id=user_handle.handle,
+            judge_id=judge.judge_id.lower(),
+            author_id=user_handle.handle.lower(),
         ))
         # Migrate submission model to SQL model.
         for mongo_submission in mongo_submissions:

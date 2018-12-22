@@ -60,11 +60,11 @@ def scrape_submissions_for_task(task_id, count=200):
             submission = dict(
                 judge_id=CODEFORCES_JUDGE_ID,
                 submission_id=submission_id,
-                task_id=task_id,
+                task_id=task_id.lower(),
                 submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
                 language=submission_data['programmingLanguage'],
                 verdict=parse_verdict(submission_data['verdict']),
-                author_id=author_id,
+                author_id=author_id.lower(),
                 time_exec=submission_data['timeConsumedMillis'],
                 memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
             )
@@ -98,7 +98,7 @@ def scrape_task_info(task_ids):
 
         task_info = {
             'judge_id': CODEFORCES_JUDGE_ID,
-            'task_id': task_id,
+            'task_id': task_id.lower(),
             'title': task_data['name'],
             'tags': tags,
         }
@@ -121,7 +121,7 @@ def scrape_user_info(handles):
             for user_data in json_data['result']:
                 info = {
                     'judge_id': CODEFORCES_JUDGE_ID,
-                    'handle': user_data['handle'],
+                    'handle': user_data['handle'].lower(),
                 }
                 if 'titlePhoto' in user_data and not user_data['titlePhoto'].endswith('no-title.jpg'):
                     info['photo_url'] = 'https:' + user_data['titlePhoto']
