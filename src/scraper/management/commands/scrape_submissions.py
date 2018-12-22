@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         services.scrape_submissions_for_tasks(
-            options['tasks'],
-            options['from_days'],
-            options['to_days']
+            *options['tasks'],
+            from_days=options['from_days'],
+            to_days=options['to_days'],
         )
