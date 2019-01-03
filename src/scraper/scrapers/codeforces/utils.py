@@ -41,7 +41,7 @@ def scrape_submissions_for_task(task_id, count=200):
                 str(submission_data['problem']['contestId']),
                 submission_data['problem']['index']])
 
-            if task_id != check_task_id:
+            if task_id.lower() != check_task_id.lower():
                 continue
 
             if submission_data['verdict'] == 'TESTING':
