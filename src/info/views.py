@@ -2,12 +2,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
+import json
 
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
+from info.utils import get_month_id_from_date, get_date_from_month_id
 from . import forms
 from info.models import TaskSheet, Assignment, FavoriteTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
@@ -74,6 +77,34 @@ class UserSubmissionsDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs['is_owner'] = self.object.user == self.request.user
+
+        # Build activity object.
+        activity = {}
+        def get_activity_item(month_id):
+            return activity.get(month_id, {
+                'name': get_date_from_month_id(month_id, format='%b %y'),
+                'total_submission_count': 0,
+                'ac_submission_count': 0,
+            })
+
+        for submission in Submission.objects.filter(author__in=self.object.handles.all()).all():
+            month_id = get_month_id_from_date(submission.submitted_on)
+            activity_item = get_activity_item(month_id)
+            activity_item['total_submission_count'] += 1
+
+            if submission.verdict == 'AC':
+                activity_item['ac_submission_count'] += 1
+
+            activity[month_id] = activity_item
+
+        month_id_end = get_month_id_from_date(timezone.now())
+        activity = [get_activity_item(month_id)
+                    for month_id in list(range(month_id_end - 36 + 1, month_id_end + 1))]
+
+        kwargs['activity'] = json.dumps(activity)
+
+        print(kwargs['activity'])
+
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
 
