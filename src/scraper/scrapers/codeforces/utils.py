@@ -9,9 +9,8 @@ CODEFORCES_JUDGE_ID = 'cf'
 
 
 def scrape_submissions_for_tasks(task_ids, count=200):
-    for task_id in task_ids:
-        for submission in scrape_submissions_for_task(task_id, count=count):
-            yield submission
+    submissions = [scrape_submissions_for_task(task_id, count=count) for task_id in task_ids]
+    return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
 
 def scrape_submissions_for_task(task_id, count=200):
