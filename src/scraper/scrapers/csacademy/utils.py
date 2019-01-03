@@ -82,7 +82,7 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
         user_id = user['id']
         if username:
             username = username.lower()
-        user_id_to_username.update({user_id, username})
+        user_id_to_username[user_id] = username
 
     # Parse submissions.
     for eval_job in reversed(eval_jobs['evaljob']):
