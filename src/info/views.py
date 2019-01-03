@@ -103,8 +103,6 @@ class UserSubmissionsDetailView(generic.DetailView):
 
         kwargs['activity'] = json.dumps(activity)
 
-        print(kwargs['activity'])
-
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
 
