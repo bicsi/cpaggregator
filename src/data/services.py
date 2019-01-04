@@ -89,7 +89,7 @@ def __update_user(db, user):
             try:
                 task = Task.objects.get(
                     judge=judge,
-                    task_id=mongo_submission['task_id'])
+                    task_id__lower=mongo_submission['task_id'].lower())
                 update_dict = dict(
                     submitted_on=timezone.make_aware(mongo_submission['submitted_on']),
                     author=user_handle,
