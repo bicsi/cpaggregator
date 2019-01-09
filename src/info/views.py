@@ -455,6 +455,7 @@ class GroupDetailView(generic.DetailView):
         members = self.object.members.all()
         scores = {member.id: [] for member in members}
         bonuses = {member.id: 0 for member in members}
+        non_bonuses = {member.id: 0 for member in members}
 
         if self.object.group_id == 'asd-seminar':
             for assignment in self.object.assignment_set.all():
@@ -475,7 +476,8 @@ class GroupDetailView(generic.DetailView):
                             'submission': submission,
                             'bonus': True,
                         })
-                    elif len(scores[submission.author.user.id]) < 10:
+                    elif non_bonuses[submission.author.user.id] < 3:
+                        non_bonuses[submission.author.user.id] += 1
                         scores[submission.author.user.id].append({
                             'submission': submission,
                             'bonus': False,
