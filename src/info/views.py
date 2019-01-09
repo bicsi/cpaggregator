@@ -452,6 +452,37 @@ class GroupDetailView(generic.DetailView):
         else:
             kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments]
 
+        members = self.object.members.all()
+        scores = {member.id: [] for member in members}
+
+        if self.object.group_id == 'asd-seminar':
+            for assignment in self.object.assignment_set.all():
+                submissions = Submission.best.filter(
+                    author__user__in=members,
+                    task__in=assignment.sheet.tasks.all(),
+                    submitted_on__gte=assignment.assigned_on,
+                    verdict='AC',
+                ).order_by('submitted_on').all()
+
+                bonus_given = {}
+                for submission in submissions:
+                    bonus = bonus_given.get(submission.task.id, 0)
+                    if bonus < 7 and len(scores[submission.author.user.id]) < 7:
+                        bonus_given[submission.task.id] = bonus + 1
+                        scores[submission.author.user.id].append({
+                            'submission': submission,
+                            'bonus': True,
+                        })
+                    elif len(scores[submission.author.user.id]) < 10:
+                        scores[submission.author.user.id].append({
+                            'submission': submission,
+                            'bonus': False,
+                        })
+            kwargs['members'] = [{'member': member, 'scores': scores[member.id]} for member in members]
+            kwargs['max_score'] = 10
+        else:
+            kwargs['members'] = [{'member': member} for member in members]
+
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 

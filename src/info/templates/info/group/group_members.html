@@ -1,4 +1,4 @@
-{% with member_count=group.members.all|length %}
+{% with member_count=members|length %}
 <div class="card mb-5">
     <h6 class="card-header">
         Members
@@ -7,27 +7,43 @@
     </h6>
 
     <div class="list-group list-group-flush">
-        {% for member in group.members.all %}
-        <a class="list-group-item list-group-item-action"
-           href="{% url 'profile' username=member.username %}">
+        {% for member_data in members %}
+        <div class="list-group-item">
             <div class="d-flex align-items-center">
-                {% include "accounts/thumbnail_profile.html" with user=member.user hide_username=True %}
-                <div class="flex-grow-1 ml-2">
-                    <strong>{{ member.get_display_name }}</strong>
-                    <span class="small text-muted ml-1">@{{ member.username }}</span>
-                </div>
+                {% include "accounts/thumbnail_profile.html" with user=member_data.member.user hide_username=True %}
+                <a href="{% url 'profile' username=member_data.member.username %}" class="flex-grow-1 ml-2 no-underline">
+                    <strong>{{ member_data.member.get_display_name }}</strong>
+                    <span class="small text-muted ml-1">@{{ member_data.member.username }}</span>
+                </a>
                 {% if is_owner %}
                 <form style="display: inline-block; float: right"
                       method="post" action="{% url 'group-member-delete' group_id=group.group_id %}">
                     {% csrf_token %}
-                    <input type="hidden" value="{{ member.username }}" name="member_username" />
+                    <input type="hidden" value="{{ member_data.member.username }}" name="member_username" />
                     <button class="btn btn-danger btn-sm align-middle" type="submit">
                         <i class="fas fa-times"></i>
                     </button>
                 </form>
                 {% endif %}
             </div>
-        </a>
+            {% if max_score %}
+            <div>
+            {% for score_data in member_data.scores %}
+            {% with submission=score_data.submission %}
+                <a href="#!" tabindex="0" data-toggle="popover"
+                     data-trigger="focus" data-html="true" data-placement="top"
+                     title="Submission <a href='{{ submission.get_url }}'>#{{ submission.submission_id }}</a>"
+                     data-content="Submitted on: {{ submission.submitted_on|date:'M d, Y H:m'}}
+                        <br/> Verdict: {{ submission.get_verdict_display }}"
+                     class="badge {% if score_data.bonus %}badge-success{% else %}badge-info{% endif %} mr-2">
+                    {{ score_data.submission.task.name_or_id }}
+                </a>
+            {% endwith %}
+            {% endfor %}
+            <span class="mr-2 text-muted small">{{ member_data.scores|length }}/{{ max_score }}</span>
+            </div>
+            {% endif %}
+        </div>
         {% endfor %}
     </div>
     <span class="card-footer text-muted small">{{ member_count }} member{{ member_count|pluralize }}</span>
