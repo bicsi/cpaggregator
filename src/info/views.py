@@ -454,6 +454,7 @@ class GroupDetailView(generic.DetailView):
 
         members = self.object.members.all()
         scores = {member.id: [] for member in members}
+        bonuses = {member.id: 0 for member in members}
 
         if self.object.group_id == 'asd-seminar':
             for assignment in self.object.assignment_set.all():
@@ -467,7 +468,8 @@ class GroupDetailView(generic.DetailView):
                 bonus_given = {}
                 for submission in submissions:
                     bonus = bonus_given.get(submission.task.id, 0)
-                    if bonus < 7 and len(scores[submission.author.user.id]) < 7:
+                    if bonus < 7 and bonuses[submission.author.user.id] < 7:
+                        bonuses[submission.author.user.id] += 1
                         bonus_given[submission.task.id] = bonus + 1
                         scores[submission.author.user.id].append({
                             'submission': submission,
