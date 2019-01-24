@@ -342,7 +342,7 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
     def form_valid(self, form):
         task, _ = Task.objects.get_or_create(
             judge=form.cleaned_data['judge'],
-            task_id=form.cleaned_data['task_id'],
+            task_id=form.cleaned_data['task_id'].lower(),
         )
         self.object.tasks.add(task)
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
