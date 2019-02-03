@@ -12,4 +12,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         db = database.get_db()
-        services.scrape_task_info(db, options['tasks'])
+        for task in options['tasks']:
+            services.scrape_task_info(db, task)
