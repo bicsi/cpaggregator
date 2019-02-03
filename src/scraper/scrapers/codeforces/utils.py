@@ -94,6 +94,8 @@ def scrape_task_info(task_ids):
         task_id = '_'.join([str(task_data['contestId']), task_data['index']]).lower()
         if task_id not in task_ids:
             continue
+        print(f'UPDATING {task_id}... [{task_data["name"]}]')
+        task_ids.remove(task_id)
 
         task_info = {
             'judge_id': CODEFORCES_JUDGE_ID,
@@ -102,6 +104,9 @@ def scrape_task_info(task_ids):
             'tags': tags,
         }
         yield task_info
+
+    for task_id in task_ids:
+        print(f'WARNING: {task_id} not found')
 
 
 def scrape_user_info(handles):
