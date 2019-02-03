@@ -78,35 +78,42 @@ def scrape_task_info(task_ids):
     :param task_ids: the id of the tasks
     :return: task information, in dict format
     """
-    page_url = "http://codeforces.com/api/problemset.problems"
-    response = get_page(page_url)
-    json_data = json.loads(response.text)
-    if json_data['status'] != 'OK':
-        raise Exception('Expected status: OK; got: %s' % json_data['status'])
-
-    for task_data in json_data['result']['problems']:
-        tags = []
-        for tag_data in task_data['tags']:
-            tag = parse_tag(tag_data)
-            if tag:
-                tags.append(tag)
-
-        task_id = '_'.join([str(task_data['contestId']), task_data['index']]).lower()
-        if task_id not in task_ids:
-            continue
-        print(f'UPDATING {task_id}... [{task_data["name"]}]')
-        task_ids.remove(task_id)
-
-        task_info = {
-            'judge_id': CODEFORCES_JUDGE_ID,
-            'task_id': task_id.lower(),
-            'title': task_data['name'],
-            'tags': tags,
-        }
-        yield task_info
-
     for task_id in task_ids:
-        print(f'WARNING: {task_id} not found')
+        try:
+            page_url = "http://codeforces.com/api/contest.standings"
+            contest_id = task_id.split('_')[0]
+            response = get_page(page_url, contestId=contest_id)
+            json_data = json.loads(response.text)
+            if json_data['status'] != 'OK':
+                raise Exception('Expected status: OK; got: %s' % json_data['status'])
+
+            found = False
+            for task_data in json_data['result']['problems']:
+                curr_task_id = '_'.join([str(task_data['contestId']), task_data['index']]).lower()
+                if task_id != curr_task_id:
+                    continue
+
+                print(f'UPDATING {task_id}... [{task_data["name"]}]')
+
+                tags = []
+                for tag_data in task_data['tags']:
+                    tag = parse_tag(tag_data)
+                    if tag:
+                        tags.append(tag)
+                task_info = {
+                    'judge_id': CODEFORCES_JUDGE_ID,
+                    'task_id': task_id.lower(),
+                    'title': task_data['name'],
+                    'tags': tags,
+                }
+                found = True
+                yield task_info
+
+            if not found:
+                raise Exception(f'Task id {task_id} not found.')
+
+        except (Exception) as e:
+            print(f'ERROR: {e}')
 
 
 def scrape_user_info(handles):
