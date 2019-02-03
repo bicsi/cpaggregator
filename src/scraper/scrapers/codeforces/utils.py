@@ -91,7 +91,7 @@ def scrape_task_info(task_ids):
             if tag:
                 tags.append(tag)
 
-        task_id = '_'.join([str(task_data['contestId']), task_data['index']])
+        task_id = '_'.join([str(task_data['contestId']), task_data['index']]).lower()
         if task_id not in task_ids:
             continue
 
