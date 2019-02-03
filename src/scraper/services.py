@@ -7,6 +7,7 @@ from scraper import utils, database
 from scraper.scrapers.infoarena import utils as infoarena_scraper
 from scraper.scrapers.csacademy import utils as csacademy_scraper
 from scraper.scrapers.codeforces import utils as codeforces_scraper
+from scraper.scrapers.ojuz import utils as ojuz_scraper
 
 from celery import shared_task
 
@@ -29,6 +30,7 @@ def __expand_handle(judge_id, handle):
 
 
 def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
+    # Infoarena - special logic to optimize monitor.
     if judge_id == 'ia':
         if len(task_ids) == 1:
             submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
@@ -37,6 +39,17 @@ def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
                 submissions = filter(lambda sub: sub['task_id'] in task_ids, infoarena_scraper.scrape_submissions())
             else:
                 all_submissions = [infoarena_scraper.scrape_submissions(task=task_id) for task_id in task_ids]
+                submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
+
+    # oj.uz - same as infoarena.
+    elif judge_id == 'ojuz':
+        if len(task_ids) == 1:
+            submissions = ojuz_scraper.scrape_submissions(problem=task_ids[0])
+        else:
+            if to_date > datetime.now() - timedelta(days=100):
+                submissions = filter(lambda sub: sub['task_id'] in task_ids, ojuz_scraper.scrape_submissions())
+            else:
+                all_submissions = [ojuz_scraper.scrape_submissions(problem=task_id) for task_id in task_ids]
                 submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
 
     elif judge_id == 'csa':
@@ -92,6 +105,9 @@ def scrape_task_info(db, task):
 
     elif judge_id == 'cf':
         task_infos = codeforces_scraper.scrape_task_info(task_ids)
+
+    elif judge_id == 'ojuz':
+        task_infos = ojuz_scraper.scrape_task_info(task_ids)
 
     else:
         print("Judge id not recognized: %s" % judge_id)
