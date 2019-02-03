@@ -153,7 +153,7 @@ class Task(models.Model):
             return 'https://www.infoarena.ro/problema/%s' % self.task_id
         if self.judge.judge_id == 'cf':
             contest_id, task_letter = self.task_id.split('_')
-            if contest_id >= 100000:
+            if int(contest_id) >= 100000:
                 # Gym contest ids are always >= 100000
                 return f'https://codeforces.com/gym/{contest_id}/problem/{task_letter.upper()}'
             return f'https://codeforces.com/contest/{contest_id}/problem/{task_letter.upper()}'
