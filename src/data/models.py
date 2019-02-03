@@ -145,6 +145,8 @@ class Task(models.Model):
         return self.task_id
 
     def get_url(self):
+        if self.judge.judge_id == 'ojuz':
+            return 'https://oj.uz/problem/view/%s' % self.task_id
         if self.judge.judge_id == 'csa':
             return 'https://csacademy.com/contest/archive/task/%s' % self.task_id
         if self.judge.judge_id == 'ia':
@@ -160,6 +162,7 @@ class Task(models.Model):
     def __str__(self):
         return "{}:{}".format(self.judge.judge_id, self.task_id)
 
+
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     handle = models.CharField(max_length=256)
@@ -170,6 +173,8 @@ class UserHandle(models.Model):
         unique_together = (('judge', 'handle'),)
 
     def get_url(self):
+        if self.judge.judge_id == 'ojuz':
+            return "https://oj.uz/profile/%s" % self.handle
         if self.judge.judge_id == 'csa':
             if self.handle.startswith('_uid_'):
                 return "https://csacademy.com/userid/%s" % self.handle[5:]
@@ -200,6 +205,8 @@ class Submission(models.Model):
     best = managers.BestSubmissionManager()
 
     def get_url(self):
+        if self.task.judge.judge_id == 'ojuz':
+            return 'https://oj.uz/submission/%s' % self.submission_id
         if self.task.judge.judge_id == 'csa':
             return 'https://csacademy.com/submission/%s' % self.submission_id
         if self.task.judge.judge_id == 'ia':

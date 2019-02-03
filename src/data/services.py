@@ -36,7 +36,7 @@ def __update_task_info(db, task):
     if 'memory_limit' in mongo_task_info:
         task.memory_limit_kb = mongo_task_info['memory_limit']
 
-    for tag_id in mongo_task_info['tags']:
+    for tag_id in mongo_task_info.get('tags', []):
         try:
             tag = MethodTag.objects.get(tag_id=tag_id)
             task.tags.add(tag)

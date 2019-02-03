@@ -107,7 +107,8 @@ def scrape_task_info(db, task):
         task_infos = codeforces_scraper.scrape_task_info(task_ids)
 
     elif judge_id == 'ojuz':
-        task_infos = ojuz_scraper.scrape_task_info(task_ids)
+        task_infos = [ojuz_scraper.scrape_task_info(task_id)
+                      for task_id in task_ids]
 
     else:
         print("Judge id not recognized: %s" % judge_id)

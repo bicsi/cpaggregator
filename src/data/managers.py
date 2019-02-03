@@ -19,7 +19,7 @@ class BestSubmissionManager(models.Manager):
 class JudgeManager(models.Manager):
     def get_queryset(self):
         return super(JudgeManager, self).get_queryset() \
-            .filter(judge_id__in=['csa', 'cf', 'ia'])
+            .filter(judge_id__in=['csa', 'cf', 'ia', 'ojuz'])
 
 
 class PublicGroupManager(models.Manager):
