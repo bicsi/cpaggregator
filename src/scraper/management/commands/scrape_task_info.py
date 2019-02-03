@@ -11,4 +11,5 @@ class Command(BaseCommand):
         parser.add_argument('--tasks', nargs='+')
 
     def handle(self, *args, **options):
-        services.scrape_task_info(options['tasks'])
+        db = database.get_db()
+        services.scrape_task_info(db, options['tasks'])
