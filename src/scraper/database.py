@@ -35,7 +35,7 @@ def insert_submissions(db, submissions):
     return __insert_many_silent(
         coll=db["submissions"],
         iterable=submissions,
-        unique_fields=['judge_id', 'submission_id'])
+        unique_fields=['judge_id', 'submission_id', 'author_id'])
 
 
 def insert_handles(db, handles):
