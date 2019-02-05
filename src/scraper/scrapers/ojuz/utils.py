@@ -79,5 +79,3 @@ def scrape_task_info(task_id):
         'time_limit': parsers.parse_time_limit(cols[0].text),
         'memory_limit': parsers.parse_memory_limit(cols[1].text),
     }
-
-print(scrape_task_info('boi18_genetics'))

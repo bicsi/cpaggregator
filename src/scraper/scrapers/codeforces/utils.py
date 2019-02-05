@@ -47,28 +47,24 @@ def scrape_submissions_for_task(task_id, count=200):
                 print('Skipped submission %s: still testing.' % submission_id)
                 continue
 
-            if len(submission_data['author']['members']) != 1:
-                print('Skipped submission %s: multiple authors not supported.' % submission_id)
-                continue
-
             if 'verdict' not in submission_data:
                 print('Skipped submission %s: no verdict?.' % submission_id)
                 continue
 
-            author_id = submission_data['author']['members'][0]['handle']
-            submission = dict(
-                judge_id=CODEFORCES_JUDGE_ID,
-                submission_id=submission_id,
-                task_id=task_id.lower(),
-                submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
-                language=submission_data['programmingLanguage'],
-                verdict=parse_verdict(submission_data['verdict']),
-                author_id=author_id.lower(),
-                time_exec=submission_data['timeConsumedMillis'],
-                memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
-            )
-
-            yield submission
+            for author in submission_data['author']['members']:
+                author_id = author['handle']
+                submission = dict(
+                    judge_id=CODEFORCES_JUDGE_ID,
+                    submission_id=submission_id,
+                    task_id=task_id.lower(),
+                    submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
+                    language=submission_data['programmingLanguage'],
+                    verdict=parse_verdict(submission_data['verdict']),
+                    author_id=author_id.lower(),
+                    time_exec=submission_data['timeConsumedMillis'],
+                    memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
+                )
+                yield submission
         id_from += count
 
 

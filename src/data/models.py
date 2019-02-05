@@ -222,7 +222,7 @@ class Submission(models.Model):
         return None
 
     class Meta:
-        unique_together = (('task', 'submission_id'),)
+        unique_together = (('submission_id', 'author'),)
         ordering = ['-submitted_on']
 
     def __str__(self):
