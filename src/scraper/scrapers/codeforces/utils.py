@@ -27,7 +27,12 @@ def scrape_submissions_for_task(task_id, count=200):
             'from': id_from,
             'count': count,
         }
-        response = get_page(page_url, **kwargs)
+        try:
+            response = get_page(page_url, **kwargs)
+        except Exception as e:
+            print(e)
+            return []
+
         json_data = json.loads(response.text)
         if json_data['status'] != 'OK':
             raise Exception('Expected status: OK; got: %s' % json_data['status'])
