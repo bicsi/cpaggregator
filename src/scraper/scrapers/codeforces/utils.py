@@ -64,8 +64,6 @@ def scrape_submissions_for_task(task_id, count=200):
                     time_exec=submission_data['timeConsumedMillis'],
                     memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
                 )
-                if author_id == 'skylinebaby':
-                    print(submission)
                 yield submission
         id_from += count
 

@@ -38,7 +38,8 @@ def get_page(page_url, **query_dict):
         else:
             break
 
-    assert page
+    if not page:
+        raise Exception("Request failed. Page not found.")
     if page.status_code != 200:
         raise Exception("Request failed. Status code: %d" % page.status_code)
 
