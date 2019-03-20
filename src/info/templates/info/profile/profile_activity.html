@@ -19,6 +19,18 @@
         <span class="text-muted">All submissions</span>
     </div>
 </div>
+<div class="card mb-3" id="profile-tags-panel">
+    <h6 class="card-header">Tags</h6>
+    <div style="overflow: auto; direction: rtl">
+        <template>
+          <la-polar :data="values">
+            <la-pie show-label label-prop="tag" prop="solved_count"
+                    color="#FF0000" label="Solved count"></la-pie>
+            <la-tooltip></la-tooltip>
+          </la-polar>
+        </template>
+    </div>
+</div>
 
 <script>
 Vue.use(Laue);
@@ -31,6 +43,17 @@ new Vue({
 
   data: () => ({
     values: {{ activity|safe }}
+  })
+});
+new Vue({
+  el: "#profile-tags-panel",
+  components: {
+    LaPolar: Laue.Polar,
+    LaPie: Laue.Pie
+  },
+
+  data: () => ({
+    values: {{ tag_data|safe }}
   })
 });
 </script>

@@ -103,6 +103,16 @@ class UserSubmissionsDetailView(generic.DetailView):
 
         kwargs['activity'] = json.dumps(activity)
 
+        solved_count_for_tag = {}
+        for submission in Submission.best.filter(author__in=self.object.handles.all(),
+                                                 verdict='AC').all():
+            for tag in submission.task.tags.all():
+                solved_count_for_tag[tag] = solved_count_for_tag.get(tag, 0) + 1
+        tag_data = [{"tag": tag.tag_name, "solved_count": solved_count}
+                    for tag, solved_count in solved_count_for_tag.items()]
+        kwargs['tag_data'] = json.dumps(tag_data)
+        print(kwargs['tag_data'])
+
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
 
