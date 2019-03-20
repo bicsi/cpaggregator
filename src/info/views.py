@@ -110,8 +110,8 @@ class UserSubmissionsDetailView(generic.DetailView):
                 solved_count_for_tag[tag] = solved_count_for_tag.get(tag, 0) + 1
         tag_data = [{"tag": tag.tag_name, "solved_count": solved_count}
                     for tag, solved_count in solved_count_for_tag.items()]
+        tag_data = sorted(tag_data, key=lambda x: x['solved_count'], reverse=True)[:5]
         kwargs['tag_data'] = json.dumps(tag_data)
-        print(kwargs['tag_data'])
 
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
