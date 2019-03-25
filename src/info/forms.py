@@ -34,7 +34,7 @@ class HandleCreateForm(forms.ModelForm):
 
 
 class GroupMemberCreateForm(forms.Form):
-    usernames = forms.CharField(label='Usernames (separated by comma)', max_length=256)
+    usernames = forms.CharField(label='Usernames (separated by comma)', max_length=2048)
 
     def __init__(self, *args, **kwargs):
         kwargs.pop('instance')
