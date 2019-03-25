@@ -9,6 +9,12 @@ TAG_DICT = {
     "Matematica": "math",
     "Grafuri": "graphs",
     "Sortare": "sorting",
+    "Backtracking": "backtracking",
+    "Programare dinamica": "dp",
+    "Greedy": "greedy",
+    "Siruri de caractere": "strings",
+    "Cautare": "search",
+    "Divide et Impera": "divide_and_conquer",
 }
 
 
