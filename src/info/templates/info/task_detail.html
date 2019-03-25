@@ -31,6 +31,9 @@
                 {{ best_submission_for_user.get_verdict_display }}
             </span>
             {% endif %}
+            <span class="small">
+                (<a href="{{ best_submission_for_user.get_url }}">#{{ best_submission_for_user.submission_id }}</a>)
+            </span>
         </h5>
         {% else %}
         <h5 class="text-muted">Not tried yet</h5>
