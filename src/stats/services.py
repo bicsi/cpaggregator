@@ -1,4 +1,7 @@
+import json
+
 from data.models import Submission, UserProfile, Task
+from stats import utils
 from .models import TaskStatistics, UserStatistics
 
 from celery import shared_task
@@ -23,7 +26,6 @@ def compute_task_statistics():
             favorited_count=favorited_count,
         ))
 
-
 @shared_task
 def compute_user_statistics():
     """
@@ -35,12 +37,16 @@ def compute_user_statistics():
 
         tasks_solved_count = submissions.filter(verdict='AC').count()
         tasks_tried_count = submissions.count()
+        activity_dict = utils.build_activity_dict(user)
+        tag_stats_dict = utils.build_tag_stats_dict(user)
 
         statistic, _ = UserStatistics.objects.update_or_create(
             user=user,
             defaults=dict(
                 tasks_solved_count=tasks_solved_count,
                 tasks_tried_count=tasks_tried_count,
+                activity=json.dumps(activity_dict),
+                tag_stats=json.dumps(tag_stats_dict),
             ))
         return statistic
 

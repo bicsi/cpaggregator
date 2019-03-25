@@ -24,12 +24,3 @@ def slugify_unique(model_klass, text, field):
         slug = "%s-%d" % (orig[:max_length - len(str(x)) - 1], x)
 
     return slug
-
-
-def get_month_id_from_date(date):
-    return date.month - 1 + 12 * date.year
-
-
-def get_date_from_month_id(month_id, format="%b-%y"):
-    y, m = divmod(month_id, 12)
-    return datetime(y, m + 1, 1).strftime(format)

@@ -1,7 +1,7 @@
 from django.db import models
 import math
 from data.models import Task, UserProfile
-
+from django.contrib.postgres.fields import JSONField
 
 class TaskStatistics(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='statistics')
@@ -28,3 +28,5 @@ class UserStatistics(models.Model):
     tasks_solved_count = models.IntegerField(default=0)
     tasks_tried_count = models.IntegerField(default=0)
     rank = models.IntegerField(null=True)
+    tag_stats = JSONField(null=True)
+    activity = JSONField(null=True)
