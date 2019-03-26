@@ -209,6 +209,7 @@ class Submission(models.Model):
     # Managers.
     objects = models.Manager()  # The default manager.
     best = managers.BestSubmissionManager()
+    best_recent = managers.BestRecentSubmissionManager()
 
     def get_url(self):
         if self.task.judge.judge_id == 'ojuz':

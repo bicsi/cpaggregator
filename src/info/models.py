@@ -46,6 +46,7 @@ class Assignment(models.Model):
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
+    use_best_recent = models.BooleanField(default=False)
 
     # Managers.
     objects = models.Manager()  # The default manager.
@@ -62,7 +63,8 @@ class Assignment(models.Model):
         ).order_by('submitted_on')
 
     def get_best_submissions(self):
-        return Submission.best.filter(
+        submission_manager = Submission.best_recent if self.use_best_recent else Submission.best
+        return submission_manager.filter(
             author__user__in=self.get_all_users(),
             task__in=self.sheet.tasks.all(),
         ).order_by('submitted_on')
