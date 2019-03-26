@@ -19,6 +19,13 @@
 
     <div class="mr-1 mt-5">
         <h1>{{ task.name_or_id }}</h1>
+        <h5 style="height: 40px" class="py-1">
+            <a href="{{ task.judge.homepage }}">
+                <img class="img-fluid" style="max-height: 100%"
+                 src="{% static task.judge.get_banner_url %}"
+                 alt="{{ task.judge.judge_id }}">
+            </a>
+        </h5>
         {% if best_submission_for_user %}
         <h5>Verdict:
             {% if best_submission_for_user.verdict == 'AC' %}
@@ -40,17 +47,18 @@
         {% endif %}
     </div>
     <div class="row">
-        <div class="col col-lg-6 col-12">
+        <div class="col col-lg-4 col-12">
             <div class="card mt-5">
                 <h6 class="card-header">Task information</h6>
                 <div class="card-body">
                     <h4 class="card-title">{{ task.name_or_id }}</h4>
-                    <h6 class="card-subtitle mb-4">
+                    <h6 class="card-subtitle text-muted mb-3">@{{ task.task_id }}</h6>
+                    <p class="card-text my-2">
                         Source: <span class="badge badge-light px-3">
                         {% include "accounts/judge_label.html" with judge=task.judge %}
                         {{ task.judge.name }}
                         </span>
-                    </span></h6>
+                    </span></p>
                     <p class="card-text">
                         Solved by <span class="badge badge-primary">
                         {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
@@ -102,7 +110,7 @@
             </div>
             {% endif %}
         </div>
-        <div class="col col-lg-6 col-12">
+        <div class="col col-lg-8 col-12">
             <div class="card mt-5">
                 <h6 class="card-header">Users who solved this task</h6>
                 <div class="card-body">

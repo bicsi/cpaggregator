@@ -28,6 +28,9 @@ class Judge(models.Model):
     homepage = models.CharField(max_length=256)
     objects = managers.JudgeManager()
 
+    def get_banner_url(self):
+        return f'img/judge_logos/{self.judge_id}-big.png'
+
     def get_logo_url(self):
         return f'img/judge_logos/{self.judge_id}.svg'
 
