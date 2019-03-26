@@ -18,7 +18,7 @@ class BestSubmissionManager(models.Manager):
 
 class BestRecentSubmissionManager(models.Manager):
     def get_queryset(self):
-        best_submissions = super(BestSubmissionManager, self).get_queryset() \
+        best_submissions = super(BestRecentSubmissionManager, self).get_queryset() \
             .annotate(is_ac=Case(
                 When(verdict='AC', then=Value(1)),
                 default=Value(0),
@@ -27,7 +27,7 @@ class BestRecentSubmissionManager(models.Manager):
                       F('score').desc(nulls_last=True), '-submitted_on') \
             .distinct('author', 'task')
         # This is to fix multiple order by's and such.
-        return super(BestSubmissionManager, self).get_queryset().filter(id__in=best_submissions)
+        return super(BestRecentSubmissionManager, self).get_queryset().filter(id__in=best_submissions)
 
 
 class JudgeManager(models.Manager):
