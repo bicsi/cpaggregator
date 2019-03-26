@@ -43,7 +43,7 @@ def compute_task_statistics():
         users_solved_count = statistics.users_solved_count
         mean_users_solved_count = judge_to_total_solved[task.judge] / judge_to_task_count[task.judge]
         multiplier = 1.0 / (users_solved_count + 10.0) / mean_users_solved_count
-        statistics.difficulty_score = min(2500, max(1, 5 * round(BASE_SCORE * multiplier / 5)))
+        statistics.difficulty_score = min(2500, 5 * max(1, round(BASE_SCORE * multiplier / 5)))
 
         statistics.save()
 
