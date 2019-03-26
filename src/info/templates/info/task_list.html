@@ -35,8 +35,8 @@
                                 {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
                             </span>
                         </span>
-                        <span class="badge badge-pill badge-info mr-3">
-                            <i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} p
+                        <span class="text-info font-weight-bold mr-3">
+                            <i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }}
                         </span>
                         {% if verdict_for_user == 'AC' %}
                         <span class="text-success">
