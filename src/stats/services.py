@@ -25,7 +25,7 @@ def compute_task_statistics():
         favorited_count = task.favorite_users.count()
 
         judge = task.judge
-        judge_to_total_solved[judge] = judge_to_total_solved.get(judge, 0) + users_solved_count + 1
+        judge_to_total_solved[judge] = judge_to_total_solved.get(judge, 0) + 1.0 / (users_solved_count + 10.0)
         judge_to_task_count[judge] = judge_to_task_count.get(judge, 0) + 1
 
         TaskStatistics.objects.update_or_create(task=task, defaults=dict(
@@ -42,8 +42,8 @@ def compute_task_statistics():
         statistics = task.statistics
         users_solved_count = statistics.users_solved_count
         mean_users_solved_count = judge_to_total_solved[task.judge] / judge_to_task_count[task.judge]
-        multiplier = mean_users_solved_count / (1.0 + users_solved_count)
-        statistics.difficulty_score = min(2500, max(1, 10 * round(BASE_SCORE * multiplier / 10)))
+        multiplier = 1.0 / (users_solved_count + 10.0) / mean_users_solved_count
+        statistics.difficulty_score = min(2500, max(1, 5 * round(BASE_SCORE * multiplier / 5)))
 
         statistics.save()
 
