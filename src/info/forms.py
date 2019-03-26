@@ -110,7 +110,7 @@ class SheetCreateForm(forms.ModelForm):
 class AssignmentCreateForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['assigned_on']
+        fields = ['assigned_on', 'use_best_recent']
         widgets = {
             'assigned_on': SelectDateWidget(),
         }
