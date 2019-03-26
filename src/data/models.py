@@ -160,6 +160,9 @@ class Task(models.Model):
                 # Gym contest ids are always >= 100000
                 return f'https://codeforces.com/gym/{contest_id}/problem/{task_letter.upper()}'
             return f'https://codeforces.com/contest/{contest_id}/problem/{task_letter.upper()}'
+        if self.judge.judge_id == 'ac':
+            contest_id, _ = self.task_id.split('_')
+            return f"https://atcoder.jp/contests/{contest_id}/tasks/{self.task_id}"
         return None
 
     class Meta:
@@ -189,6 +192,8 @@ class UserHandle(models.Model):
             return "https://www.infoarena.ro/utilizator/%s" % self.handle
         if self.judge.judge_id == 'cf':
             return "https://codeforces.com/profile/%s" % self.handle
+        if self.judge.judge_id == 'ac':
+            return f"https://atcoder.jp/users/{self.handle}"
 
     def __str__(self):
         return "%s:%s" % (self.judge.judge_id, self.handle)
@@ -221,6 +226,9 @@ class Submission(models.Model):
         if self.task.judge.judge_id == 'cf':
             contest_id, _ = self.task.task_id.split('_')
             return 'https://codeforces.com/contest/%s/submission/%s' % (contest_id, self.submission_id)
+        if self.task.judge.judge_id == 'ac':
+            contest_id, _ = self.task.task_id.split('_')
+            return f'https://atcoder.jp/contests/{contest_id}/submissions/{self.submission_id}'
 
         print("Bad", self.submission_id)
         return None

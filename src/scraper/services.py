@@ -7,6 +7,7 @@ from scraper import utils, database
 from scraper.scrapers.infoarena import utils as infoarena_scraper
 from scraper.scrapers.csacademy import utils as csacademy_scraper
 from scraper.scrapers.codeforces import utils as codeforces_scraper
+from scraper.scrapers.atcoder import utils as atcoder_scraper
 from scraper.scrapers.ojuz import utils as ojuz_scraper
 
 from celery import shared_task
@@ -58,6 +59,12 @@ def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
     elif judge_id == 'cf':
         submissions = codeforces_scraper.scrape_submissions_for_tasks(task_ids)
 
+    elif judge_id == 'ac':
+        submissions = atcoder_scraper.scrape_submissions_for_tasks(task_ids)
+        for idx, submission in enumerate(submissions):
+            print(submission)
+            if idx > 10:
+                break
     else:
         print("Judge id not recognized: %s" % judge_id)
         return
@@ -109,6 +116,9 @@ def scrape_task_info(db, task):
     elif judge_id == 'ojuz':
         task_infos = [ojuz_scraper.scrape_task_info(task_id)
                       for task_id in task_ids]
+
+    elif judge_id == 'ac':
+        task_infos = atcoder_scraper.scrape_task_info(task_ids)
 
     else:
         print("Judge id not recognized: %s" % judge_id)
