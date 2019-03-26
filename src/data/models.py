@@ -141,6 +141,7 @@ class Task(models.Model):
     memory_limit_kb = models.IntegerField(null=True, blank=True)
     tags = models.ManyToManyField(MethodTag, blank=True)
     modified_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def name_or_id(self):
         if self.name:

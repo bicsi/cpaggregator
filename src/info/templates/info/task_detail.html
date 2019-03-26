@@ -10,6 +10,12 @@
 
 
 <div class="container">
+    {% if not task.statistics %}
+    <div class="alert alert-warning text-center" role="alert">
+      This task has just been added and it hasn't been fully processed yet.
+        Some information might be missing for a little while.
+    </div>
+    {% endif %}
     {% if not user_has_handle %}
     <div class="alert alert-info text-center" role="alert">
       You currently have not linked any account on <span class="font-weight-bold">{{ task.judge.name }}</span>.
@@ -29,8 +35,10 @@
             </a>
         </h5>
         <h5>
+            {% if task.statistics %}
             <span class="badge badge-pill badge-info"><i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} points</span>
             <span class="text-light mx-2">|</span>
+            {% endif %}
         {% if best_submission_for_user %}
             <span class="small text-muted">Verdict:</span>
             {% if best_submission_for_user.verdict == 'AC' %}
@@ -65,23 +73,25 @@
                         {{ task.judge.name }}
                         </span>
                     </span></p>
-                    <p class="card-text">
-                        Solved by <span class="badge badge-primary">
-                        {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
-                    </span> users (acceptance rate: <span class="badge badge-secondary">
-                        {{ task.statistics.acceptance_rate|floatformat:0 }}%</span>)
-                    </p>
-                    <p class="card-text">
-                        Average number of submissions per user:
-                            <span class="badge badge-primary">
-                                {{ task.statistics.mean_submission_count|floatformat:2 }}
-                            </span>
-                    </p>
-                    <p class="card-text">
-                        Favorited by <span class="badge badge-primary">
-                            {{ task.statistics.favorited_count }}
-                        </span> user{{ task.statistics.favorited_count|pluralize }}
-                    </p>
+                    {% if task.statistics %}
+                        <p class="card-text">
+                            Solved by <span class="badge badge-primary">
+                            {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
+                        </span> users (acceptance rate: <span class="badge badge-secondary">
+                            {{ task.statistics.acceptance_rate|floatformat:0 }}%</span>)
+                        </p>
+                        <p class="card-text">
+                            Average number of submissions per user:
+                                <span class="badge badge-primary">
+                                    {{ task.statistics.mean_submission_count|floatformat:2 }}
+                                </span>
+                        </p>
+                        <p class="card-text">
+                            Favorited by <span class="badge badge-primary">
+                                {{ task.statistics.favorited_count }}
+                            </span> user{{ task.statistics.favorited_count|pluralize }}
+                        </p>
+                    {% endif %}
 
                     <a href="{{ task.get_url }}" class="btn btn-primary mt-3 mr-2" target="_blank">
                         <i class="fas fa-external-link-alt mr-1"></i> Go to task

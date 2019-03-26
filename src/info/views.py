@@ -492,6 +492,23 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
+        task_list = Task.objects.order_by('-created_at')[:5]
+
+        # Map task to verdict of current user.
+        verdict_for_user_dict = {
+            submission.task: submission.verdict for submission in
+            Submission.best \
+                .filter(author__user__user=self.request.user,
+                        task__in=task_list)
+        }
+        favorite_tasks = {favorite.task for favorite in
+                          self.request.user.profile.favorite_tasks.all()}
+        context['newly_added_task_list'] = [{
+            'task': task,
+            'verdict_for_user': verdict_for_user_dict.get(task),
+            'faved': task in favorite_tasks,
+        } for task in task_list]
+
         context['public_groups_data'] = [{
             "group": group,
             "assignments": [{
