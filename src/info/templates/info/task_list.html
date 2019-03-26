@@ -20,8 +20,6 @@
             <a class="list-group-item list-group-item-action"
                href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
                 <div style="position: relative">
-
-
                     <div class="d-flex align-items-center">
                         <i class="fa fa-xs fa-star text-primary mr-1{% if not faved %} invisible{% endif %}"
                            style="margin-left: -10px"></i>
@@ -37,16 +35,17 @@
                                 {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
                             </span>
                         </span>
-                        {% if verdict_for_user %}
-                            {% if verdict_for_user == 'AC' %}
-                            <span class="text-success">
-                                <i class="fas fa-check" style="width: 16px"></i>
-                            </span>
-                            {% else %}
-                            <span class="text-danger">
-                                <i class="fas fa-times" style="width: 16px"></i>
-                            </span>
-                            {% endif %}
+                        <span class="badge badge-pill badge-info mr-3">
+                            <i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} p
+                        </span>
+                        {% if verdict_for_user == 'AC' %}
+                        <span class="text-success">
+                            <i class="fas fa-check" style="width: 16px"></i>
+                        </span>
+                        {% else %}
+                        <span class="text-danger"{% if not verdict_for_user %}style="opacity: 0"{% endif %}>
+                            <i class="fas fa-times" style="width: 16px"></i>
+                        </span>
                         {% endif %}
                     </div>
                 </div>

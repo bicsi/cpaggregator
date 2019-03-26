@@ -349,7 +349,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
     context_object_name = 'task_list'
     queryset = Task.objects.order_by(
-        F('statistics__users_solved_count').desc(nulls_last=True))
+        F('statistics__difficulty_score').asc(nulls_last=True))
 
     def get_context_data(self, *args, **kwargs):
         kwargs['task_count'] = self.get_queryset().count()
