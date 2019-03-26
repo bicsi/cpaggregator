@@ -10,6 +10,7 @@ class TaskStatistics(models.Model):
     users_solved_count = models.IntegerField(default=0)
     submission_count = models.IntegerField(default=0)
     favorited_count = models.IntegerField(default=0)
+    difficulty_score = models.IntegerField(default=1)
 
     @property
     def mean_submission_count(self):
@@ -28,6 +29,7 @@ class UserStatistics(models.Model):
     user = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='statistics')
     tasks_solved_count = models.IntegerField(default=0)
     tasks_tried_count = models.IntegerField(default=0)
+    total_points = models.IntegerField(default=0)
     rank = models.IntegerField(null=True)
     tag_stats = JSONField(null=True)
     activity = JSONField(null=True)

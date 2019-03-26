@@ -8,10 +8,16 @@
         <h5 class="card-title">{{ profile.get_display_name }}</h5>
         <h6 class="card-subtitle mb-2 text-muted">@{{ profile.username }}</h6>
         {% if profile.statistics %}
-        <h6>Rank: {{ profile.statistics.rank }}</h6>
+        <h6>
+            <span class="text-info font-weight-bold">
+                <i class="far fa-dot-circle mr-1"></i>{{ profile.statistics.total_points }} points
+            </span>
+            <span class="text-light mx-2">|</span>
+            Rank: {{ profile.statistics.rank }}
+        </h6>
         {% endif %}
 
-        <p>Joined on: {{ profile.created_at|date:"M d, Y"}}</p>
+        <p class="card-text mt-4">Joined on: {{ profile.created_at|date:"M d, Y"}}</p>
         {% if profile.user == user %}
         <a class="btn btn-secondary"
            data-toggle="modal" href="#modal"

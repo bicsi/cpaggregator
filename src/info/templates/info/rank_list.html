@@ -24,6 +24,10 @@
                 <span class="flex-grow-1">
                 {% include "accounts/thumbnail_profile.html" with user=profile.user %}
                 </span>
+                <span class="text-info font-weight-bold">
+                    <i class="far fa-dot-circle mr-1"></i>{{ profile.statistics.total_points }}
+                </span>
+                <span class="text-light mx-2">|</span>
                 <span class="text-success font-weight-bold">
                     <i class="fas fa-xs fa-check mr-1"></i>{{ profile.statistics.tasks_solved_count }}
                 </span>
