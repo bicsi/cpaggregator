@@ -54,6 +54,8 @@ urlpatterns = [
         path('delete/', views.SheetDeleteView.as_view(), name='sheet-delete'),
         path('update-description/', views.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),
+        path('reorder-tasks/', views.UpdateSheetTaskOrdering.as_view(),
+             name='sheet-task-reorder')
     ])),
     path('task/', include([
         path('', views.TaskListView.as_view(), name='task-list'),

@@ -3,6 +3,7 @@ import math
 from data.models import Task, UserProfile
 from django.contrib.postgres.fields import JSONField
 
+
 class TaskStatistics(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='statistics')
     users_tried_count = models.IntegerField(default=0)

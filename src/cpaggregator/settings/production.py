@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'scraper',
     'stats',
     'contact',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

@@ -10,21 +10,25 @@
         <a @click="toggleEditMode" href="#!" class="badge badge-dark badge-pill py-1">
             <span v-if="!editMode"><i class="fas fa-pen mr-1"></i>Edit</span>
         </a>
-        <a @click="toggleEditMode" href="#!" class="badge badge-success badge-pill py-1" v-cloak>
+        <a @click="saveChanges" href="#!" class="badge badge-success badge-pill py-1" v-cloak>
             <span v-if="editMode">Done</span>
         </a>
         {% endif %}
     </div>
     {% if tasks %}
-    <div class="list-group list-group-flush">
+    <div class="list-group list-group-flush" id="taskList">
         {% for task_status in tasks %}
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
         {% with idx=forloop.counter0 %}
         <a class="list-group-item list-group-item-action px-0 py-2"
+           data-id="{{ idx }}"
            @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
            title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
            href="{{ task.get_url }}" target="_blank" v-cloak>
             <div class="d-flex align-items-center">
+                <span v-cloak v-show="editMode" class="pl-3">
+                    <i class="fas fa-grip-vertical text-muted" ></i>
+                </span>
                 <div class="py-1 px-3 border-right border-light">
                     {% include 'accounts/judge_label.html' with judge=task.judge %}
                     <span class="text-uppercase text-center text-monospace small font-weight-bold d-inline-block"
@@ -84,6 +88,16 @@
     {% endif %}
 </div>
 <script>
+var sortable;
+
+$('document').ready(function(){
+    sortable = new Sortable(taskList, {
+        animation: 150,
+        // ghostClass: 'blue-background-class',
+        handle: ".fa-grip-vertical",
+    });
+});
+
 new Vue({
   delimiters: ["[[", "]]"],
   el: "#sheet-task-panel",
@@ -92,7 +106,18 @@ new Vue({
     editMode: false,
   },
   methods: {
-    toggleEditMode: function() { this.editMode = !this.editMode; }
+    toggleEditMode: function() { this.editMode = !this.editMode; },
+    saveChanges: function() {
+        var ordering = sortable.toArray();
+        $.post({
+            url: "{% url 'sheet-task-reorder' sheet_id=sheet.sheet_id %}",
+            data: {
+                'csrfmiddlewaretoken': "{{ csrf_token }}",
+                'ordering': JSON.stringify(ordering),
+            },
+        });
+        this.toggleEditMode();
+    },
   }
 });
 </script>

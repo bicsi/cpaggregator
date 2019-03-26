@@ -13,7 +13,7 @@ class TaskSheet(models.Model):
     sheet_id = models.CharField(max_length=256, unique=True)
     created_at = models.DateTimeField(default=timezone.now)
     description = MarkdownxField(blank=True, null=True)
-    tasks = models.ManyToManyField(Task)
+    tasks = models.ManyToManyField(Task, through='TaskSheetTask')
     is_public = models.BooleanField(default=False)
     author = models.ForeignKey(UserProfile, null=True, blank=True, on_delete=models.CASCADE)
 
@@ -26,6 +26,20 @@ class TaskSheet(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class TaskSheetTask(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
+    ordering_id = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.sheet} -> {self.task.judge.judge_id}:{self.task.task_id}'
+
+    class Meta:
+        db_table = 'info_tasksheet_x_task'
+        unique_together = (('task', 'sheet'))
+        ordering = ['ordering_id']
 
 
 class Assignment(models.Model):

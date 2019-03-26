@@ -10,12 +10,13 @@ import json
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
 from . import forms
-from info.models import TaskSheet, Assignment, FavoriteTask
+from info.models import TaskSheet, Assignment, FavoriteTask, TaskSheetTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
 
 from info.tables import ResultsTable
 from django_ajax.mixin import AJAXMixin
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 class ProfileUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
     template_name = 'info/modal/profile_update.html'
@@ -111,8 +112,8 @@ class ResultsDetailView(generic.DetailView):
             self.submissions.filter(author__user__user=self.request.user)
         }
         # Build tasks as a dict.
-        tasks = [{'task': task, 'verdict_for_user': verdict_for_user_dict.get(task)}
-                 for task in self.object.sheet.tasks.all()]
+        tasks = [{'task': task.task, 'verdict_for_user': verdict_for_user_dict.get(task.task)}
+                 for task in TaskSheetTask.objects.filter(sheet=self.object.sheet).all()]
 
         # Send results data.
         results_data = []
@@ -203,10 +204,11 @@ class SheetTaskDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
     def post(self, request, *args, **kwargs):
         sheet = self.get_object()
         if sheet.is_owned_by(request.user):
-            task = get_object_or_404(Task,
-                        task_id=request.POST.get('task_id', ''),
-                        judge__judge_id=request.POST.get('judge_id', ''))
-            sheet.tasks.remove(task)
+            task = get_object_or_404(TaskSheetTask,
+                        sheet=sheet,
+                        task__task_id=request.POST.get('task_id', ''),
+                        task__judge__judge_id=request.POST.get('judge_id', ''))
+            task.delete()
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -323,7 +325,10 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
             judge=form.cleaned_data['judge'],
             task_id=form.cleaned_data['task_id'].lower(),
         )
-        self.object.tasks.add(task)
+        TaskSheetTask.objects.create(
+            task=task,
+            sheet=self.object,
+        )
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -606,3 +611,22 @@ class GroupUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
         if self.object.is_owned_by(self.request.user):
             return super(GroupUpdateView, self).form_valid(form)
         return redirect('home')
+
+
+class UpdateSheetTaskOrdering(APIView):
+
+    def post(self, request, *args, **kwargs):
+        print('POST')
+        sheet_id = kwargs['sheet_id']
+        print(request.data)
+        ordering = json.loads(request.data.get('ordering'))
+        ordering_index = {int(elem): int(idx) for idx, elem in enumerate(ordering)}
+
+        print(ordering)
+        sheet = get_object_or_404(TaskSheet, sheet_id=sheet_id)
+        if sheet.is_owned_by(request.user):
+            for idx, task in enumerate(TaskSheetTask.objects.filter(sheet=sheet).all()):
+                print(f'{task} -> {ordering_index.get(idx)}')
+                task.ordering_id = ordering_index.get(idx)
+                task.save()
+            return Response({'success': 'Success'})
