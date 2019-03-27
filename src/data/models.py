@@ -140,6 +140,9 @@ class TaskSource(models.Model):
     public = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"[{self.judge.judge_id}] {self.name}"
+
     class Meta:
         unique_together = (('judge', 'source_id'))
 
