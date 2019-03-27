@@ -3,6 +3,8 @@ import itertools
 
 from django.utils.text import slugify
 
+from info.models import Assignment
+
 
 def slugify_unique(model_klass, text, field):
     """
@@ -24,3 +26,19 @@ def slugify_unique(model_klass, text, field):
         slug = "%s-%d" % (orig[:max_length - len(str(x)) - 1], x)
 
     return slug
+
+
+def build_group_card_context(group, user):
+    return {
+        "group": group,
+        "is_user_member": group.members.filter(user=user).exists(),
+        "assignments": [{
+            "assignment": assignment,
+            "solved_count": assignment.get_best_submissions().filter(
+                author__user__user=user, verdict='AC').count(),
+            "task_count": assignment.sheet.tasks.count(),
+        } for assignment in Assignment.active.filter(group=group)[:3]],
+        "assignment_count": Assignment.active.filter(group=group).count(),
+        "judges": {judge for assignment in Assignment.active.filter(group=group).all()
+                   for judge in assignment.get_all_judges()}
+    }

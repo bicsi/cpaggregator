@@ -9,6 +9,7 @@ import json
 
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
+from info.utils import build_group_card_context
 from . import forms
 from info.models import TaskSheet, Assignment, FavoriteTask, TaskSheetTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
@@ -510,49 +511,19 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             'faved': task in favorite_tasks,
         } for task in task_list]
 
-        context['popular_group_list'] = [{
-            "group": group,
-            "is_user_member": group.members.filter(user=self.request.user).exists(),
-            "assignments": [{
-                "assignment": assignment,
-                "solved_count": assignment.get_best_submissions().filter(
-                    author__user__user=self.request.user, verdict='AC').count(),
-                "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.active.filter(group=group)[:3]],
-            "assignment_count": Assignment.active.filter(group=group).count(),
-            "judges": {judge for assignment in Assignment.active.filter(group=group).all()
-                       for judge in assignment.get_all_judges()}
-        } for group in UserGroup.public
-            .annotate(member_count=Count('members'))
-            .order_by('-member_count')[:3]]
+        context['popular_group_list'] = [
+            build_group_card_context(group, self.request.user)
+            for group in UserGroup.public
+                             .annotate(member_count=Count('members'))
+                             .order_by('-member_count')[:3]]
 
-        context['owned_groups_data'] = [{
-            "group": group,
-            "is_user_member": group.members.filter(user=self.request.user).exists(),
-            "assignments": [{
-                "assignment": assignment,
-                "solved_count": assignment.get_best_submissions().filter(
-                    author__user__user=self.request.user, verdict='AC').count(),
-                "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.objects.filter(group=group)[:3]],
-            "assignment_count": Assignment.objects.filter(group=group).count(),
-            "judges": {judge for assignment in Assignment.objects.filter(group=group).all()
-                       for judge in assignment.get_all_judges()}
-        } for group in self.request.user.profile.owned_groups.all()]
+        context['owned_groups_data'] = [
+            build_group_card_context(group, self.request.user)
+            for group in self.request.user.profile.owned_groups.all()]
 
-        context['assigned_groups_data'] = [{
-            "group": group,
-            "is_user_member": group.members.filter(user=self.request.user).exists(),
-            "assignments": [{
-                "assignment": assignment,
-                "solved_count": assignment.get_best_submissions().filter(
-                    author__user__user=self.request.user, verdict='AC').count(),
-                "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.active.filter(group=group)[:3]],
-            "assignment_count": Assignment.active.filter(group=group).count(),
-            "judges": {judge for assignment in Assignment.active.filter(group=group).all()
-                       for judge in assignment.get_all_judges()}
-        } for group in self.request.user.profile.assigned_groups.all()]
+        context['assigned_groups_data'] = [
+            build_group_card_context(group, self.request.user)
+            for group in self.request.user.profile.assigned_groups.all()]
 
 
         context['sheets'] = [{
