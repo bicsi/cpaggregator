@@ -81,7 +81,7 @@ class Assignment(models.Model):
 
     class Meta:
         unique_together = (('group', 'sheet'),)
-        ordering = ('ordering_id', 'assigned_on')
+        ordering = ('ordering_id', '-assigned_on')
 
 
 class FavoriteTask(models.Model):
