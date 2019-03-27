@@ -4,7 +4,7 @@ import datetime
 MONTH_ENCODINGS = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
 TAG_DICT = {
-    "Structuri de Date": "data_structures",
+    "Structuri de Date": "data-structures",
     "Geometrie": "geometry",
     "Matematica": "math",
     "Grafuri": "graphs",
@@ -14,7 +14,7 @@ TAG_DICT = {
     "Greedy": "greedy",
     "Siruri de caractere": "strings",
     "Cautare": "search",
-    "Divide et Impera": "divide_and_conquer",
+    "Divide et Impera": "divide",
 }
 
 
