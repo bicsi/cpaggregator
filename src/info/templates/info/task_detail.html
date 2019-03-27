@@ -67,12 +67,12 @@
                 <div class="card-body">
                     <h4 class="card-title">{{ task.name_or_id }}</h4>
                     <h6 class="card-subtitle text-muted mb-3">@{{ task.task_id }}</h6>
+                    {% if task.source %}
                     <p class="card-text my-2">
-                        Source: <span class="badge badge-light px-3">
-                        {% include "accounts/judge_label.html" with judge=task.judge %}
-                        {{ task.judge.name }}
-                        </span>
-                    </span></p>
+                        Source: <span class="badge badge-light px-3">{{ task.source.name }}</span>
+                    </p>
+                    {% endif %}
+
                     {% if task.statistics %}
                         <p class="card-text">
                             Solved by <span class="badge badge-primary">
