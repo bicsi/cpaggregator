@@ -20,8 +20,12 @@
         </a>
         {% endwith %}
     </div>
-    <div class="mt-2">
-        {% for judge in judges %}{% include 'accounts/judge_label.html' %}{% endfor %}
+    <div class="mt-2 border border-secondary d-inline-block">
+        {% for judge in judges %}
+        <div class="mx-1 d-inline-block">
+        {% include 'accounts/judge_label.html' with dim_if_no_account=True %}
+        </div>
+        {% endfor %}
     </div>
     <div class="mt-2">{{ group.formatted_description|safe }}</div>
     {% if is_owner %}

@@ -21,51 +21,8 @@
     <h5 class="mb-3 mt-5">Popular groups</h5>
      <div class="row">
         {% for group_data in popular_group_list %}
-         <div class="col-sm-6 col-md-4 px-3 mb-2">
-        <div class="card h-100">
-            <div class="card-body flex-grow-0">
-                <h5 class="card-title">
-                    <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
-                        <i class="fas fa-users mr-1 fa-xs"></i>
-                        {{ group_data.group.name }}
-                    </a>
-                </h5>
-                <p class="card-text text-secondary">
-                    <span>
-                        <i class="fas fa-xs mr-1 fa-globe-americas"></i>{{ group_data.group.get_visibility_display }}
-                    </span>
-                    <span class="mx-2 text-light">|</span>
-                    {% with members_count=group_data.group.members.count %}
-                    {{ members_count }} member{{ members_count|pluralize }}
-                    {% endwith %}
-                </p>
-            </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
-                {% for assignment_data in group_data.assignments %}
-                <a class="list-group-item list-group-item-action d-flex align-items-center"
-                   href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
-                    <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
-                    {% if assignment_data.assignment.is_future %}
-                    <span class="badge badge-pill badge-light ml-2">Future</span>
-                    {% endif %}
-                    <span class="badge badge-pill badge-info ml-2">
-                        {{ assignment_data.task_count }} tasks
-                    </span>
-                </a>
-                {% endfor %}
-                {% with shown_assignments=group_data.assignments|length %}
-                {% if shown_assignments < group_data.assignment_count %}
-                <li class="list-group-item text-muted">
-                    and {{ group_data.assignment_count|sub:shown_assignments }} more...
-                </li>
-                {% endif %}
-                {% endwith %}
-            </div>
-            <div class="card-body flex-grow-0">
-                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
-                   class="card-link">Go to group</a>
-            </div>
-        </div>
+            <div class="col-12 col-lg-4 px-3 mb-2">
+             {% include 'info/group/group_card.html' %}
          </div>
         {% endfor %}
     </div>
@@ -75,53 +32,8 @@
     <h5 class="mb-3 mt-5">Groups you manage</h5>
      <div class="row">
         {% for group_data in owned_groups_data %}
-         <div class="col-sm-6 col-md-4 px-3 mb-2">
-        <div class="card h-100">
-            <div class="card-body flex-grow-0">
-                <h5 class="card-title">
-                    <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
-                        <i class="fas fa-users mr-1 fa-xs"></i>
-                        {{ group_data.group.name }}
-                    </a>
-                </h5>
-                <p class="card-text text-secondary">
-                    <span>
-                        <i class="fas fa-xs mr-1 fa-globe-americas"></i>{{ group_data.group.get_visibility_display }}
-                    </span>
-                    <span class="mx-2 text-light">|</span>
-                    {% with members_count=group_data.group.members.count %}
-                    {{ members_count }} member{{ members_count|pluralize }}
-                    {% endwith %}
-                </p>
-            </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
-                {% for assignment_data in group_data.assignments %}
-                <a class="list-group-item list-group-item-action d-flex align-items-center"
-                   href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
-                    <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
-                    {% if assignment_data.assignment.is_future %}
-                    <span class="badge badge-pill badge-light ml-2">Future</span>
-                    {% endif %}
-                    <span class="badge badge-pill badge-info ml-2">
-                        {{ assignment_data.task_count }} tasks
-                    </span>
-                </a>
-                {% endfor %}
-                {% with shown_assignments=group_data.assignments|length %}
-                {% if shown_assignments < group_data.assignment_count %}
-                <li class="list-group-item text-muted">
-                    and {{ group_data.assignment_count|sub:shown_assignments }} more...
-                </li>
-                {% endif %}
-                {% endwith %}
-            </div>
-            <div class="card-body flex-grow-0">
-                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
-                   class="card-link">Go to group</a>
-                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
-                   class="card-link">Add assignment</a>
-            </div>
-        </div>
+         <div class="col-12 col-lg-4 px-3 mb-2">
+             {% include 'info/group/group_card.html' %}
          </div>
         {% endfor %}
     </div>
@@ -131,53 +43,8 @@
     <h5 class="mb-3 mt-5">Assigned to you</h5>
      <div class="row">
         {% for group_data in assigned_groups_data %}
-         <div class="col-sm-6 col-md-4 px-3 mb-2">
-        <div class="card h-100">
-            <div class="card-body flex-grow-0">
-
-                <h5 class="card-title">
-                    <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
-                        <i class="fas fa-users mr-1 fa-xs"></i>
-                        {{ group_data.group.name }}
-                    </a>
-                </h5>
-                <p class="card-text">
-                    {% with other_members_count=group_data.group.members.count|sub:1 %}
-                    {% with request.user as user %}
-                        {% include "accounts/thumbnail_profile.html" with hide_username=True img_dim=16 %}
-                    {% endwith %}
-                    <strong>You</strong> and {{ other_members_count }} other user{{ other_members_count|pluralize }}
-                    are members of this group.
-                    {% endwith %}
-                </p>
-            </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
-                {% for assignment_data in group_data.assignments %}
-                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                   href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
-                    {{ assignment_data.assignment.sheet }}
-                    {% if assignment_data.solved_count == assignment_data.task_count %}
-                    <span class="badge badge-pill badge-success">
-                    {% else %}
-                    <span class="badge badge-pill badge-secondary">
-                    {% endif %}
-                        {{ assignment_data.solved_count }}/{{ assignment_data.task_count }} solved
-                    </span>
-                </a>
-                {% endfor %}
-                {% with shown_assignments=group_data.assignments|length %}
-                {% if shown_assignments < group_data.assignment_count %}
-                <li class="list-group-item text-muted">
-                    and {{ group_data.assignment_count|sub:shown_assignments }} more...
-                </li>
-                {% endif %}
-                {% endwith %}
-            </div>
-            <div class="card-body flex-grow-0">
-                <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
-                   class="card-link">Go to group</a>
-            </div>
-        </div>
+         <div class="col-12 col-lg-4 px-3 mb-2">
+             {% include 'info/group/group_card.html' %}
          </div>
          {% empty %}
          <p class="mx-3">You are not a member of any groups yet.</p>

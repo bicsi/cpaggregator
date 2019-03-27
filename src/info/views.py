@@ -512,8 +512,11 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
 
         context['popular_group_list'] = [{
             "group": group,
+            "is_user_member": group.members.filter(user=self.request.user).exists(),
             "assignments": [{
                 "assignment": assignment,
+                "solved_count": assignment.get_best_submissions().filter(
+                    author__user__user=self.request.user, verdict='AC').count(),
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.active.filter(group=group)[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
@@ -525,8 +528,11 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
 
         context['owned_groups_data'] = [{
             "group": group,
+            "is_user_member": group.members.filter(user=self.request.user).exists(),
             "assignments": [{
                 "assignment": assignment,
+                "solved_count": assignment.get_best_submissions().filter(
+                    author__user__user=self.request.user, verdict='AC').count(),
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.objects.filter(group=group)[:3]],
             "assignment_count": Assignment.objects.filter(group=group).count(),
@@ -536,6 +542,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
 
         context['assigned_groups_data'] = [{
             "group": group,
+            "is_user_member": group.members.filter(user=self.request.user).exists(),
             "assignments": [{
                 "assignment": assignment,
                 "solved_count": assignment.get_best_submissions().filter(

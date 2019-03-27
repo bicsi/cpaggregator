@@ -1,7 +1,16 @@
 <!-- Template used for showing a judge with icon and name. -->
 {% load static from staticfiles %}
+{% load judge_extras %}
 
+{% if dim_if_no_account and not request.user|has_account:judge %}
+<img class="img-fluid p-1"
+     style="width: 24px; height: 24px;opacity: 0.2"
+     src="{% static judge.get_logo_url %}"
+     data-toggle="tooltip" data-placement="top" title="No account"
+     alt="{{ judge.judge_id }}">
+{% else %}
 <img class="img-fluid p-1"
      style="width: 24px; height: 24px"
      src="{% static judge.get_logo_url %}"
      alt="{{ judge.judge_id }}">
+{% endif %}

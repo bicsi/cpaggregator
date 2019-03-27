@@ -1,0 +1,73 @@
+{% load mathfilters %}
+{% load humanize %}
+
+{% with request.user as user %}
+<div class="card h-100">
+    <div class="card-body flex-grow-0">
+        <h5 class="card-title">
+            <a href="{% url 'group-detail' group_id=group_data.group.group_id %}" class="card-link">
+                <i class="fas fa-users mr-1 fa-xs"></i>
+                {{ group_data.group.name }}
+            </a>
+        </h5>
+        <p class="card-text text-secondary">
+            <span>
+                <i class="fas fa-xs mr-1 fa-globe-americas"></i>{{ group_data.group.get_visibility_display }}
+            </span>
+            {% with members_count=group_data.group.members.count %}
+                <span class="mx-2 text-light">|</span>
+                <span>{{ members_count }} member{{ members_count|pluralize }}</span>
+            {% endwith %}
+            {% if group_data.is_user_member %}
+                <span class="mx-2 text-light">|</span>
+                <span>
+                    {% include "accounts/thumbnail_profile.html" with hide_username=True img_dim=16 %}
+                    <span class="small text-secondary font-weight-bold">Enrolled</span>
+                </span>
+            {% endif %}
+        </p>
+    </div>
+    <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
+        {% for assignment_data in group_data.assignments %}
+        <a class="list-group-item list-group-item-action d-flex align-items-center"
+           href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
+            {% if assignment_data.assignment.is_future %}
+                <span class="badge badge-pill badge-info mr-2" data-toggle="tooltip" data-placement="top"
+                      title="Assigned {{ assignment_data.assignment.assigned_on|naturaltime }}">
+                    <i class="fas fa-xs fa-forward"></i>
+                </span>
+                <span class="flex-grow-1 text-muted">{{ assignment_data.assignment.sheet }}</span>
+            {% else %}
+                <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
+            {% endif %}
+            {% if group_data.is_user_member %}
+            {% with assignment_data.task_count|sub:assignment_data.solved_count  as unsolved_count %}
+                <span data-toggle="tooltip" data-placement="top"
+                      class="badge badge-pill {% if unsolved_count == 0 %}badge-success{% else %}badge-secondary{% endif %}"
+                      title="Tasks solved by you">
+                    <i class="fas fa-xs fa-check"></i>
+                    {{ assignment_data.solved_count }}/{{ assignment_data.task_count }}
+                </span>
+            {% endwith %}
+            {% else %}
+                <span class="badge badge-pill badge-info ml-2" data-toggle="tooltip" data-placement="top"
+                      title="Tasks assigned">
+                    {{ assignment_data.task_count }}
+                </span>
+            {% endif %}
+        </a>
+        {% endfor %}
+        {% with shown_assignments=group_data.assignments|length %}
+        {% if shown_assignments < group_data.assignment_count %}
+        <li class="list-group-item text-muted">
+            and {{ group_data.assignment_count|sub:shown_assignments }} more...
+        </li>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <div class="card-body flex-grow-0">
+        <a href="{% url 'group-detail' group_id=group_data.group.group_id %}"
+           class="card-link">Go to group</a>
+    </div>
+</div>
+{% endwith %}
