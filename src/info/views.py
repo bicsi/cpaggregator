@@ -425,7 +425,8 @@ class GroupDetailView(generic.DetailView):
 
             kwargs['is_owner'] = is_owner
             kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=self.object.id).exists()
-
+            kwargs['judges'] = {judge for assignment in assignments.all()
+                                for judge in assignment.get_all_judges()}
             kwargs['assignments'] = [{
                 'assignment': assignment,
                 'solved_count': Submission.best.filter(
@@ -516,6 +517,8 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.active.filter(group=group)[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
+            "judges": {judge for assignment in Assignment.active.filter(group=group).all()
+                       for judge in assignment.get_all_judges()}
         } for group in UserGroup.public
             .annotate(member_count=Count('members'))
             .order_by('-member_count')[:3]]
@@ -527,6 +530,8 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.objects.filter(group=group)[:3]],
             "assignment_count": Assignment.objects.filter(group=group).count(),
+            "judges": {judge for assignment in Assignment.objects.filter(group=group).all()
+                       for judge in assignment.get_all_judges()}
         } for group in self.request.user.profile.owned_groups.all()]
 
         context['assigned_groups_data'] = [{
@@ -538,6 +543,8 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.active.filter(group=group)[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
+            "judges": {judge for assignment in Assignment.active.filter(group=group).all()
+                       for judge in assignment.get_all_judges()}
         } for group in self.request.user.profile.assigned_groups.all()]
 
 

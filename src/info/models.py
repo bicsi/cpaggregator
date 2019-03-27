@@ -70,6 +70,9 @@ class Assignment(models.Model):
             task__in=self.sheet.tasks.all(),
         ).order_by('submitted_on')
 
+    def get_all_judges(self):
+        return {task.judge for task in self.sheet.tasks.all()}
+
     def is_active(self):
         return self.assigned_on < timezone.now()
 

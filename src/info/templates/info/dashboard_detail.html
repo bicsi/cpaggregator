@@ -21,7 +21,7 @@
     <h5 class="mb-3 mt-5">Popular groups</h5>
      <div class="row">
         {% for group_data in popular_group_list %}
-         <div class="col-sm-6 col-md-4 px-3 mb-3">
+         <div class="col-sm-6 col-md-4 px-3 mb-2">
         <div class="card h-100">
             <div class="card-body flex-grow-0">
                 <h5 class="card-title">
@@ -40,7 +40,7 @@
                     {% endwith %}
                 </p>
             </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-center">
+            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
                 {% for assignment_data in group_data.assignments %}
                 <a class="list-group-item list-group-item-action d-flex align-items-center"
                    href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
@@ -75,7 +75,7 @@
     <h5 class="mb-3 mt-5">Groups you manage</h5>
      <div class="row">
         {% for group_data in owned_groups_data %}
-         <div class="col-sm-6 col-md-4 px-3 mb-3">
+         <div class="col-sm-6 col-md-4 px-3 mb-2">
         <div class="card h-100">
             <div class="card-body flex-grow-0">
                 <h5 class="card-title">
@@ -94,7 +94,7 @@
                     {% endwith %}
                 </p>
             </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-center">
+            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
                 {% for assignment_data in group_data.assignments %}
                 <a class="list-group-item list-group-item-action d-flex align-items-center"
                    href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">
@@ -131,7 +131,7 @@
     <h5 class="mb-3 mt-5">Assigned to you</h5>
      <div class="row">
         {% for group_data in assigned_groups_data %}
-         <div class="col-sm-6 col-md-4 px-3 mb-3">
+         <div class="col-sm-6 col-md-4 px-3 mb-2">
         <div class="card h-100">
             <div class="card-body flex-grow-0">
 
@@ -151,7 +151,7 @@
                     {% endwith %}
                 </p>
             </div>
-            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-center">
+            <div class="list-group list-group-flush flex-grow-1 d-flex flex-column justify-content-top">
                 {% for assignment_data in group_data.assignments %}
                 <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                    href="{% url 'group-sheet-detail' group_id=group_data.group.group_id sheet_id=assignment_data.assignment.sheet.sheet_id %}">

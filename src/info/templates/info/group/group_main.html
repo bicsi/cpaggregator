@@ -20,6 +20,9 @@
         </a>
         {% endwith %}
     </div>
+    <div class="mt-2">
+        {% for judge in judges %}{% include 'accounts/judge_label.html' %}{% endfor %}
+    </div>
     <div class="mt-2">{{ group.formatted_description|safe }}</div>
     {% if is_owner %}
     <div class="btn-group my-2" aria-label="Moderate group">
