@@ -133,6 +133,17 @@ class MethodTag(models.Model):
         return self.tag_name
 
 
+class TaskSource(models.Model):
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
+    source_id = models.SlugField(max_length=256)
+    name = models.CharField(max_length=1024)
+    public = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = (('judge', 'source_id'))
+
+
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=256)
@@ -142,6 +153,7 @@ class Task(models.Model):
     tags = models.ManyToManyField(MethodTag, blank=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    source = models.ForeignKey(TaskSource, blank=True, null=True, on_delete=models.SET_NULL)
 
     def name_or_id(self):
         if self.name:

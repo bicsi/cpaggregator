@@ -1,8 +1,9 @@
 import math
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.text import slugify
 
-from data.models import MethodTag, Task, Submission, UserProfile, UserHandle
+from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource
 from scraper.database import get_db
 import scraper.services as scraper_services
 
@@ -42,6 +43,13 @@ def __update_task_info(db, task):
             task.tags.add(tag)
         except ObjectDoesNotExist:
             print('Skipped adding tag {}. Does not exist'.format(tag_id))
+
+    if 'source' in mongo_task_info:
+        source_id = slugify(mongo_task_info['source'])
+        source = TaskSource.objects.get_or_create(
+            judge=task.judge, source_id=source_id,
+            defaults={'name': mongo_task_info['source']})
+        task.source = source
 
     task.save()
 

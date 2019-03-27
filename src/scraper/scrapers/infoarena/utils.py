@@ -95,17 +95,19 @@ def scrape_task_info(task_id):
     title = main_view.find('h1').text.strip()
     time_limit = info_table.find_all('tr')[2].find_all('td')[1].text
     memory_limit = info_table.find_all('tr')[2].find_all('td')[3].text
+    source = info_table.find_all('tr')[0].find_all('td')[3].text
 
     tags = []
     for tag_a in main_view.select('a.tag_search_anchor'):
         tag = parsers.parse_tag(tag_a.text)
         if tag is not None:
             tags.append(tag)
-
+    print(source)
     return {
         'judge_id': INFOARENA_JUDGE_ID,
         'task_id': task_id.lower(),
         'title': title,
+        'source': source,
         'time_limit': parsers.parse_time_limit(time_limit),
         'memory_limit': parsers.parse_memory_limit(memory_limit),
         'tags': tags,
