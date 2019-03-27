@@ -12,7 +12,7 @@ from info.forms import UserUpdateForm, HandleCreateForm
 from info.utils import build_group_card_context, compute_asd_scores
 from . import forms
 from info.models import TaskSheet, Assignment, FavoriteTask, TaskSheetTask
-from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
+from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission, TaskSource
 
 from info.tables import ResultsTable
 from django_ajax.mixin import AJAXMixin
@@ -322,14 +322,23 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
         return super(SheetTaskAddView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        task, _ = Task.objects.get_or_create(
-            judge=form.cleaned_data['judge'],
-            task_id=form.cleaned_data['task_id'].lower(),
-        )
-        TaskSheetTask.objects.create(
-            task=task,
-            sheet=self.object,
-        )
+        if form.cleaned_data['is_source']:
+            if TaskSource.objects.filter(source_id=form.cleaned_data['task_id']).exists():
+                source = TaskSource.objects.get(source_id=form.cleaned_data['task_id'])
+                for task in source.task_set.all():
+                    TaskSheetTask.objects.create(
+                        task=task,
+                        sheet=self.object,
+                    )
+        else:
+            task, _ = Task.objects.get_or_create(
+                judge=form.cleaned_data['judge'],
+                task_id=form.cleaned_data['task_id'].lower(),
+            )
+            TaskSheetTask.objects.create(
+                task=task,
+                sheet=self.object,
+            )
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
