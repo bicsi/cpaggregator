@@ -9,7 +9,7 @@ import json
 
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
-from info.utils import build_group_card_context
+from info.utils import build_group_card_context, compute_asd_scores
 from . import forms
 from info.models import TaskSheet, Assignment, FavoriteTask, TaskSheetTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission
@@ -456,35 +456,9 @@ class GroupDetailView(generic.DetailView):
             kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments.all()]
 
         members = self.object.members.all()
-        scores = {member.id: [] for member in members}
-        bonuses = {member.id: 0 for member in members}
-        non_bonuses = {member.id: 0 for member in members}
 
-        if self.object.group_id == 'asd-seminar':
-            for assignment in self.object.assignment_set.all():
-                submissions = Submission.best.filter(
-                    author__user__in=members,
-                    task__in=assignment.sheet.tasks.all(),
-                    submitted_on__gte=assignment.assigned_on,
-                    verdict='AC',
-                ).order_by('submitted_on').all()
-
-                bonus_given = {}
-                for submission in submissions:
-                    bonus = bonus_given.get(submission.task.id, 0)
-                    if bonus < 7 and bonuses[submission.author.user.id] < 7:
-                        bonuses[submission.author.user.id] += 1
-                        bonus_given[submission.task.id] = bonus + 1
-                        scores[submission.author.user.id].append({
-                            'submission': submission,
-                            'bonus': True,
-                        })
-                    elif non_bonuses[submission.author.user.id] < 3:
-                        non_bonuses[submission.author.user.id] += 1
-                        scores[submission.author.user.id].append({
-                            'submission': submission,
-                            'bonus': False,
-                        })
+        if self.object.group_id == 'asd-seminar' and 0:
+            scores = compute_asd_scores(self.object)
             kwargs['members'] = [{'member': member, 'scores': scores[member.id]} for member in members]
             kwargs['max_score'] = 10
         else:
