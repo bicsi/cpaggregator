@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F
+from django.db.models import F, Count
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.datetime_safe import datetime
@@ -509,14 +509,16 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             'faved': task in favorite_tasks,
         } for task in task_list]
 
-        context['public_groups_data'] = [{
+        context['popular_group_list'] = [{
             "group": group,
             "assignments": [{
                 "assignment": assignment,
                 "task_count": assignment.sheet.tasks.count(),
             } for assignment in Assignment.active.filter(group=group).order_by('-assigned_on')[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
-        } for group in UserGroup.public.all()]
+        } for group in UserGroup.public
+            .annotate(member_count=Count('members'))
+            .order_by('-member_count')[:3]]
 
         context['owned_groups_data'] = [{
             "group": group,
