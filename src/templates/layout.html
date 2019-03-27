@@ -57,6 +57,9 @@
 				<ul class="navbar-nav navbar-right vertical-align mr-auto">
 					{% if user.is_authenticated %}
 					<li>
+						<a href="{% url 'group-list' %}" class="nav-link">Groups</a>
+					</li>
+					<li>
 						<a href="{% url 'task-list' %}" class="nav-link">Tasks</a>
 					</li>
 					<li>

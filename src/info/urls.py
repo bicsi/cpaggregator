@@ -21,6 +21,7 @@ from info import views
 urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('rank/', views.RankListView.as_view(), name='rank-list'),
+    path('group/', views.GroupListView.as_view(), name='group-list'),
     path('group/<group_id>/', include([
         path('', views.GroupDetailView.as_view(), name='group-detail'),
         path('join/', views.GroupJoinView.as_view(), name='group-join'),

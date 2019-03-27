@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+{% load bootstrap_pagination %}
+
+{% block title_tag %}Groups{% endblock %}
+
+{% block body_content %}
+
+<div class="container">
+    <h1 class="mt-5">Groups</h1>
+    <a class="btn btn-primary mt-2"
+       data-toggle="modal" href="#modal"
+       onclick="loadModalForm('{% url 'group-create' %}');">
+        <i class="fas fa-xs fa-plus"></i>
+        <span class="mx-2">Create a group</span>
+    </a>
+    <div class="row mt-5">
+        {% for group_data in group_list %}
+         <div class="col-12 col-lg-4 px-2 mb-4">
+             {% include 'info/group/group_card.html' %}
+         </div>
+        {% endfor %}
+    </div>
+    {% if is_paginated %}
+        <div class="mx-auto d-flex flex-column align-items-center">
+            <span class="small text-muted my-3">
+                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ group_count }} groups
+            </span>
+            {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
+        </div>
+    {% endif %}
+    <p class="small text-muted">Only public groups are shown here. Private groups are hidden from view.</p>
+</div>
+
+{% endblock %}

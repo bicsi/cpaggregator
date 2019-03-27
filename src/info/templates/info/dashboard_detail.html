@@ -26,6 +26,7 @@
          </div>
         {% endfor %}
     </div>
+    <a class='btn btn-link btn-sm float-right' href="{% url 'group-list' %}">See all</a>
     {% endif %}
 
     {% if owned_groups_data|length > 0 %}

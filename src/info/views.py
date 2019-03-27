@@ -373,6 +373,23 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         return context
 
 
+class GroupListView(LoginRequiredMixin, generic.ListView):
+    template_name = 'info/group_list.html'
+    paginate_by = 15
+    context_object_name = 'group_list'
+    queryset = UserGroup.public.annotate(member_count=Count('members')).order_by('-member_count')
+
+    def get_context_data(self, *args, **kwargs):
+        kwargs['group_count'] = self.get_queryset().count()
+        context = super(GroupListView, self).get_context_data(*args, **kwargs)
+        print(context)
+        group_list = context.pop('group_list')
+        print(group_list)
+        context['group_list'] = [build_group_card_context(group, self.request.user)
+                                 for group in group_list]
+        return context
+
+
 class RankListView(generic.ListView):
     template_name = 'info/rank_list.html'
     paginate_by = 10
@@ -618,7 +635,6 @@ class GroupUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
 
 
 class UpdateSheetTaskOrdering(APIView):
-
     def post(self, request, *args, **kwargs):
         sheet_id = kwargs['sheet_id']
         ordering = json.loads(request.data.get('ordering'))
@@ -631,8 +647,8 @@ class UpdateSheetTaskOrdering(APIView):
                 task.save()
             return Response({'success': 'Success'})
 
-class UpdateGroupAssignmentOrdering(APIView):
 
+class UpdateGroupAssignmentOrdering(APIView):
     def post(self, request, *args, **kwargs):
         group_id = kwargs['group_id']
         ordering = json.loads(request.data.get('ordering'))
