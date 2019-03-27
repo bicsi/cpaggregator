@@ -137,7 +137,7 @@ class TaskSource(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     source_id = models.SlugField(max_length=256)
     name = models.CharField(max_length=1024)
-    public = models.BooleanField(default=False)
+    public = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
