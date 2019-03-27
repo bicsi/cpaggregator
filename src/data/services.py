@@ -149,8 +149,6 @@ def update_all_tasks_info():
             __update_task_info(db, task)
         except Exception as e:
             print(f'ERROR: {e}')
-            print(f'DELETING TASK: {task}')
-            task.delete()
 
 
 @shared_task
