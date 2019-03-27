@@ -514,7 +514,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             "assignments": [{
                 "assignment": assignment,
                 "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.active.filter(group=group).order_by('-assigned_on')[:3]],
+            } for assignment in Assignment.active.filter(group=group)[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
         } for group in UserGroup.public
             .annotate(member_count=Count('members'))
@@ -525,7 +525,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             "assignments": [{
                 "assignment": assignment,
                 "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.objects.filter(group=group).order_by('-assigned_on')[:3]],
+            } for assignment in Assignment.objects.filter(group=group)[:3]],
             "assignment_count": Assignment.objects.filter(group=group).count(),
         } for group in self.request.user.profile.owned_groups.all()]
 
@@ -536,7 +536,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 "solved_count": assignment.get_best_submissions().filter(
                     author__user__user=self.request.user, verdict='AC').count(),
                 "task_count": assignment.sheet.tasks.count(),
-            } for assignment in Assignment.active.filter(group=group).order_by('-assigned_on')[:3]],
+            } for assignment in Assignment.active.filter(group=group)[:3]],
             "assignment_count": Assignment.active.filter(group=group).count(),
         } for group in self.request.user.profile.assigned_groups.all()]
 
