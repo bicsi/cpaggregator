@@ -43,6 +43,8 @@ urlpatterns = [
                     show_submissions=True,
                 ), name='group-sheet-submissions'),
             ])),
+        path('reorder-assignments/', views.UpdateGroupAssignmentOrdering.as_view(),
+             name='group-assignment-reorder'),
         path('delete/', views.GroupDeleteView.as_view(), name='group-delete'),
     ])),
     path('create-group/', views.GroupCreateView.as_view(), name='group-create'),

@@ -1,17 +1,32 @@
 {% load humanize %}
 
 {% with sheet_count=assignments|length %}
-<div class="card mb-5">
-    <h6 class="card-header">Assignments</h6>
-
-    <div class="list-group list-group-flush">
+<div class="card mb-5" id="groupAssignmentPanel">
+    <div class="card-header d-flex align-items-center">
+        <h6 class="d-inline flex-grow-1 mb-0">Assignments</h6>
+        {% if is_owner %}
+        <a @click="toggleEditMode" href="#!" class="badge badge-dark badge-pill py-1">
+            <span v-if="!editMode"><i class="fas fa-pen mr-1"></i>Edit</span>
+        </a>
+        <a @click="saveChanges" href="#!" class="badge badge-success badge-pill py-1" v-cloak>
+            <span v-if="editMode">Done</span>
+        </a>
+        {% endif %}
+    </div>
+    <div class="list-group list-group-flush" id="assignmentList">
         {% for assignment_data in assignments %}
         {% with assignment=assignment_data.assignment solved_count=assignment_data.solved_count %}
         {% with task_count=assignment.sheet.tasks.count %}
-        <a class="list-group-item list-group-item-action"
+        {% with idx=forloop.counter0 %}
+        <a class="list-group-item list-group-item-action" data-id="{{ idx }}"
            href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
             <div class="d-flex align-items-center">
-                <strong class="flex-grow-1">{{ assignment.sheet.title }}</strong>
+                <span v-cloak v-show="editMode" class="mr-2 move-assignment">
+                    <i class="fas fa-arrows-alt text-secondary" ></i>
+                </span>
+                <div class="flex-grow-1">
+                    <strong class="d-inline-block">{{ assignment.sheet.title }}</strong>
+                </div>
                 {% if is_user_member %}
                     <span class="badge badge-pill
                         {% if solved_count == task_count %}
@@ -37,8 +52,44 @@
         </a>
         {% endwith %}
         {% endwith %}
+        {% endwith %}
         {% endfor %}
     </div>
     <span class="card-footer text-muted small">{{ sheet_count }} sheet{{ sheet_count|pluralize }}</span>
 </div>
 {% endwith %}
+
+<script>
+var sortable;
+
+$('document').ready(function(){
+    sortable = new Sortable(assignmentList, {
+        animation: 150,
+        // ghostClass: 'blue-background-class',
+        handle: ".move-assignment",
+    });
+});
+
+new Vue({
+  delimiters: ["[[", "]]"],
+  el: "#groupAssignmentPanel",
+  data: {
+    hoverIndex: null,
+    editMode: false,
+  },
+  methods: {
+    toggleEditMode: function() { this.editMode = !this.editMode; },
+    saveChanges: function() {
+        var ordering = sortable.toArray();
+        $.post({
+            url: "{% url 'group-assignment-reorder' group_id=group.group_id %}",
+            data: {
+                'csrfmiddlewaretoken': "{{ csrf_token }}",
+                'ordering': JSON.stringify(ordering),
+            },
+        });
+        this.toggleEditMode();
+    },
+  }
+});
+</script>

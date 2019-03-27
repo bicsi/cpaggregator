@@ -46,6 +46,7 @@ class Assignment(models.Model):
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
+    ordering_id = models.PositiveIntegerField(blank=True, null=True)
     use_best_recent = models.BooleanField(default=False)
 
     # Managers.
@@ -80,7 +81,7 @@ class Assignment(models.Model):
 
     class Meta:
         unique_together = (('group', 'sheet'),)
-        ordering = ['assigned_on']
+        ordering = ('ordering_id', 'assigned_on')
 
 
 class FavoriteTask(models.Model):

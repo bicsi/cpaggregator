@@ -26,8 +26,8 @@
            title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
            href="{{ task.get_url }}" target="_blank" v-cloak>
             <div class="d-flex align-items-center">
-                <span v-cloak v-show="editMode" class="pl-3">
-                    <i class="fas fa-grip-vertical text-muted" ></i>
+                <span v-cloak v-show="editMode" class="pl-3 task-move">
+                    <i class="fas fa-arrows-alt text-muted"></i>
                 </span>
                 <div class="py-1 px-3 border-right border-light">
                     {% include 'accounts/judge_label.html' with judge=task.judge %}
@@ -93,8 +93,7 @@ var sortable;
 $('document').ready(function(){
     sortable = new Sortable(taskList, {
         animation: 150,
-        // ghostClass: 'blue-background-class',
-        handle: ".fa-grip-vertical",
+        handle: ".task-move",
     });
 });
 
@@ -113,7 +112,7 @@ new Vue({
             url: "{% url 'sheet-task-reorder' sheet_id=sheet.sheet_id %}",
             data: {
                 'csrfmiddlewaretoken': "{{ csrf_token }}",
-                'ordering': JSON.stringify(ordering),
+                'ordering': ordering,
             },
         });
         this.toggleEditMode();

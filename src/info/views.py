@@ -417,12 +417,12 @@ class GroupDetailView(generic.DetailView):
     context_object_name = 'group'
 
     def get_context_data(self, **kwargs):
-        assignments = list(Assignment.active.filter(group=self.object).order_by('-assigned_on').all())
+        assignments = Assignment.active.filter(group=self.object)
         if self.request.user.is_authenticated:
             is_owner = self.object.is_owned_by(self.request.user)
             if is_owner:
-                assignments = list(Assignment.future.filter(group=self.object).order_by('-assigned_on').all()) \
-                                        + assignments
+                assignments = Assignment.objects.filter(group=self.object)
+
             kwargs['is_owner'] = is_owner
             kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=self.object.id).exists()
 
@@ -432,9 +432,9 @@ class GroupDetailView(generic.DetailView):
                     author__in=self.request.user.profile.handles.all(),
                     task__in=assignment.sheet.tasks.all(),
                     verdict='AC').count()
-            } for assignment in assignments]
+            } for assignment in assignments.all()]
         else:
-            kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments]
+            kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments.all()]
 
         members = self.object.members.all()
         scores = {member.id: [] for member in members}
@@ -635,17 +635,29 @@ class GroupUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
 class UpdateSheetTaskOrdering(APIView):
 
     def post(self, request, *args, **kwargs):
-        print('POST')
         sheet_id = kwargs['sheet_id']
-        print(request.data)
         ordering = json.loads(request.data.get('ordering'))
         ordering_index = {int(elem): int(idx) for idx, elem in enumerate(ordering)}
 
-        print(ordering)
         sheet = get_object_or_404(TaskSheet, sheet_id=sheet_id)
         if sheet.is_owned_by(request.user):
             for idx, task in enumerate(TaskSheetTask.objects.filter(sheet=sheet).all()):
-                print(f'{task} -> {ordering_index.get(idx)}')
                 task.ordering_id = ordering_index.get(idx)
                 task.save()
             return Response({'success': 'Success'})
+
+class UpdateGroupAssignmentOrdering(APIView):
+
+    def post(self, request, *args, **kwargs):
+        group_id = kwargs['group_id']
+        ordering = json.loads(request.data.get('ordering'))
+        ordering_index = {int(elem): int(idx) for idx, elem in enumerate(ordering)}
+        print(ordering_index)
+
+        group = get_object_or_404(UserGroup, group_id=group_id)
+        if group.is_owned_by(request.user):
+            for idx, assignment in enumerate(Assignment.objects.filter(group=group).all()):
+                assignment.ordering_id = ordering_index.get(idx)
+                assignment.save()
+            return Response({'success': 'Success'})
+
