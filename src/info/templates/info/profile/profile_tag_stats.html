@@ -1,0 +1,44 @@
+<div style="max_height: 100px" class="p-2">
+    <canvas id="profileTagsPanel" height="100"></canvas>
+</div>
+
+<script>
+Chart.defaults.global.legend.labels.fontSize = 13;
+// Chart.defaults.global.legend.labels.usePointStyle = true;
+
+new Chart(profileTagsPanel.getContext('2d'), {
+    type: 'pie',
+    data: {
+        labels: {{ tag_data.tags|safe }},
+        datasets: [{
+            label: 'Solved tasks',
+            data: {{ tag_data.solved_count|safe }},
+            backgroundColor: [
+                '#5899DA',
+                '#E8743B',
+                '#19A979',
+                '#ED4A7B',
+                '#945ECF',
+                '#13A4B4',
+                '#525DF4',
+                '#BF399E',
+            ],
+            borderColor: [
+                '#5899DA',
+                '#E8743B',
+                '#19A979',
+                '#ED4A7B',
+                '#945ECF',
+                '#13A4B4',
+                '#525DF4',
+                '#BF399E',
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        animation: { animateRotate: false },
+        legend: { onClick: null },
+    }
+});
+</script>

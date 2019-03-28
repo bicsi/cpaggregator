@@ -26,49 +26,24 @@
             {% include 'info/profile/profile_handles.html' %}
         </div>
         <div class="col col-md-8 col-12">
-            {% include 'info/profile/profile_activity.html' %}
             <div class="card">
+                <h6 class="card-header">Activity</h6>
+                {% include 'info/profile/profile_activity.html' %}
+            </div>
+            <div class="card mt-3" id="profile-tags-panel">
+                <h6 class="card-header">Tags</h6>
+                {% include 'info/profile/profile_tag_stats.html' %}
+            </div>
+            <div class="card mt-3">
                 <h6 class="card-header">Tasks solved</h6>
                 <div class="card-body">
-                    <ul class="list-unstyled list-inline">
-                        {% for task in profile.get_solved_tasks %}
-                        <li class="list-inline-item">
-                            <a class="badge badge-primary"
-                               href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
-                                {{ task.name_or_id }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <span class="small text-muted">
-                        {% if profile.get_solved_tasks.empty %}
-                        No tasks
-                        {% else %}
-                        {{ profile.get_solved_tasks|length }} task{{ profile.get_solved_tasks|length|pluralize }}
-                        {% endif %}
-                    </span>
+                    {% include 'info/profile/profile_task_display.html' with tasks=profile.get_solved_tasks %}
                 </div>
             </div>
             <div class="card mt-3">
                 <h6 class="card-header">Tasks tried</h6>
                 <div class="card-body">
-                    <ul class="list-unstyled list-inline">
-                        {% for task in profile.get_unsolved_tasks %}
-                        <li class="list-inline-item">
-                            <a class="badge badge-primary"
-                               href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
-                                {{ task.name_or_id }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <span class="small text-muted">
-                        {% if profile.get_unsolved_tasks|length <= 0 %}
-                        No tasks
-                        {% else %}
-                        {{ profile.get_unsolved_tasks|length }} task{{ profile.get_unsolved_tasks|length|pluralize }}
-                        {% endif %}
-                    </span>
+                    {% include 'info/profile/profile_task_display.html' with tasks=profile.get_unsolved_tasks %}
                 </div>
             </div>
         </div>

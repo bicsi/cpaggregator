@@ -1,59 +1,67 @@
-<div class="card mb-3" id="profile-activity-panel">
-    <h6 class="card-header">Activity</h6>
-    <div style="overflow: auto; direction: rtl">
-        <template>
-          <la-cartesian :width="2000" :height="200" :data="values">
-            <la-area dot prop="total_submission_count" :width="3" label="All submissions" color="#F0F0F0"></la-area>
-            <la-area dot prop="ac_submission_count" label="Accepted submissions"
-                     color="#28B62C" :width="2"></la-area>
-            <la-x-axis prop="name" :font-size="11"></la-x-axis>
-            <la-tooltip style="left: 0px;"></la-tooltip>
-          </la-cartesian>
-        </template>
-    </div>
-    <div class="mx-auto mb-3 d-flex align-items-center">
-        <i class="fas fa-circle text-success mr-1"></i>
-        <span class="text-muted">Accepted submissions</span>
-        <span class="mx-2"></span>
-        <i class="fas fa-circle mr-1" style="color: #F0F0F0"></i>
-        <span class="text-muted">All submissions</span>
+<div style="overflow: auto; direction: rtl;" class="p-2">
+    <div style="height: 200px; width: 2000px">
+        <canvas id="profileActivityPanel" height="200" width="2000"></canvas>
     </div>
 </div>
-<div class="card mb-3" id="profile-tags-panel">
-    <h6 class="card-header">Tags</h6>
-    <div style="overflow: auto; direction: rtl">
-        <template>
-          <la-polar :data="values">
-            <la-pie show-label show-value label-prop="tag" prop="solved_count"
-                    color="#FF0000" label="Solved count"></la-pie>
-            <la-tooltip></la-tooltip>
-          </la-polar>
-        </template>
-    </div>
+<div class="mx-auto mb-3 d-flex align-items-center">
+    <i class="fas fa-circle text-success mr-1"></i>
+    <span class="text-muted">Accepted submissions</span>
+    <span class="mx-2"></span>
+    <i class="fas fa-circle mr-1" style="color: #F0F0F0"></i>
+    <span class="text-muted">All submissions</span>
 </div>
 
 <script>
-Vue.use(Laue);
-new Vue({
-  el: "#profile-activity-panel",
-  components: {
-    LaCartesian: Laue.Cartesian,
-    LaLine: Laue.Line
-  },
+Chart.defaults.global.defaultFontFamily = '"Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"';
+Chart.defaults.global.defaultFontColor = '#999';
 
-  data: () => ({
-    values: {{ activity|safe }}
-  })
-});
-new Vue({
-  el: "#profile-tags-panel",
-  components: {
-    LaPolar: Laue.Polar,
-    LaPie: Laue.Pie
-  },
-
-  data: () => ({
-    values: {{ tag_data|safe }}
-  })
+new Chart(profileActivityPanel.getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: {{ activity.timestamps|safe }},
+        datasets: [
+        {
+            label: 'Accepted submissions',
+            data: {{ activity.ac_submission_count|safe }},
+            borderWidth: 2,
+            borderColor: "rgba(40, 182, 44, 1.0)",
+            backgroundColor: "rgba(40, 182, 44, 0.4)",
+        },
+        {
+            label: 'Total submissions',
+            data: {{ activity.total_submission_count|safe }},
+            borderWidth: 1,
+            borderColor: "rgba(240, 240, 240, 1.0)",
+            backgroundColor: "rgba(240, 240, 240, 0.4)",
+        }]
+    },
+    options: {
+        tooltips: {
+            mode: 'x'
+        },
+        elements: {
+            line: {
+                tension: 0 // disables bezier curves
+            }
+        },
+        animation: {
+            duration: 0 // general animation time
+        },
+        legend: { display: false },
+        scales: {
+            xAxes: [{
+                gridLines: {
+                    display: false,
+                },
+            }],
+            yAxes: [{
+                gridLines: {
+                    display: false,
+                    drawBorder: false,
+                },
+                ticks: { display: false },
+            }],
+        },
+    }
 });
 </script>

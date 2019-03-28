@@ -1,0 +1,18 @@
+
+<ul class="list-unstyled list-inline">
+    {% for task in tasks %}
+    <li class="list-inline-item">
+        <a class="badge badge-primary"
+           href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
+            {{ task.name_or_id }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+<span class="small text-muted">
+    {% if tasks.empty %}
+    No tasks
+    {% else %}
+    {{ tasks|length }} task{{ tasks|length|pluralize }}
+    {% endif %}
+</span>

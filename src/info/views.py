@@ -79,10 +79,21 @@ class UserSubmissionsDetailView(generic.DetailView):
         kwargs['is_owner'] = self.object.user == self.request.user
         statistics = self.object.statistics
         if statistics.activity:
-            kwargs['activity'] = statistics.activity
+            activity = json.loads(statistics.activity)
+            kwargs['activity'] = {
+                'timestamps': json.dumps([activity_point['name']
+                               for activity_point in activity]),
+                'ac_submission_count': json.dumps([activity_point['ac_submission_count']
+                                        for activity_point in activity]),
+                'total_submission_count': json.dumps([activity_point['total_submission_count']
+                                           for activity_point in activity]),
+            }
         if statistics.tag_stats:
             tag_data = sorted(json.loads(statistics.tag_stats), key=lambda x: x['solved_count'], reverse=True)[:5]
-            kwargs['tag_data'] = json.dumps(tag_data)
+            kwargs['tag_data'] = {
+                'tags': json.dumps([tag_data_point['tag'] for tag_data_point in tag_data]),
+                'solved_count': json.dumps([tag_data_point['solved_count'] for tag_data_point in tag_data]),
+            }
 
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
 
