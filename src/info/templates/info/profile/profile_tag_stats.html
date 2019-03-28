@@ -1,5 +1,5 @@
-<div style="max_height: 100px" class="p-2">
-    <canvas id="profileTagsPanel" height="100"></canvas>
+<div style="position: relative; max_height: 200px" class="p-2">
+    <canvas id="profileTagsPanel" height="200"></canvas>
 </div>
 
 <script>
@@ -40,6 +40,7 @@ new Chart(profileTagsPanel.getContext('2d'), {
         rotation: -Math.PI,
         circumference: Math.PI,
         cutoutPercentage: 50,
+        maintainAspectRatio: false,
         animation: { animateRotate: false },
         legend: { onClick: null },
     }
