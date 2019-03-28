@@ -66,13 +66,6 @@ class Assignment(models.Model):
         ).order_by('submitted_on')
 
     def get_best_submissions(self, use_cache=True):
-        if not self.use_best_recent and use_cache:
-            return BestSubmission.objects.filter(
-                profile__in=self.get_all_users(),
-                task__in=self.sheet.tasks.all()) \
-                .values_list('submission', flat=True) \
-                .order_by('submitted_on')
-
         queryset = Submission.best_recent if self.use_best_recent else Submission.best
         return queryset.filter(
             author__user__in=self.get_all_users(),
