@@ -106,6 +106,7 @@ def scrape_task_info(task_ids):
                     'task_id': task_id.lower(),
                     'title': task_data['name'],
                     'tags': tags,
+                    'source': json_data['result']['contest']['name'],
                 }
                 found = True
                 yield task_info
