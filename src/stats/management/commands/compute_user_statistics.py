@@ -9,3 +9,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         services.compute_user_statistics()
+        services.compute_best_submissions()

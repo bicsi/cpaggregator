@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Case, Value, When, IntegerField, F
 from django.utils import timezone
 
+
 class ActiveAssignmentManager(models.Manager):
     def get_queryset(self):
         return super(ActiveAssignmentManager, self).get_queryset() \

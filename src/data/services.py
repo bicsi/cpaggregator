@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.text import slugify
 
-from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource
+from data.models import MethodTag, Task, Submission, UserProfile, UserHandle
 from scraper.database import get_db
 import scraper.services as scraper_services
 
@@ -46,10 +46,7 @@ def __update_task_info(db, task):
 
     if 'source' in mongo_task_info:
         source_id = slugify(mongo_task_info['source'])
-        source, _ = TaskSource.objects.get_or_create(
-            judge=task.judge, source_id=source_id,
-            defaults={'name': mongo_task_info['source']})
-        task.source = source
+        source = S
 
     task.save()
 
@@ -149,6 +146,8 @@ def update_all_tasks_info():
             __update_task_info(db, task)
         except Exception as e:
             print(f'ERROR: {e}')
+            print(f'DELETING TASK: {task}')
+            task.delete()
 
 
 @shared_task

@@ -2,7 +2,7 @@ import json
 
 from data.models import Submission, UserProfile, Task
 from stats import utils
-from .models import TaskStatistics, UserStatistics
+from .models import TaskStatistics, UserStatistics, BestSubmission
 
 from celery import shared_task
 
@@ -47,6 +47,15 @@ def compute_task_statistics():
 
         statistics.save()
 
+
+@shared_task
+def compute_best_submissions():
+    print('[TASK] Computing best submissions...')
+    for submission in Submission.best.all():
+        BestSubmission.objects.update_or_create(
+            task=submission.task,
+            profile=submission.author.user,
+            defaults={'submission': submission})
 
 
 @shared_task

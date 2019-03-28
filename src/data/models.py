@@ -74,22 +74,18 @@ class UserProfile(models.Model):
         return self.username
 
     def get_solved_tasks(self):
-        tasks = []
-        for handle in self.handles.all():
-            for submission in handle.submission_set.all():
-                if submission.verdict == 'AC':
-                    tasks.append(submission.task)
-        return set(tasks)
+        tasks = Submission.best.filter(author__user=self) \
+            .filter(verdict='AC').values_list('task', flat=True)
+        return Task.objects.filter(id__in=tasks.all())
 
     def get_submitted_tasks(self):
-        tasks = []
-        for handle in self.handles.all():
-            for submission in handle.submission_set.all():
-                tasks.append(submission.task)
-        return set(tasks)
+        tasks = Submission.best.filter(author__user=self).values_list('task', flat=True)
+        return Task.objects.filter(id__in=tasks.all())
 
     def get_unsolved_tasks(self):
-        return self.get_submitted_tasks() - self.get_solved_tasks()
+        tasks = Submission.best.filter(author__user=self) \
+            .exclude(verdict='AC').values_list('task', flat=True)
+        return Task.objects.filter(id__in=tasks.all())
 
     def __str__(self):
         return self.get_display_name()

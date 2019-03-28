@@ -10,6 +10,10 @@ def setup_periodic_tasks(sender, **kwargs):
         compute_user_statistics,
         name='compute user statistics')
     sender.add_periodic_task(
+        1,  # * 60,
+        compute_user_statistics,
+        name='compute best submissions')
+    sender.add_periodic_task(
         5, # * 60,
         compute_task_statistics,
         name='compute task statistics')

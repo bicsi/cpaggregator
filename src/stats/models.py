@@ -1,6 +1,6 @@
 from django.db import models
 import math
-from data.models import Task, UserProfile
+from data.models import Task, UserProfile, Submission
 from django.contrib.postgres.fields import JSONField
 
 
@@ -33,3 +33,12 @@ class UserStatistics(models.Model):
     rank = models.IntegerField(null=True)
     tag_stats = JSONField(null=True)
     activity = JSONField(null=True)
+
+
+class BestSubmission(models.Model):
+    profile = models.ForeignKey(UserProfile, related_name='best_submissions', on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, related_name='best_submissions', on_delete=models.CASCADE)
+    submission = models.OneToOneField(Submission, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('profile', 'task'),)
