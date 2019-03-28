@@ -67,13 +67,6 @@ class Assignment(models.Model):
 
     def get_best_submissions(self):
         queryset = Submission.best_recent if self.use_best_recent else Submission.best
-        if not self.use_best_recent:
-            submission_ids = BestSubmission.objects.filter(
-                profile__in=self.get_all_users(),
-                task__in=self.sheet.tasks.all(),
-            ).values_list('submission')
-            return Submission.objects.filter(id__in=submission_ids).order_by('submitted_on')
-
         return queryset.filter(
             author__user__in=self.get_all_users(),
             task__in=self.sheet.tasks.all(),
