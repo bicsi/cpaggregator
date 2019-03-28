@@ -156,7 +156,9 @@ def scrape_task_info(task_ids):
                 'time_limit': parse_time_limit(time_limit_text),
                 'memory_limit': parse_memory_limit(memory_limit_text),
                 'tags': [],
+                'source': soup.select_one('.contest-title').text,
             }
+            print(task_info)
             yield task_info
         except Exception as e:
             print(f'ERROR: {e}')

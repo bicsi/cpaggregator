@@ -28,6 +28,7 @@ TAG_DICT = {
     'flows': 'flow',
     'sortings': 'sorting',
     'combinatorics': 'combinatorics',
+    'divide and conquer': 'divide',
 }
 
 VERDICT_DICT = {
