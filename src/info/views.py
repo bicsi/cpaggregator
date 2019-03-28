@@ -89,7 +89,7 @@ class UserSubmissionsDetailView(generic.DetailView):
                                            for activity_point in activity]),
             }
         if statistics.tag_stats:
-            tag_data = sorted(json.loads(statistics.tag_stats), key=lambda x: x['solved_count'], reverse=True)[:5]
+            tag_data = sorted(json.loads(statistics.tag_stats), key=lambda x: x['solved_count'], reverse=True)[:8]
             kwargs['tag_data'] = {
                 'tags': json.dumps([tag_data_point['tag'] for tag_data_point in tag_data]),
                 'solved_count': json.dumps([tag_data_point['solved_count'] for tag_data_point in tag_data]),
