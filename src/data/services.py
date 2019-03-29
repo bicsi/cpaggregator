@@ -46,7 +46,9 @@ def __update_task_info(db, task):
 
     if 'source' in mongo_task_info:
         source_id = slugify(mongo_task_info['source'])
-        source, _ = TaskSource.objects.get_or_create(source_id=source_id)
+        source, _ = TaskSource.objects.get_or_create(
+            judge=task.judge, source_id=source_id,
+            defaults={'name': mongo_task_info['source']})
         task.source = source
 
     task.save()
