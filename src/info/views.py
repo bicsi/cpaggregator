@@ -536,7 +536,6 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
             build_group_card_context(group, self.request.user)
             for group in self.request.user.profile.assigned_groups.all()]
 
-
         context['sheets'] = [{
             'sheet': sheet,
             'solved_count': Submission.best.filter(task__in=sheet.tasks.all(),

@@ -112,7 +112,7 @@ new Vue({
             url: "{% url 'sheet-task-reorder' sheet_id=sheet.sheet_id %}",
             data: {
                 'csrfmiddlewaretoken': "{{ csrf_token }}",
-                'ordering': ordering,
+                'ordering': JSON.stringify(ordering),
             },
         });
         this.toggleEditMode();
