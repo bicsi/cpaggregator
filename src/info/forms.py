@@ -55,6 +55,7 @@ class SheetTaskCreateForm(forms.Form):
         max_length=256)
     is_source = forms.BooleanField(
         label='Is source',
+        required=False,
         help_text='Check this if the id above represents a task source id, instead of a task id')
 
 
