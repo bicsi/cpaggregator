@@ -45,8 +45,8 @@ def __update_task_info(db, task):
             print('Skipped adding tag {}. Does not exist'.format(tag_id))
 
     if 'source' in mongo_task_info:
-        source_id, _ = slugify(mongo_task_info['source'])
-        source = TaskSource.objects.get_or_create(source_id=source_id)
+        source_id = slugify(mongo_task_info['source'])
+        source, _ = TaskSource.objects.get_or_create(source_id=source_id)
         task.source = source
 
     task.save()
