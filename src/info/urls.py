@@ -65,6 +65,7 @@ urlpatterns = [
         path('<judge_id>/<task_id>/', include([
             path('', views.TaskDetailView.as_view(), name='task-detail'),
             path('favorite/', views.FavoriteToggleView.as_view(), name='task-favorite'),
+            path('preview/', views.TaskPreviewView.as_view(), name='task-preview'),
         ])),
     ])),
     path('me/', views.MeDetailView.as_view(), name='me'),

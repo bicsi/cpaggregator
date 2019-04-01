@@ -572,6 +572,33 @@ class SheetDescriptionUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateVi
         return redirect('home')
 
 
+class TaskPreviewView(LoginRequiredMixin, AJAXMixin, generic.DetailView):
+    template_name = 'info/modal/task_preview.html'
+    context_object_name = 'task'
+    model = Task
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(
+            Task,
+            task_id=self.kwargs['task_id'],
+            judge__judge_id=self.kwargs['judge_id'],
+        )
+
+    def get_context_data(self, **kwargs):
+        task = self.object
+        kwargs['best_submission_for_user'] = Submission.best.filter(
+            task=task, author__user__user=self.request.user).first()
+        kwargs['accepted_submissions'] = Submission.best.filter(
+            task=task, verdict='AC')
+        kwargs['user_has_handle'] = UserHandle.objects.filter(
+            judge=task.judge, user=self.request.user.profile
+        ).exists()
+        kwargs['is_favorited'] = self.request.user.profile.favorite_tasks.filter(
+            task=task).exists()
+        return super(TaskPreviewView, self).get_context_data(**kwargs)
+
+
+
 class FavoriteToggleView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -654,4 +681,5 @@ class UpdateGroupAssignmentOrdering(APIView):
                 assignment.ordering_id = ordering_index.get(idx)
                 assignment.save()
             return Response({'success': 'Success'})
+
 

@@ -24,7 +24,9 @@
            data-id="{{ idx }}"
            @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
            title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
-           href="{{ task.get_url }}" target="_blank" v-cloak>
+           data-toggle="modal" href="#modal"
+           onclick="loadModalForm('{% url 'task-preview' judge_id=task.judge.judge_id task_id=task.task_id %}');"
+           v-cloak>
             <div class="d-flex align-items-center">
                 <span v-cloak v-show="editMode" class="pl-3 task-move">
                     <i class="fas fa-arrows-alt text-muted"></i>
@@ -38,7 +40,8 @@
                 </div>
                 <span class="mx-3 text-primary flex-grow-1">
                     {{ task.name_or_id }}
-                    <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"></i>
+                    <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"
+                       v-on:click="goExternal('{{ task.get_url }}')"></i>
                 </span>
                 <div class="mr-3">
                     <div v-cloak>
@@ -117,6 +120,9 @@ new Vue({
         });
         this.toggleEditMode();
     },
+    goExternal: function(url) {
+        window.location.href = url;
+    }
   }
 });
 </script>
