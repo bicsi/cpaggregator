@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 from django.forms import SelectDateWidget
 
+from cpaggregator.widgets import BootstrapDateTimePickerInput
 from data.models import UserProfile, UserHandle, Task, Judge, UserGroup
 from info.models import TaskSheet, Assignment
 from betterforms import multiform
@@ -116,7 +117,7 @@ class AssignmentCreateForm(forms.ModelForm):
         model = Assignment
         fields = ['assigned_on', 'use_best_recent']
         widgets = {
-            'assigned_on': SelectDateWidget(),
+            'assigned_on': BootstrapDateTimePickerInput(),
         }
 
     def __init__(self, **kwargs):
