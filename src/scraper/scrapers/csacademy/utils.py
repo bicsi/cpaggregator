@@ -165,9 +165,13 @@ def scrape_submissions_for_tasks(tasks):
     csrftoken = get_csrftoken()
     task_name_dict = get_task_name_dict(csrftoken)
 
-    submissions = [scrape_submissions_for_task(
-        csrftoken, task_name, task_name_dict[task_name]['id'])
-            for task_name in tasks]
+    submissions = []
+    for task_name in tasks:
+        if task_name in task_name_dict:
+            submissions.append(scrape_submissions_for_task(
+                csrftoken, task_name, task_name_dict[task_name]['id']))
+        else:
+            print(f'ERROR: {task_name} not found.')
 
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
