@@ -1,8 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from django.forms import SelectDateWidget
-
 from cpaggregator.widgets import BootstrapDateTimePickerInput
 from data.models import UserProfile, UserHandle, Task, Judge, UserGroup
 from info.models import TaskSheet, Assignment
@@ -98,6 +96,7 @@ class SheetCreateForm(forms.ModelForm):
         help_texts = {
             'title': "Example: \"Dynamic Programming super-tasks\"."
         }
+
     def __init__(self, **kwargs):
         print(kwargs)
         self.user = kwargs.pop('user')
@@ -113,12 +112,14 @@ class SheetCreateForm(forms.ModelForm):
 
 
 class AssignmentCreateForm(forms.ModelForm):
+    assigned_on = forms.DateTimeField(
+        input_formats=['%d/%m/%Y %H:%M'],
+        widget=BootstrapDateTimePickerInput(),
+        help_text='When the assignment will start showing up. Time is in UTC+0.')
+
     class Meta:
         model = Assignment
         fields = ['assigned_on', 'use_best_recent']
-        widgets = {
-            'assigned_on': BootstrapDateTimePickerInput(),
-        }
 
     def __init__(self, **kwargs):
         user = kwargs.pop('user')
