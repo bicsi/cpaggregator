@@ -131,16 +131,19 @@ class ResultsDetailView(generic.DetailView):
         results_data = []
         for user in self.object.group.members.all():
             user_submissions = []
+            has_one_submission = False
             total_solved = 0
             for task in tasks:
                 submission = self.object.get_best_submissions() \
                     .filter(author__user=user, task=task['task'])
                 if submission.exists():
                     user_submissions.append(submission.first())
-                    total_solved += 1
+                    has_one_submission = True
+                    if submission.first().verdict == 'AC':
+                        total_solved += 1
                 else:
                     user_submissions.append(None)
-            if total_solved > 0:
+            if has_one_submission:
                 results_data.append({
                     'user': user,
                     'results': user_submissions,
