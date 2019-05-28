@@ -131,20 +131,22 @@ class ResultsDetailView(generic.DetailView):
         results_data = []
         for user in self.object.group.members.all():
             user_submissions = []
-            found_one_submission = False
+            total_solved = 0
             for task in tasks:
                 submission = self.object.get_best_submissions() \
                     .filter(author__user=user, task=task['task'])
                 if submission.exists():
                     user_submissions.append(submission.first())
-                    found_one_submission = True
+                    total_solved += 1
                 else:
                     user_submissions.append(None)
-            if found_one_submission:
+            if total_solved > 0:
                 results_data.append({
                     'user': user,
                     'results': user_submissions,
+                    'total_solved': total_solved,
                 })
+        results_data.sort(key=lambda x: x['total_solved'], reverse=True)
 
         context['tasks'] = tasks
         context['is_owner'] = self.object.sheet.is_owned_by(self.request.user)

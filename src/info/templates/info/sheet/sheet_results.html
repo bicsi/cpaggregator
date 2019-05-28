@@ -17,9 +17,11 @@
                   </span>
               </th>
               {% endfor %}
+              <th scope="col" class="text-uppercase text-center">Total</th>
             </tr>
           </thead>
           <tbody>
+
             {% for data_row in results %}
             {% with user=data_row.user %}
             <tr>
@@ -44,6 +46,7 @@
                   {% endif %}
               </td>
               {% endfor %}
+              <td class="text-center"><strong>{{ data_row.total_solved }}</strong></td>
             </tr>
             {% endwith %}
             {% endfor %}
