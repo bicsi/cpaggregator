@@ -21,11 +21,12 @@
         {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
         {% with idx=forloop.counter0 %}
         <a class="list-group-item list-group-item-action px-0 py-2"
+           style="cursor: pointer;"
            data-id="{{ idx }}"
            @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
            title="External: {{task.judge.judge_id}}/{{ task.task_id }}"
-           data-toggle="modal" href="#modal"
-           onclick="loadModalForm('{% url 'task-preview' judge_id=task.judge.judge_id task_id=task.task_id %}');"
+           @disabled="editMode"
+           @click="loadModal('{% url 'task-preview' judge_id=task.judge.judge_id task_id=task.task_id %}');"
            v-cloak>
             <div class="d-flex align-items-center">
                 <span v-cloak v-show="editMode" class="pl-3 task-move">
@@ -41,7 +42,7 @@
                 <span class="mx-3 text-primary flex-grow-1">
                     {{ task.name_or_id }}
                     <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"
-                       v-on:click="goExternal('{{ task.get_url }}')"></i>
+                       @click="goExternal('{{ task.get_url }}')"></i>
                 </span>
                 <div class="mr-3">
                     <div v-cloak>
@@ -122,7 +123,13 @@ new Vue({
     },
     goExternal: function(url) {
         window.location.href = url;
-    }
+    },
+    loadModal: function(form) {
+        if (this.editMode)
+            return null;
+        loadModalForm(form);
+        $('#modal').modal('show');
+    },
   }
 });
 </script>
