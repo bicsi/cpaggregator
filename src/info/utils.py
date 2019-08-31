@@ -1,10 +1,12 @@
 from datetime import datetime
 import itertools
+from django.db.models import Count, Prefetch
 
+from . import queries
 from django.utils.text import slugify
 
-from data.models import Submission
-from info.models import Assignment
+from data.models import Submission, UserGroup
+from info.models import Assignment, TaskSheetTask
 
 
 def slugify_unique(model_klass, text, field):
@@ -29,22 +31,48 @@ def slugify_unique(model_klass, text, field):
     return slug
 
 
-def build_group_card_context(group, user):
-    return {
-        "group": group,
-        "is_user_member": group.members.filter(user=user).exists(),
-        "assignments": [{
-            "assignment": assignment,
-            "solved_count": assignment.get_best_submissions().filter(
-                author__user__user=user, verdict='AC').count(),
-            "task_count": assignment.sheet.tasks.count(),
-        } for assignment in Assignment.active.filter(group=group)[:3]],
-        "assignment_count": Assignment.active.filter(group=group).count(),
-        "judges": {judge for assignment in Assignment.active \
-            .prefetch_related('sheet__tasks') \
-            .filter(group=group).all()
-                   for judge in assignment.get_all_judges()}
-    }
+def build_group_card_context(request, groups):
+    profile = request.user.profile
+    member_groups = set(UserGroup.objects
+                        .filter(members=profile, id__in=groups)
+                        .values_list('id', flat=True))
+    groups = groups.prefetch_related(Prefetch(
+        'assignment_set',
+        Assignment.objects.active(),
+        to_attr='active_assignments'))
+
+    assignments = Assignment.objects \
+        .select_related('sheet') \
+        .active() \
+        .filter(group__in=groups) \
+        .annotate(task_count=Count('sheet__tasks'))
+
+    tasks = TaskSheetTask.objects.filter(sheet__in=assignments.values('sheet'))
+    ac_submissions = Submission.best.filter(author__user=profile, verdict='AC')
+    solved_tasks = tasks.filter(task__in=ac_submissions.values('task'))
+
+    solved_count = {
+        sheet['sheet']: sheet['solved_count']
+        for sheet in solved_tasks.values('sheet')
+                      .order_by('sheet')
+                      .annotate(solved_count=Count('sheet'))}
+
+    assignment_ctx = {
+        assignment: {
+                "assignment": assignment,
+                "solved_count": solved_count.get(assignment.sheet.id, 0),
+                "task_count": assignment.task_count}
+        for assignment in assignments}
+
+    ret = [{
+            "group": group,
+            "is_user_member": (group.id in member_groups),
+            "assignments": [assignment_ctx[assignment]
+                            for assignment in group.active_assignments[:3]],
+            "assignment_count": len(group.active_assignments)
+        } for group in groups]
+
+    return ret
 
 
 def compute_asd_scores(group):

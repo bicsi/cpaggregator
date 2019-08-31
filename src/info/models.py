@@ -52,9 +52,7 @@ class Assignment(models.Model):
     use_best_recent = models.BooleanField(default=False)
 
     # Managers.
-    objects = models.Manager()  # The default manager.
-    active = managers.ActiveAssignmentManager()
-    future = managers.FutureAssignmentManager()
+    objects = managers.AssignmentQuerySet.as_manager()
 
     def get_all_users(self):
         return self.group.members.all()

@@ -10,7 +10,7 @@ import json
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
 from info.utils import build_group_card_context, compute_asd_scores
-from . import forms
+from . import forms, queries
 from info.models import TaskSheet, Assignment, FavoriteTask, TaskSheetTask
 from data.models import UserProfile, UserHandle, UserGroup, Task, User, Submission, TaskSource
 
@@ -418,11 +418,8 @@ class GroupListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, *args, **kwargs):
         kwargs['group_count'] = self.get_queryset().count()
         context = super(GroupListView, self).get_context_data(*args, **kwargs)
-        print(context)
         group_list = context.pop('group_list')
-        print(group_list)
-        context['group_list'] = [build_group_card_context(group, self.request.user)
-                                 for group in group_list]
+        context['group_list'] = build_group_card_context(self.request, group_list)
         return context
 
 
@@ -471,16 +468,17 @@ class GroupDetailView(generic.DetailView):
     context_object_name = 'group'
 
     def get_context_data(self, **kwargs):
-        assignments = Assignment.active.filter(group=self.object)
+        group = self.object
+
+        assignments = Assignment.objects.active().filter(group=group)
         if self.request.user.is_authenticated:
-            is_owner = self.object.is_owned_by(self.request.user)
+            is_owner = group.is_owned_by(self.request.user)
             if is_owner:
-                assignments = Assignment.objects.filter(group=self.object)
+                assignments = Assignment.objects.filter(group=group)
 
             kwargs['is_owner'] = is_owner
-            kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=self.object.id).exists()
-            kwargs['judges'] = {judge for assignment in assignments.all()
-                                for judge in assignment.get_all_judges()}
+            kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=group.id).exists()
+            kwargs['judges'] = queries.get_all_judges(group)
             kwargs['assignments'] = [{
                 'assignment': assignment,
                 'solved_count': Submission.best.filter(
@@ -491,10 +489,10 @@ class GroupDetailView(generic.DetailView):
         else:
             kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments.all()]
 
-        members = self.object.members.all()
+        members = group.members.all()
 
-        if self.object.group_id == 'asd-seminar' and 0:
-            scores = compute_asd_scores(self.object)
+        if group.group_id == 'asd-seminar' and 0:
+            scores = compute_asd_scores(group)
             kwargs['members'] = [{'member': member, 'scores': scores[member.id]} for member in members]
             kwargs['max_score'] = 10
         else:
@@ -530,41 +528,27 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 .filter(author__user__user=self.request.user,
                         task__in=task_list)
         }
-        favorite_tasks = {favorite.task for favorite in
-                          self.request.user.profile.favorite_tasks.all()}
+        favorite_tasks = {self.request.user.profile.favorite_tasks.values_list('task', flat=True)}
+
         context['newly_added_task_list'] = [{
             'task': task,
             'verdict_for_user': verdict_for_user_dict.get(task),
-            'faved': task in favorite_tasks,
+            'faved': task.id in favorite_tasks,
         } for task in task_list]
 
-        context['popular_group_list'] = [
-            build_group_card_context(group, self.request.user)
-            for group in UserGroup.public
-                             .annotate(member_count=Count('members'))
-                             .order_by('-member_count')[:3]]
+        context['popular_group_list'] = build_group_card_context(
+            self.request,
+            UserGroup.public
+                .annotate(member_count=Count('members'))
+                .order_by('-member_count')[:3])
 
-        context['owned_groups_data'] = [
-            build_group_card_context(group, self.request.user)
-            for group in self.request.user.profile.owned_groups.all()]
+        context['owned_groups_data'] = build_group_card_context(
+            self.request,
+            self.request.user.profile.owned_groups.all())
 
-        context['assigned_groups_data'] = [
-            build_group_card_context(group, self.request.user)
-            for group in self.request.user.profile.assigned_groups.all()]
-
-        context['sheets'] = [{
-            'sheet': sheet,
-            'solved_count': Submission.best.filter(task__in=sheet.tasks.all(),
-                author__user__user=self.request.user, verdict='AC').count()
-        } for sheet in TaskSheet.objects.filter(author=self.request.user.profile).all()]
-
-        context['assignations'] = [{
-            'assignation': assignation,
-            'solved_count': assignation.get_best_submissions() \
-                .filter(author__user__user=self.request.user, verdict='AC') \
-                .count(),
-        } for assignation in Assignment.active \
-            .filter(group__in=self.request.user.profile.assigned_groups.all())]
+        context['assigned_groups_data'] = build_group_card_context(
+            self.request,
+            self.request.user.profile.assigned_groups.all())
 
         return context
 
