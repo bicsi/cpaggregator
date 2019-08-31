@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'stats',
     'contact',
     'rest_framework',
+    'debug_toolbar',
 ]
 
 DATABASES = {
@@ -73,9 +74,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'cpaggregator.urls'
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request:
+        request.user.is_authenticated and request.user.username == 'admin'
+}
 
 TEMPLATES = [
     {
