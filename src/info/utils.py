@@ -40,7 +40,9 @@ def build_group_card_context(group, user):
             "task_count": assignment.sheet.tasks.count(),
         } for assignment in Assignment.active.filter(group=group)[:3]],
         "assignment_count": Assignment.active.filter(group=group).count(),
-        "judges": {judge for assignment in Assignment.active.filter(group=group).all()
+        "judges": {judge for assignment in Assignment.active \
+            .prefetch_related('sheet__tasks') \
+            .filter(group=group).all()
                    for judge in assignment.get_all_judges()}
     }
 

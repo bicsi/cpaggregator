@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'stats',
     'contact',
     'rest_framework',
-    'debug_toolbar',
+    'silk',
 ]
 
 MIDDLEWARE = [
@@ -62,13 +62,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
-
-DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": lambda request:
-        request.user.is_authenticated and request.user.username == 'admin'
-}
 
 ROOT_URLCONF = 'cpaggregator.urls'
 

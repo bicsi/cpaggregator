@@ -108,38 +108,46 @@ class ResultsDetailView(generic.DetailView):
     context_object_name = 'assignment'
 
     def get_object(self, **kwargs):
-        obj = Assignment.objects.get(group__group_id=self.kwargs['group_id'],
-                                     sheet__sheet_id=self.kwargs['sheet_id'])
+        obj = Assignment.objects \
+            .select_related('group', 'sheet') \
+            .get(group__group_id=self.kwargs['group_id'],
+                 sheet__sheet_id=self.kwargs['sheet_id'])
         self.submissions = obj.get_best_submissions()
-        self.table = ResultsTable(self.submissions)
+        self.table = ResultsTable(self.submissions.select_related(
+            'task', 'task__judge', 'author__user', 'author__user__user'))
         return obj
 
     def get_context_data(self, **kwargs):
+        request_user = self.request.user
         kwargs['table'] = self.table
         context = super(ResultsDetailView, self).get_context_data(**kwargs)
 
         # Map task to verdict of current user.
         verdict_for_user_dict = {
             submission.task: submission.verdict for submission in
-            self.submissions.filter(author__user__user=self.request.user)
+            self.submissions.select_related('task').filter(author__user__user=request_user)
         }
         # Build tasks as a dict.
         tasks = [{'task': task.task, 'verdict_for_user': verdict_for_user_dict.get(task.task)}
-                 for task in TaskSheetTask.objects.filter(sheet=self.object.sheet).all()]
+                 for task in TaskSheetTask.objects.select_related('task', 'task__judge') \
+                     .filter(sheet=self.object.sheet).all()]
 
         # Send results data.
         results_data = []
+        submissions_for_user_and_task = {
+            (submission.author.user, submission.task): submission
+            for submission in self.submissions.select_related('author__user', 'task', 'task__judge').all()}
+
         for user in self.object.group.members.all():
             user_submissions = []
             has_one_submission = False
             total_solved = 0
             for task in tasks:
-                submission = self.object.get_best_submissions() \
-                    .filter(author__user=user, task=task['task'])
-                if submission.exists():
-                    user_submissions.append(submission.first())
+                submission = submissions_for_user_and_task.get((user, task['task']), None)
+                if submission:
+                    user_submissions.append(submission)
                     has_one_submission = True
-                    if submission.first().verdict == 'AC':
+                    if submission.verdict == 'AC':
                         total_solved += 1
                 else:
                     user_submissions.append(None)
@@ -152,7 +160,7 @@ class ResultsDetailView(generic.DetailView):
         results_data.sort(key=lambda x: x['total_solved'], reverse=True)
 
         context['tasks'] = tasks
-        context['is_owner'] = self.object.sheet.is_owned_by(self.request.user)
+        context['is_owner'] = self.object.sheet.is_owned_by(request_user)
         context['results'] = results_data
         context['show_results'] = self.show_results
         context['show_submissions'] = self.show_submissions
@@ -510,7 +518,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(DashboardView, self).get_context_data(**kwargs)
 
-        task_list = Task.objects.order_by('-created_at')[:5]
+        task_list = Task.objects.select_related('statistics').order_by('-created_at')[:5]
 
         # Map task to verdict of current user.
         verdict_for_user_dict = {
@@ -549,9 +557,11 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
 
         context['assignations'] = [{
             'assignation': assignation,
-            'solved_count': len(assignation.get_best_submissions().filter(
-                author__user__user=self.request.user, verdict='AC').all()),
-        } for assignation in Assignment.active.filter(group__in=self.request.user.profile.assigned_groups.all())]
+            'solved_count': assignation.get_best_submissions() \
+                .filter(author__user__user=self.request.user, verdict='AC') \
+                .count(),
+        } for assignation in Assignment.active \
+            .filter(group__in=self.request.user.profile.assigned_groups.all())]
 
         return context
 

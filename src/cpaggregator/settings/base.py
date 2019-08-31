@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'stats',
     'contact',
     'rest_framework',
-    'debug_toolbar',
+    'silk',
 ]
 
 DATABASES = {
@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'cpaggregator.urls'

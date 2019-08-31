@@ -22,10 +22,7 @@ from django.views.generic import RedirectView
 
 from . import views, settings
 
-import debug_toolbar
-
 urlpatterns = [
-    path('__debug__/', include(debug_toolbar.urls)),
     path('admin/', admin.site.urls),
     path('', include('info.urls')),
     path('', views.HomeView.as_view(), name='home'),
@@ -39,3 +36,4 @@ urlpatterns = [
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

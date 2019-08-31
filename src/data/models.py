@@ -42,6 +42,9 @@ def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>.
     return 'user_{0}/{1}'.format(instance.user.username, filename)
 
+class UserProfileManager(models.Manager):
+    def get_queryset(self):
+        return super(UserProfileManager, self).get_queryset().prefetch_related('user')
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='profile')
@@ -49,6 +52,8 @@ class UserProfile(models.Model):
     last_name = models.CharField(max_length=256, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     avatar = models.ImageField(upload_to=user_directory_path, blank=True)
+
+    objects = UserProfileManager()
 
     @property
     def username(self):
@@ -60,7 +65,8 @@ class UserProfile(models.Model):
         if self.avatar:
             return self.avatar.url
 
-        handle_dict = {handle.judge.judge_id: handle for handle in self.handles.all()}
+        handle_dict = {handle.judge.judge_id: handle
+                       for handle in self.handles.select_related('judge').all()}
         judge_order = ['cf', 'ia', 'csa']
         for judge_id in judge_order:
             if judge_id in handle_dict and handle_dict[judge_id].photo_url:
@@ -143,6 +149,10 @@ class TaskSource(models.Model):
         unique_together = (('judge', 'source_id'))
 
 
+class TaskManager(models.Manager):
+    def get_queryset(self):
+        return super(TaskManager, self).get_queryset().select_related('judge')
+
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=256)
@@ -153,6 +163,8 @@ class Task(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     source = models.ForeignKey(TaskSource, blank=True, null=True, on_delete=models.SET_NULL)
+
+    objects = TaskManager()
 
     def name_or_id(self):
         if self.name:
@@ -182,7 +194,6 @@ class Task(models.Model):
 
     def __str__(self):
         return "{}:{}".format(self.judge.judge_id, self.task_id)
-
 
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
