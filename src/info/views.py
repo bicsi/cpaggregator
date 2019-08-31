@@ -119,13 +119,19 @@ class ResultsDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         request_user = self.request.user
+        request_profile = request_user.profile
         kwargs['table'] = self.table
         context = super(ResultsDetailView, self).get_context_data(**kwargs)
 
+
+        submissions_for_user_and_task = {
+            (submission.author.user, submission.task): submission
+            for submission in self.submissions.select_related('author__user', 'task', 'task__judge')}
+
         # Map task to verdict of current user.
         verdict_for_user_dict = {
-            submission.task: submission.verdict for submission in
-            self.submissions.select_related('task').filter(author__user__user=request_user)
+            submission.task: submission.verdict for ((user, task), submission) in
+            submissions_for_user_and_task.items() if user == request_profile
         }
         # Build tasks as a dict.
         tasks = [{'task': task.task, 'verdict_for_user': verdict_for_user_dict.get(task.task)}
@@ -134,9 +140,6 @@ class ResultsDetailView(generic.DetailView):
 
         # Send results data.
         results_data = []
-        submissions_for_user_and_task = {
-            (submission.author.user, submission.task): submission
-            for submission in self.submissions.select_related('author__user', 'task', 'task__judge').all()}
 
         for user in self.object.group.members.all():
             user_submissions = []
@@ -451,7 +454,7 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
         kwargs['best_submission_for_user'] = Submission.best.filter(
             task=task, author__user__user=self.request.user).first()
         kwargs['accepted_submissions'] = Submission.best.filter(
-            task=task, verdict='AC')
+            task=task, verdict='AC').select_related('author__user__user')
         kwargs['user_has_handle'] = UserHandle.objects.filter(
             judge=task.judge, user=self.request.user.profile
         ).exists()

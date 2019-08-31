@@ -66,7 +66,7 @@ def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
             if idx > 10:
                 break
     else:
-        print("Judge id not recognized: %s" % judge_id)
+        print(f"Judge id not recognized: {judge_id}")
         return
 
     submissions_to_write = takewhile(lambda x: x['submitted_on'] >= to_date, submissions)

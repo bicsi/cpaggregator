@@ -1,10 +1,9 @@
 from datetime import datetime
-
+from django.contrib.auth.models import User
 from django.test import TestCase
-
 from pytz import UTC
 
-from data.models import UserProfile, UserHandle, Judge, Task, Submission
+from data.models import UserHandle, Judge, Task, Submission
 
 
 class BestSubmissionManagerTestCase(TestCase):
@@ -13,7 +12,7 @@ class BestSubmissionManagerTestCase(TestCase):
     def setUp(self):
         # Create an user and a task.
         self.judge = Judge.objects.create(judge_id='ia')
-        self.user = UserProfile.objects.create(username='user1')
+        self.user = User.objects.create_user(username='testuser', password='12345').profile
         self.handle = UserHandle.objects.create(judge=self.judge, handle='ia_user', user=self.user)
         self.task = Task.objects.create(judge=self.judge, task_id='ia_task')
 
@@ -83,3 +82,15 @@ class BestSubmissionManagerTestCase(TestCase):
             score=50,
             verdict='WA')
         self.assertCountEqual(Submission.best.all(), [submission_better_score])
+
+    def test_one_query(self):
+        Submission.objects.create(
+            submission_id='1',
+            submitted_on=self.today,
+            task=self.task,
+            author=self.handle,
+            language='C++',
+            source_size=1000,
+            score=20,
+            verdict='WA')
+        self.assertNumQueries(1, lambda: list(Submission.best.all()))

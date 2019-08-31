@@ -130,7 +130,7 @@
             <div class="card mt-5">
                 <h6 class="card-header">Users who solved this task</h6>
                 <div class="card-body">
-                    {% for ac_submission in accepted_submissions.all %}
+                    {% for ac_submission in accepted_submissions %}
                     {% with author_profile=ac_submission.author.user %}
                     <a class="badge badge-primary"
                        href="{% url 'profile' username=author_profile.username %}">
