@@ -106,7 +106,8 @@ class DownloadResultsView(LoginRequiredMixin, generic.View):
             .select_related('group', 'sheet') \
             .get(group__group_id=kwargs['group_id'],
                  sheet__sheet_id=kwargs['sheet_id'])
-        submissions = assignment.get_best_submissions().select_related('author__user')
+        submissions = assignment.get_best_submissions() \
+            .select_related('author', 'author__user', 'task', 'task__judge')
 
         filename = f"{self.kwargs['sheet_id']}.csv"
         response = HttpResponse(content_type='text/csv')
