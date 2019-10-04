@@ -43,6 +43,7 @@ urlpatterns = [
                     show_results=False,
                     show_submissions=True,
                 ), name='group-sheet-submissions'),
+                path('download/', views.DownloadResultsView.as_view(), name='group-sheet-results-download'),
             ])),
         path('reorder-assignments/', views.UpdateGroupAssignmentOrdering.as_view(),
              name='group-assignment-reorder'),

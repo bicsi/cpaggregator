@@ -1,11 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, Count
+from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.datetime_safe import datetime
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 import json
+import csv
 
 from accounts.forms import UserForm
 from info.forms import UserUpdateForm, HandleCreateForm
@@ -96,6 +98,33 @@ class UserSubmissionsDetailView(generic.DetailView):
             }
 
         return super(UserSubmissionsDetailView, self).get_context_data(**kwargs)
+
+
+class DownloadResultsView(LoginRequiredMixin, generic.View):
+    def get(self, request, **kwargs):
+        assignment = Assignment.objects \
+            .select_related('group', 'sheet') \
+            .get(group__group_id=kwargs['group_id'],
+                 sheet__sheet_id=kwargs['sheet_id'])
+        submissions = assignment.get_best_submissions().select_related('author__user')
+
+        filename = f"{self.kwargs['sheet_id']}.csv"
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'Author', 'Task', 'Verdict', 'Score', 'Submitted on', 'Link'])
+        for submission in submissions:
+            writer.writerow([
+                submission.submission_id,
+                submission.author.user,
+                submission.task,
+                submission.verdict,
+                submission.score or "",
+                submission.submitted_on.strftime('%Y-%m-%d %H:%M:%S'),
+                submission.get_url(),
+            ])
+        return response
 
 
 class ResultsDetailView(generic.DetailView):

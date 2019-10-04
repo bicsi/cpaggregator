@@ -40,7 +40,7 @@ class TaskSheetTask(models.Model):
 
     class Meta:
         db_table = 'info_tasksheet_x_task'
-        unique_together = (('task', 'sheet'))
+        unique_together = (('task', 'sheet'),)
         ordering = ['ordering_id']
 
 

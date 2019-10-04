@@ -2,7 +2,15 @@
 {% load bootstrap4 %}
 
 <div class="card mt-5">
-    <h6 class="card-header">Submissions</h6>
+    <h6 class="card-header">
+        Submissions
+        {% with group_id=assignment.group.group_id sheet_id=assignment.sheet.sheet_id %}
+        <a class="ml-2"
+           href="{% url 'group-sheet-results-download' group_id=group_id sheet_id=sheet_id %}">
+            <i class="fas fa-file-download" aria-hidden="true" alt="download"></i>
+        </a>
+        {% endwith %}
+    </h6>
     {% if table.data %}
     {% render_table table %}
     <span class="card-footer text-muted small">

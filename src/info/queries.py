@@ -1,8 +1,10 @@
-from data.models import Judge
-from info.models import Assignment, TaskSheetTask
+from django.db.models import QuerySet
+
+from data.models import Judge, UserGroup
+from .models import Assignment, TaskSheetTask
 
 
-def get_all_judges(group):
+def get_all_judges(group: UserGroup) -> QuerySet:
     assignments = Assignment.objects.active().filter(group=group)
     judges = TaskSheetTask.objects.filter(sheet__in=assignments.values('sheet')) \
         .values_list('task__judge', flat=True) \

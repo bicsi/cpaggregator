@@ -40,7 +40,6 @@ redis = "*"
 djangorestframework = "*"
 django-silk = "*"
 model-mommy = "*"
-psycopg2-binary = "*"
 psycopg2 = "==2.7.5"
 
 [requires]

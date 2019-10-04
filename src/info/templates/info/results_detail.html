@@ -10,7 +10,7 @@
 
 <div class="container">
     {% include "info/sheet/sheet_title_description.html" %}
-    <div class="btn-group" role="group" aria-label="Viewing mode">
+    <div class="btn-group d-block" role="group" aria-label="Viewing mode">
         {% if show_results %}
         <a class="btn btn-primary"
            href="{% url 'group-sheet-submissions' group_id=group.group_id sheet_id=sheet.sheet_id %}">
