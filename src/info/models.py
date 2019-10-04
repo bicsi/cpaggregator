@@ -48,6 +48,7 @@ class Assignment(models.Model):
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
     sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
+    end_on = models.DateTimeField(blank=True, null=True)
     ordering_id = models.PositiveIntegerField(blank=True, null=True)
     use_best_recent = models.BooleanField(default=False)
 
@@ -57,18 +58,20 @@ class Assignment(models.Model):
     def get_all_users(self):
         return self.group.members.all()
 
-    def get_all_submissions(self):
-        return Submission.objects.filter(
+    def _filter_submissions(self, submissions):
+        submissions = submissions.filter(
             author__user__in=self.get_all_users(),
-            task__in=self.sheet.tasks.all(),
-        ).order_by('submitted_on')
+            task__in=self.sheet.tasks.all())
+        if self.end_on:
+            submissions = submissions.filter(submitted_on__lt=self.end_on)
+        return submissions.order_by('submitted_on')
+
+    def get_all_submissions(self):
+        return self._filter_submissions(Submission.objects)
 
     def get_best_submissions(self):
-        queryset = Submission.best_recent if self.use_best_recent else Submission.best
-        return queryset.filter(
-            author__user__in=self.get_all_users(),
-            task__in=self.sheet.tasks.all(),
-        ).order_by('submitted_on')
+        submissions = Submission.best_recent if self.use_best_recent else Submission.best
+        return self._filter_submissions(submissions)
 
     def get_all_judges(self):
         return {task.judge for task in self.sheet.tasks.all()}

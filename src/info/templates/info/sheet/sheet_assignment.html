@@ -8,6 +8,13 @@
             <span class="ml-2">{{ assignment.assigned_on|date:"M d, Y H:m" }}</span>
             <span class="text-muted small ml-2">({{ assignment.assigned_on|naturaltime }})</span>
         </div>
+        {% if assignment.end_on %}
+        <div class="mt-1">
+            <i style="width: 24px" class="fas fa-stopwatch text-secondary text-center"></i>
+            <span class="ml-2">{{ assignment.end_on|date:"M d, Y H:m" }}</span>
+            <span class="text-muted small ml-2">({{ assignment.end_on|naturaltime }})</span>
+        </div>
+        {% endif %}
         <div class="mt-1">
             <i style="width: 24px" class="fas fa-users text-secondary text-center"></i>
             <a class="ml-2 font-weight-bold no-underline" href="{% url 'group-detail' group_id=group.group_id %}">

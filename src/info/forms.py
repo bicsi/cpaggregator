@@ -117,9 +117,15 @@ class AssignmentCreateForm(forms.ModelForm):
         widget=BootstrapDateTimePickerInput(),
         help_text='When the assignment will start showing up. Time is in UTC+0.')
 
+    end_on = forms.DateTimeField(
+        input_formats=['%d/%m/%Y %H:%M'],
+        widget=BootstrapDateTimePickerInput(),
+        required=False,
+        help_text='When the assignment will end. Time is in UTC+0.')
+
     class Meta:
         model = Assignment
-        fields = ['assigned_on', 'use_best_recent']
+        fields = ['assigned_on', 'use_best_recent', 'end_on']
 
     def __init__(self, **kwargs):
         user = kwargs.pop('user')
