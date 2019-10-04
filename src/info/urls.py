@@ -13,65 +13,65 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
 
 from info import views
 
 urlpatterns = [
-    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
-    path('rank/', views.RankListView.as_view(), name='rank-list'),
-    path('group/', views.GroupListView.as_view(), name='group-list'),
+    path('dashboard/', views.dashboard.DashboardView.as_view(), name='dashboard'),
+    path('rank/', views.dashboard.RankListView.as_view(), name='rank-list'),
+    path('group/', views.group.GroupListView.as_view(), name='group-list'),
     path('group/<group_id>/', include([
-        path('', views.GroupDetailView.as_view(), name='group-detail'),
-        path('join/', views.GroupJoinView.as_view(), name='group-join'),
-        path('leave/', views.GroupLeaveView.as_view(), name='group-leave'),
-        path('update/', views.GroupUpdateView.as_view(), name='group-update'),
-        path('delete-member/', views.GroupMemberDeleteView.as_view(), name='group-member-delete'),
-        path('add-member/', views.GroupMemberAddView.as_view(), name='group-member-add'),
-        path('create-assignment/', views.AssignmentCreateView.as_view(), name='assignment-create'),
+        path('', views.group.GroupDetailView.as_view(), name='group-detail'),
+        path('join/', views.group.GroupJoinView.as_view(), name='group-join'),
+        path('leave/', views.group.GroupLeaveView.as_view(), name='group-leave'),
+        path('update/', views.group.GroupUpdateView.as_view(), name='group-update'),
+        path('delete-member/', views.group.GroupMemberDeleteView.as_view(), name='group-member-delete'),
+        path('add-member/', views.group.GroupMemberAddView.as_view(), name='group-member-add'),
+        path('create-assignment/', views.group.AssignmentCreateView.as_view(), name='assignment-create'),
         path('sheet/<sheet_id>/', include([
-                path('', views.ResultsDetailView.as_view(
+                path('', views.sheet.ResultsDetailView.as_view(
                     show_results=False,
                     show_submissions=True,
                 ), name='group-sheet-detail'),
-                path('results/', views.ResultsDetailView.as_view(
+                path('results/', views.sheet.ResultsDetailView.as_view(
                     show_results=True,
                     show_submissions=False,
                 ), name='group-sheet-results'),
-                path('submissions/', views.ResultsDetailView.as_view(
+                path('submissions/', views.sheet.ResultsDetailView.as_view(
                     show_results=False,
                     show_submissions=True,
                 ), name='group-sheet-submissions'),
-                path('download/', views.DownloadResultsView.as_view(), name='group-sheet-results-download'),
+                path('download/', views.sheet.DownloadResultsView.as_view(),
+                     name='group-sheet-results-download'),
             ])),
-        path('reorder-assignments/', views.UpdateGroupAssignmentOrdering.as_view(),
+        path('reorder-assignments/', views.group.GroupAssignmentOrderingUpdate.as_view(),
              name='group-assignment-reorder'),
-        path('delete/', views.GroupDeleteView.as_view(), name='group-delete'),
+        path('delete/', views.group.GroupDeleteView.as_view(), name='group-delete'),
     ])),
-    path('create-group/', views.GroupCreateView.as_view(), name='group-create'),
-    path('create-sheet/', views.SheetCreateView.as_view(), name='sheet-create'),
+    path('create-group/', views.group.GroupCreateView.as_view(), name='group-create'),
+    path('create-sheet/', views.sheet.SheetCreateView.as_view(), name='sheet-create'),
     path('sheet/<sheet_id>/', include([
-        path('', views.SheetDetailView.as_view(), name='sheet-detail'),
-        path('add-task/', views.SheetTaskAddView.as_view(), name='sheet-task-add'),
-        path('delete-task/', views.SheetTaskDeleteView.as_view(), name='sheet-task-delete'),
-        path('delete/', views.SheetDeleteView.as_view(), name='sheet-delete'),
-        path('update-description/', views.SheetDescriptionUpdateView.as_view(),
+        path('', views.sheet.SheetDetailView.as_view(), name='sheet-detail'),
+        path('add-task/', views.sheet.SheetTaskAddView.as_view(), name='sheet-task-add'),
+        path('delete-task/', views.sheet.SheetTaskDeleteView.as_view(), name='sheet-task-delete'),
+        path('delete/', views.sheet.SheetDeleteView.as_view(), name='sheet-delete'),
+        path('update-description/', views.sheet.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),
-        path('reorder-tasks/', views.UpdateSheetTaskOrdering.as_view(),
+        path('reorder-tasks/', views.sheet.SheetTaskOrderingUpdate.as_view(),
              name='sheet-task-reorder')
     ])),
     path('task/', include([
-        path('', views.TaskListView.as_view(), name='task-list'),
+        path('', views.task.TaskListView.as_view(), name='task-list'),
         path('<judge_id>/<task_id>/', include([
-            path('', views.TaskDetailView.as_view(), name='task-detail'),
-            path('favorite/', views.FavoriteToggleView.as_view(), name='task-favorite'),
-            path('preview/', views.TaskPreviewView.as_view(), name='task-preview'),
+            path('', views.task.TaskDetailView.as_view(), name='task-detail'),
+            path('favorite/', views.task.FavoriteToggleView.as_view(), name='task-favorite'),
+            path('preview/', views.task.TaskPreviewView.as_view(), name='task-preview'),
         ])),
     ])),
-    path('me/', views.MeDetailView.as_view(), name='me'),
-    path('handle/<handle_id>/delete/', views.HandleDeleteView.as_view(), name='delete-handle'),
-    path('handle/create/', views.HandleCreateView.as_view(), name='handle-create'),
-    path('profile/<username>/update/', views.ProfileUpdateView.as_view(), name='profile-update'),
-    path('profile/<username>/', views.UserSubmissionsDetailView.as_view(), name='profile'),
+    path('me/', views.profile.MeDetailView.as_view(), name='me'),
+    path('handle/<handle_id>/delete/', views.profile.HandleDeleteView.as_view(), name='delete-handle'),
+    path('handle/create/', views.profile.HandleCreateView.as_view(), name='handle-create'),
+    path('profile/<username>/update/', views.profile.ProfileUpdateView.as_view(), name='profile-update'),
+    path('profile/<username>/', views.profile.UserSubmissionsDetailView.as_view(), name='profile'),
 ]
