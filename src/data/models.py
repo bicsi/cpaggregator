@@ -42,9 +42,11 @@ def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>.
     return 'user_{0}/{1}'.format(instance.user.username, filename)
 
+
 class UserProfileManager(models.Manager):
     def get_queryset(self):
         return super(UserProfileManager, self).get_queryset().prefetch_related('user')
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='profile')
@@ -80,16 +82,16 @@ class UserProfile(models.Model):
         return self.username
 
     def get_solved_tasks(self):
-        tasks = Submission.best.filter(author__user=self) \
+        tasks = Submission.objects.best().filter(author__user=self) \
             .filter(verdict='AC').values_list('task', flat=True)
         return Task.objects.filter(id__in=tasks.all())
 
     def get_submitted_tasks(self):
-        tasks = Submission.best.filter(author__user=self).values_list('task', flat=True)
+        tasks = Submission.objects.best().filter(author__user=self).values_list('task', flat=True)
         return Task.objects.filter(id__in=tasks.all())
 
     def get_unsolved_tasks(self):
-        tasks = Submission.best.filter(author__user=self) \
+        tasks = Submission.objects.best().filter(author__user=self) \
             .exclude(verdict='AC').values_list('task', flat=True)
         return Task.objects.filter(id__in=tasks.all())
 
@@ -146,12 +148,13 @@ class TaskSource(models.Model):
         return f"[{self.judge.judge_id}] {self.name}"
 
     class Meta:
-        unique_together = (('judge', 'source_id'))
+        unique_together = (('judge', 'source_id'),)
 
 
 class TaskManager(models.Manager):
     def get_queryset(self):
         return super(TaskManager, self).get_queryset().select_related('judge')
+
 
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
@@ -195,6 +198,7 @@ class Task(models.Model):
     def __str__(self):
         return "{}:{}".format(self.judge.judge_id, self.task_id)
 
+
 class UserHandle(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     handle = models.CharField(max_length=256)
@@ -234,10 +238,7 @@ class Submission(models.Model):
     exec_time = models.IntegerField(null=True, blank=True)
     memory_used = models.IntegerField(null=True, blank=True)
 
-    # Managers.
-    objects = models.Manager()  # The default manager.
-    best = managers.BestSubmissionManager()
-    best_recent = managers.BestRecentSubmissionManager()
+    objects = managers.SubmissionQuerySet().as_manager()
 
     def get_url(self):
         if self.task.judge.judge_id == 'ojuz':

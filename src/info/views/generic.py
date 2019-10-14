@@ -9,7 +9,7 @@ import csv
 class SubmissionDownloadCSVView(LoginRequiredMixin, generic.View):
 
     def get_queryset(self):
-        return Submission.best
+        return Submission.objects.best()
 
     def get(self, request, **kwargs):
         filename = f"{self.kwargs['sheet_id']}.csv"

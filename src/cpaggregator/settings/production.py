@@ -151,3 +151,4 @@ MEDIA_URL = '/media/'
 FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 CELERY_BROKER_URL = os.environ['REDIS_URL']
+USE_CELERY = True

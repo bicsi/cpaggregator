@@ -62,7 +62,7 @@ class Command(BaseCommand):
         return self.handle_mongo(*args, **options)
 
         submission_map = {}
-        for submission in Submission.best.order_by('submitted_on'):
+        for submission in Submission.objects.best().order_by('submitted_on'):
             task_id = submission.task.id
             author_id = submission.author.user.id
             solved = (submission.verdict == 'AC')

@@ -113,7 +113,7 @@ class SheetDetailView(generic.DetailView):
                 .filter(author__user__user=self.request.user) \
                 .filter(task__in=obj.tasks.all())
         else:
-            self.submissions = Submission.best \
+            self.submissions = Submission.objects.best() \
                 .filter(author__user__user=self.request.user) \
                 .filter(task__in=obj.tasks.all())
 

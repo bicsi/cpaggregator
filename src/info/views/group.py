@@ -150,7 +150,7 @@ class GroupDetailView(generic.DetailView):
             kwargs['judges'] = queries.get_all_judges(group)
             kwargs['assignments'] = [{
                 'assignment': assignment,
-                'solved_count': Submission.best.filter(
+                'solved_count': Submission.objects.best().filter(
                     author__in=self.request.user.profile.handles.all(),
                     task__in=assignment.sheet.tasks.all(),
                     verdict='AC').count()

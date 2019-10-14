@@ -19,8 +19,8 @@ def compute_task_statistics():
     judge_to_task_count = {}
 
     for task in Task.objects.all():
-        users_solved_count = Submission.best.filter(task=task, verdict='AC').count()
-        users_tried_count = Submission.best.filter(task=task).count()
+        users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
+        users_tried_count = Submission.objects.best().filter(task=task).count()
         submission_count = Submission.objects.filter(task=task).count()
         favorited_count = task.favorite_users.count()
 
@@ -51,7 +51,7 @@ def compute_task_statistics():
 @shared_task
 def compute_best_submissions():
     print('[TASK] Computing best submissions...')
-    for submission in Submission.best.all():
+    for submission in Submission.objects.best().all():
         BestSubmission.objects.update_or_create(
             task=submission.task,
             profile=submission.author.user,
@@ -65,7 +65,7 @@ def compute_user_statistics():
     which it saves to the database
     """
     def make_user_stat(user):
-        submissions = Submission.best.filter(author__in=user.handles.all())
+        submissions = Submission.objects.best().filter(author__in=user.handles.all())
 
         tasks_solved_count = submissions.filter(verdict='AC').count()
         tasks_tried_count = submissions.count()

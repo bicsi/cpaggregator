@@ -3,11 +3,13 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from pytz import UTC
 
+from cpaggregator import settings
 from data.models import UserHandle, Judge, Task, Submission
 
 
 class BestSubmissionManagerTestCase(TestCase):
     today = datetime(2010, 1, 1, tzinfo=UTC)
+    settings.USE_CELERY = False
 
     def setUp(self):
         # Create an user and a task.
@@ -36,7 +38,7 @@ class BestSubmissionManagerTestCase(TestCase):
             source_size=1000,
             score=20,
             verdict='WA')
-        self.assertCountEqual(Submission.best.all(), [submission_bad_score])
+        self.assertCountEqual(Submission.objects.best().all(), [submission_bad_score])
 
     def test_best_submission_picks_ac(self):
         # Submission 1: verdict = WA.
@@ -58,7 +60,7 @@ class BestSubmissionManagerTestCase(TestCase):
             language='C++',
             source_size=1000,
             verdict='AC')
-        self.assertCountEqual(Submission.best.all(), [submission_ok_score])
+        self.assertCountEqual(Submission.objects.best().all(), [submission_ok_score])
 
     def test_best_submission_picks_higher_score(self):
         # Submission 1: score = 20.
@@ -81,7 +83,7 @@ class BestSubmissionManagerTestCase(TestCase):
             source_size=1000,
             score=50,
             verdict='WA')
-        self.assertCountEqual(Submission.best.all(), [submission_better_score])
+        self.assertCountEqual(Submission.objects.best().all(), [submission_better_score])
 
     def test_one_query(self):
         Submission.objects.create(
@@ -93,4 +95,4 @@ class BestSubmissionManagerTestCase(TestCase):
             source_size=1000,
             score=20,
             verdict='WA')
-        self.assertNumQueries(1, lambda: list(Submission.best.all()))
+        self.assertNumQueries(1, lambda: list(Submission.objects.best().all()))

@@ -162,4 +162,5 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 # Celery settings.
 CELERY_BROKER_URL = 'redis://localhost'
+USE_CELERY = True
 

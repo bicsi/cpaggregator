@@ -22,7 +22,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         # Map task to verdict of current user.
         verdict_for_user_dict = {
             submission.task: submission.verdict for submission in
-            Submission.best
+            Submission.objects.best()
                 .filter(author__user__user=self.request.user,
                         task__in=task_list)
         }
@@ -50,9 +50,9 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         task = self.object
-        kwargs['best_submission_for_user'] = Submission.best.filter(
+        kwargs['best_submission_for_user'] = Submission.objects.best().filter(
             task=task, author__user__user=self.request.user).first()
-        kwargs['accepted_submissions'] = Submission.best.filter(
+        kwargs['accepted_submissions'] = Submission.objects.best().filter(
             task=task, verdict='AC').select_related('author__user__user')
         kwargs['user_has_handle'] = UserHandle.objects.filter(
             judge=task.judge, user=self.request.user.profile
@@ -76,9 +76,9 @@ class TaskPreviewView(LoginRequiredMixin, AJAXMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         task = self.object
-        kwargs['best_submission_for_user'] = Submission.best.filter(
+        kwargs['best_submission_for_user'] = Submission.objects.best().filter(
             task=task, author__user__user=self.request.user).first()
-        kwargs['accepted_submissions'] = Submission.best.filter(
+        kwargs['accepted_submissions'] = Submission.objects.best().filter(
             task=task, verdict='AC')
         kwargs['user_has_handle'] = UserHandle.objects.filter(
             judge=task.judge, user=self.request.user.profile

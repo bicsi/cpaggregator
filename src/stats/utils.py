@@ -15,7 +15,7 @@ def get_date_from_month_id(month_id, format="%b-%y"):
 
 def build_tag_stats_dict(user):
     solved_count_for_tag = {}
-    for submission in Submission.best.filter(author__in=user.handles.all(), verdict='AC').all():
+    for submission in Submission.objects.best().filter(author__in=user.handles.all(), verdict='AC').all():
         for tag in submission.task.tags.all():
             solved_count_for_tag[tag] = solved_count_for_tag.get(tag, 0) + 1
     tag_stats = [{"tag": tag.tag_name, "solved_count": solved_count}

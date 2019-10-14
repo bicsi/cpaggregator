@@ -1,11 +1,12 @@
+import datetime
+
+from betterforms import multiform
 from django import forms
 from django.contrib.auth.models import User
 
 from cpaggregator.widgets import BootstrapDateTimePickerInput
-from data.models import UserProfile, UserHandle, Task, Judge, UserGroup
+from data.models import UserProfile, UserHandle, Judge, UserGroup
 from info.models import TaskSheet, Assignment
-from betterforms import multiform
-
 from info.utils import slugify_unique
 
 
@@ -115,13 +116,14 @@ class AssignmentCreateForm(forms.ModelForm):
     assigned_on = forms.DateTimeField(
         input_formats=['%d/%m/%Y %H:%M'],
         widget=BootstrapDateTimePickerInput(),
+        initial=datetime.datetime.now(),
         help_text='When the assignment will start showing up. Time is in UTC+0.')
 
     end_on = forms.DateTimeField(
         input_formats=['%d/%m/%Y %H:%M'],
         widget=BootstrapDateTimePickerInput(),
         required=False,
-        help_text='When the assignment will end. Time is in UTC+0.')
+        help_text='Optional. When the assignment will end. Time is in UTC+0.')
 
     class Meta:
         model = Assignment

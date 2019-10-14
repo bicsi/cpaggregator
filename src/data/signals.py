@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from cpaggregator import settings
 from data import services
 from data.models import UserProfile, Task, UserHandle
 
@@ -36,7 +37,7 @@ def save_user_profile(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Task)
 def create_task(sender, instance, created, **kwargs):
-    if created:
+    if created and settings.USE_CELERY:
         task_id = ":".join([instance.judge.judge_id, instance.task_id])
 
         print(f'Created new task {task_id}: updating info async...')
@@ -54,7 +55,7 @@ def create_task(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=UserHandle)
 def create_handle(sender, instance, created, **kwargs):
-    if created:
+    if created and settings.USE_CELERY:
         print('Created new handle: updating info...')
         celery.chain(
             services.update_handles.si(':'.join([instance.judge.judge_id, instance.handle])),

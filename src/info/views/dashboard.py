@@ -29,7 +29,7 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
         # Map task to verdict of current user.
         verdict_for_user_dict = {
             submission.task: submission.verdict for submission in
-            Submission.best.filter(
+            Submission.objects.best().filter(
                 author__user__user=self.request.user,
                 task__in=task_list)}
         favorite_tasks = {self.request.user.profile.favorite_tasks.values_list('task', flat=True)}

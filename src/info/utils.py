@@ -48,7 +48,7 @@ def build_group_card_context(request, groups):
         .annotate(task_count=Count('sheet__tasks'))
 
     tasks = TaskSheetTask.objects.filter(sheet__in=assignments.values('sheet'))
-    ac_submissions = Submission.best.filter(author__user=profile, verdict='AC')
+    ac_submissions = Submission.objects.best().filter(author__user=profile, verdict='AC')
     solved_tasks = tasks.filter(task__in=ac_submissions.values('task'))
 
     solved_count = {
@@ -82,7 +82,7 @@ def compute_asd_scores(group):
     non_bonuses = {member.id: 0 for member in members}
 
     for assignment in group.assignment_set.all():
-        submissions = Submission.best.filter(
+        submissions = Submission.objects.best().filter(
             author__user__in=members,
             task__in=assignment.sheet.tasks.all(),
             submitted_on__gte=assignment.assigned_on,

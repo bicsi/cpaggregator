@@ -58,20 +58,16 @@ class Assignment(models.Model):
     def get_all_users(self):
         return self.group.members.all()
 
-    def _filter_submissions(self, submissions):
-        submissions = submissions.filter(
+    def get_all_submissions(self):
+        submissions = Submission.objects.filter(
             author__user__in=self.get_all_users(),
             task__in=self.sheet.tasks.all())
         if self.end_on:
             submissions = submissions.filter(submitted_on__lt=self.end_on)
-        return submissions.order_by('submitted_on')
-
-    def get_all_submissions(self):
-        return self._filter_submissions(Submission.objects)
+        return submissions
 
     def get_best_submissions(self):
-        submissions = Submission.best_recent if self.use_best_recent else Submission.best
-        return self._filter_submissions(submissions)
+        return self.get_all_submissions().best(use_recent=self.use_best_recent)
 
     def get_all_judges(self):
         return {task.judge for task in self.sheet.tasks.all()}
