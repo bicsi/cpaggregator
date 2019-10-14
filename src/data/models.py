@@ -52,7 +52,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='profile')
     first_name = models.CharField(max_length=256, null=True, blank=True)
     last_name = models.CharField(max_length=256, null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     avatar = models.ImageField(upload_to=user_directory_path, blank=True)
 
     objects = UserProfileManager()
@@ -103,7 +103,7 @@ class UserGroup(models.Model):
     group_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(UserProfile, related_name='owned_groups', null=True, on_delete=models.SET_NULL)
     visibility = models.CharField(max_length=256, choices=VISIBILITY_CHOICES, default='PRIVATE')
     description = MarkdownxField(blank=True, null=True)
@@ -142,7 +142,7 @@ class TaskSource(models.Model):
     source_id = models.SlugField(max_length=256)
     name = models.CharField(max_length=1024)
     public = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"[{self.judge.judge_id}] {self.name}"

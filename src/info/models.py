@@ -51,6 +51,7 @@ class Assignment(models.Model):
     end_on = models.DateTimeField(blank=True, null=True)
     ordering_id = models.PositiveIntegerField(blank=True, null=True)
     use_best_recent = models.BooleanField(default=False)
+    hide_submissions_before_assigned = models.BooleanField(default=False)
 
     # Managers.
     objects = managers.AssignmentQuerySet.as_manager()
@@ -58,16 +59,21 @@ class Assignment(models.Model):
     def get_all_users(self):
         return self.group.members.all()
 
-    def get_all_submissions(self):
+    def _submissions(self):
         submissions = Submission.objects.filter(
             author__user__in=self.get_all_users(),
             task__in=self.sheet.tasks.all())
+        if self.hide_submissions_before_assigned:
+            submissions = submissions.filter(submitted_on__gt=self.assigned_on)
         if self.end_on:
             submissions = submissions.filter(submitted_on__lt=self.end_on)
         return submissions
 
+    def get_all_submissions(self):
+        return self._submissions().order_by('submitted_on')
+
     def get_best_submissions(self):
-        return self.get_all_submissions().best(use_recent=self.use_best_recent)
+        return self._submissions().best(use_recent=self.use_best_recent).order_by('submitted_on')
 
     def get_all_judges(self):
         return {task.judge for task in self.sheet.tasks.all()}
