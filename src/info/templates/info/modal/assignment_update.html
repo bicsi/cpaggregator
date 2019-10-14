@@ -1,0 +1,11 @@
+{% extends "info/modal/generic_form_modal.html" %}
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+
+{% block modal_title %}Update assignment{% endblock %}
+{% block action_text %}Update{% endblock %}
+{% block modal_body %}
+    {% bootstrap_form form %}
+    <script type="text/javascript" src="{% static 'bootstrap_datepicker_plus/js/datepicker-widget.js' %}"></script>
+{% endblock %}
+{% block submit_url %}{% url 'assignment-update' sheet_id=object.sheet.sheet_id group_id=object.group.group_id %}{% endblock %}

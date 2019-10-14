@@ -1,10 +1,11 @@
 import datetime
 
 from betterforms import multiform
+from bootstrap_datepicker_plus import DateTimePickerInput
 from django import forms
 from django.contrib.auth.models import User
+from django.utils import timezone
 
-from cpaggregator.widgets import BootstrapDateTimePickerInput
 from data.models import UserProfile, UserHandle, Judge, UserGroup
 from info.models import TaskSheet, Assignment
 from info.utils import slugify_unique
@@ -112,16 +113,28 @@ class SheetCreateForm(forms.ModelForm):
         return sheet
 
 
+FORMAT = '%d.%m.%Y %H:%M'
+
+
+def get_date_time_picker_widget(required=True):
+    return DateTimePickerInput(
+        format=FORMAT,
+        options=dict(
+            showClose=False,
+            showClear=not required,
+            showTodayButton=True))
+
+
 class AssignmentCreateForm(forms.ModelForm):
     assigned_on = forms.DateTimeField(
-        input_formats=['%d/%m/%Y %H:%M'],
-        widget=BootstrapDateTimePickerInput(),
-        initial=datetime.datetime.now(),
+        input_formats=[FORMAT],
+        widget=get_date_time_picker_widget(),
+        initial=timezone.now(),
         help_text='When the assignment will start showing up. Time is in UTC+0.')
 
     end_on = forms.DateTimeField(
-        input_formats=['%d/%m/%Y %H:%M'],
-        widget=BootstrapDateTimePickerInput(),
+        input_formats=[FORMAT],
+        widget=get_date_time_picker_widget(required=False),
         required=False,
         help_text='Optional. When the assignment will end. Time is in UTC+0.')
 
@@ -132,6 +145,26 @@ class AssignmentCreateForm(forms.ModelForm):
     def __init__(self, **kwargs):
         user = kwargs.pop('user')
         super(AssignmentCreateForm, self).__init__(**kwargs)
+
+
+class AssignmentUpdateForm(forms.ModelForm):
+
+    assigned_on = forms.DateTimeField(
+        input_formats=[FORMAT],
+        widget=get_date_time_picker_widget(),
+        help_text='When the assignment will start showing up. Time is in UTC+0.')
+
+    end_on = forms.DateTimeField(
+        input_formats=[FORMAT],
+        widget=get_date_time_picker_widget(required=False),
+        required=False,
+        help_text='Optional. When the assignment will end. Time is in UTC+0.')
+
+    class Meta:
+        model = Assignment
+        fields = ['assigned_on', 'end_on',
+                  'use_best_recent',
+                  'hide_submissions_before_assigned']
 
 
 class AssignmentSheetCreateMultiForm(multiform.MultiModelForm):

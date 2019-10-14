@@ -34,6 +34,8 @@ urlpatterns = [
                     show_results=False,
                     show_submissions=True,
                 ), name='group-sheet-detail'),
+                path('update', views.sheet.AssignmentUpdateView.as_view(),
+                     name='assignment-update'),
                 path('results/', views.sheet.ResultsDetailView.as_view(
                     show_results=True,
                     show_submissions=False,

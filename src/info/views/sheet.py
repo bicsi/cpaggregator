@@ -48,6 +48,7 @@ class ResultsDetailView(generic.DetailView):
         request_user = self.request.user
         request_profile = request_user.profile
         kwargs['table'] = self.table
+        kwargs['media'] = forms.AssignmentUpdateForm().media
         context = super(ResultsDetailView, self).get_context_data(**kwargs)
 
         submissions_for_user_and_task = {
@@ -252,3 +253,20 @@ class SheetTaskOrderingUpdate(APIView):
                 task.ordering_id = ordering_index.get(idx)
                 task.save()
             return Response({'success': 'Success'})
+
+
+class AssignmentUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    template_name = 'info/modal/assignment_update.html'
+    model = Assignment
+    form_class = forms.AssignmentUpdateForm
+
+    def get_success_url(self):
+        return reverse_lazy('group-sheet-detail', kwargs=self.kwargs)
+
+    def get_object(self, queryset=None):
+        return Assignment.objects.get(
+            sheet__sheet_id=self.kwargs['sheet_id'],
+            group__group_id=self.kwargs['group_id'])
+
+
+

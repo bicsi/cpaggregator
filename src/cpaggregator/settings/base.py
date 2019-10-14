@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'contact',
     'rest_framework',
     'silk',
+    'bootstrap_datepicker_plus',
 ]
 
 DATABASES = {
@@ -163,4 +164,8 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 # Celery settings.
 CELERY_BROKER_URL = 'redis://localhost'
 USE_CELERY = True
+
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}
 

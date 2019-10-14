@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'contact',
     'rest_framework',
     'silk',
+    'bootstrap_datepicker_plus',
 ]
 
 MIDDLEWARE = [

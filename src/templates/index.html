@@ -2,6 +2,9 @@
 
 {% load render_table from django_tables2 %}
 {% load bootstrap4 %}
+{% bootstrap_css %}         {# Embed Bootstrap CSS #}
+{% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
+{{ form.media }}            {# Adds date-picker required JS and CSS #}
 
 {% block title_tag %}Log In or Sign Up{% endblock %}
 

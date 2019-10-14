@@ -41,6 +41,7 @@ djangorestframework = "*"
 django-silk = "*"
 model-mommy = "*"
 psycopg2 = "==2.7.5"
+django-bootstrap-datepicker-plus = "*"
 
 [requires]
 python_version = "3.7"

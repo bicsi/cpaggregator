@@ -1,7 +1,16 @@
 {% load humanize %}
 
 <div class="card mt-5">
-    <h6 class="card-header">Assignment</h6>
+    <div class="card-header d-flex align-items-center">
+        <h6 class="d-inline flex-grow-1 mb-0">Assignment</h6>
+        {% if is_owner %}
+        <a data-toggle="modal" href="#modal"
+           class="badge badge-dark badge-pill py-1"
+           onclick="loadModalForm('{% url 'assignment-update' sheet_id=sheet.sheet_id group_id=group.group_id %}');">
+            <i class="fas fa-pen mr-1"></i>Edit
+        </a>
+        {% endif %}
+    </div>
     <div class="card-body">
         <div>
             <i style="width: 24px" class="fas fa-calendar-alt text-secondary text-center"></i>
