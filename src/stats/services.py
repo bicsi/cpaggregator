@@ -65,7 +65,7 @@ def compute_task_statistics():
         sum_difficulty = 0.
         for task in task_data.values():
             ratings = sorted([users_rating[user] for user in task.users_solved])
-            clipped = ratings[:len(ratings) // 2 + 1]
+            clipped = ratings[len(ratings) // 10:len(ratings) // 2 + 1]
             task.difficulty = 5.0 / len(ratings) + sum(clipped) / len(clipped)
             sum_difficulty += task.difficulty
 
