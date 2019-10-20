@@ -15,6 +15,9 @@ class SubmissionQuerySet(models.QuerySet):
         # This is to fix multiple order by's and such.
         return self.filter(id__in=best_submissions)
 
+    def accepted(self):
+        return self.filter(verdict='AC')
+
 
 class JudgeManager(models.Manager):
     def get_queryset(self):
