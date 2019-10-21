@@ -65,20 +65,21 @@ def compute_task_statistics():
         sum_difficulty = 0.
         for task in task_data.values():
             ratings = sorted([users_rating[user] for user in task.users_solved])
-            clipped = ratings[len(ratings) // 10:len(ratings) // 2 + 1]
-            task.difficulty = 5.0 / len(ratings) + sum(clipped) / len(clipped)
+            clipped = ratings[len(ratings) // 10:len(ratings) // 4 + 1]
+            task.difficulty = 50.0 / len(ratings) + sum(clipped) / len(clipped)
             sum_difficulty += task.difficulty
 
         norm_factor = sum_difficulty / len(task_data)
         for task in task_data.values():
             task.difficulty = task.difficulty / norm_factor
 
+    max_difficulty = max([task.difficulty for task in task_data.values()])
+
     for statistics in TaskStatistics.objects.all():
-        difficulty_score = 2500
+        difficulty = max_difficulty
         if statistics.task in task_data:
             difficulty = task_data[statistics.task].difficulty
-            difficulty_score = min(2500, max(5, 5 * round(BASE_SCORE * difficulty / 5)))
-
+        difficulty_score = min(2500, max(5, 5 * round(BASE_SCORE * difficulty / 5)))
         print(f'Task: {statistics.task} score: {difficulty_score}')
         statistics.difficulty_score = difficulty_score
         statistics.save()
