@@ -1,6 +1,7 @@
 import datetime
 import heapq
 
+from core.logging import log
 from scraper.scrapers.codeforces.parsers import parse_tag, parse_verdict
 from scraper.utils import get_page, split_into_chunks
 import json
@@ -30,7 +31,7 @@ def scrape_submissions_for_task(task_id, count=200):
         try:
             response = get_page(page_url, **kwargs)
         except Exception as e:
-            print(e)
+            log.exception(e)
             return []
 
         json_data = json.loads(response.text)
@@ -49,11 +50,11 @@ def scrape_submissions_for_task(task_id, count=200):
                 continue
 
             if submission_data['verdict'] == 'TESTING':
-                print('Skipped submission %s: still testing.' % submission_id)
+                log.info(f'Skipped submission {submission_id}: still testing.')
                 continue
 
             if 'verdict' not in submission_data:
-                print('Skipped submission %s: no verdict?.' % submission_id)
+                log.warning(f'Skipped submission {submission_id}: no verdict?.')
                 continue
 
             for author in submission_data['author']['members']:
@@ -94,7 +95,7 @@ def scrape_task_info(task_ids):
                 if task_id != curr_task_id:
                     continue
 
-                print(f'UPDATING {task_id}... [{task_data["name"]}]')
+                log.info(f"Updating task '{task_id}' [{task_data['name']}]...")
 
                 tags = []
                 for tag_data in task_data['tags']:
@@ -112,10 +113,9 @@ def scrape_task_info(task_ids):
                 yield task_info
 
             if not found:
-                raise Exception(f'Task id {task_id} not found.')
-
-        except (Exception) as e:
-            print(f'ERROR: {e}')
+                raise Exception(f"Task id '{task_id}' not found.")
+        except Exception as e:
+            log.exception(f'{e}')
 
 
 def scrape_user_info(handles):
@@ -145,5 +145,4 @@ def scrape_user_info(handles):
 
                 yield info
         except Exception as e:
-            print('EXCEPTION TRYING TO FETCH CHUNK: ')
-            print(e)
+            log.exception(f'Exception trying to fetch chunk: {e}')

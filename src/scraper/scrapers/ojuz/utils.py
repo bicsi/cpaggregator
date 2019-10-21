@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+from core.logging import log
 from scraper.scrapers.ojuz import parsers
 from scraper.utils import get_page
 
@@ -55,7 +56,7 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, **query_dict):
             yield submission
         except (TypeError, AttributeError) as e:
             # Probably task name was hidden.
-            print(f"WARNING: Skipped one submission. ERROR: {e}")
+            log.warning(f"Skipped one submission. Error: {e}")
 
 
 def scrape_task_info(task_id):

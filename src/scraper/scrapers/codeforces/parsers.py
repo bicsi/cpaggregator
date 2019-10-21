@@ -1,3 +1,5 @@
+from core.logging import log
+
 TAG_DICT = {
     'graphs': 'graphs',
     'graph matchings': 'graphs',
@@ -45,7 +47,7 @@ def parse_tag(tag_text):
     if tag_text in TAG_DICT:
         return TAG_DICT[tag_text]
 
-    print(f"WARNING: Unknown tag: {tag_text}.")
+    log.warning(f"Unknown tag: {tag_text}.")
     return None
 
 
@@ -53,5 +55,5 @@ def parse_verdict(verdict_text):
     if verdict_text in VERDICT_DICT:
         return VERDICT_DICT[verdict_text]
 
-    print(f'WARNING: Unknown verdict: {verdict_text}.')
+    log.warning(f'Unknown verdict: {verdict_text}.')
     return 'WA'

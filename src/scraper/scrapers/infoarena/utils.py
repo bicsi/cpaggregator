@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+from core.logging import log
 from scraper.utils import get_page
 from scraper.scrapers.infoarena import parsers
 
@@ -57,9 +58,9 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
                 score=parsers.parse_score(verdict_text),
             )
             yield submission
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError) as e:
             # Probably task name was hidden.
-            print("WARNING: Skipped one submission.")
+            log.warning(f"Skipped one submission. Error: {e}")
 
 
 def scrape_task_ids(page_name, from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200):
@@ -102,7 +103,7 @@ def scrape_task_info(task_id):
         tag = parsers.parse_tag(tag_a.text)
         if tag is not None:
             tags.append(tag)
-    print(source)
+
     return {
         'judge_id': INFOARENA_JUDGE_ID,
         'task_id': task_id.lower(),

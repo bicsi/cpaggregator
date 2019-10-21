@@ -1,7 +1,6 @@
 import os
 
-from pymongo import MongoClient, InsertOne, UpdateOne, ReplaceOne
-from pymongo.errors import BulkWriteError
+from pymongo import MongoClient, ReplaceOne
 
 
 def __insert_many_silent(coll, iterable, unique_fields):

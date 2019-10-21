@@ -1,7 +1,9 @@
+import time
 import urllib
-from datetime import datetime, time
+from datetime import datetime
 import requests
 
+from core.logging import log
 from scraper import database
 
 
@@ -17,9 +19,10 @@ def split_into_chunks(iterable, chunk_size):
         yield buffer
 
 
-def get_page(page_url, **query_dict):
+def get_page(page_url, max_retries=10, **query_dict):
     """
     Sends a GET request, while also printing the page to console.
+    :param max_retries: the maximum number of retries
     :param page_url: the url of the GET request
     :param query_dict: the GET query parameters
     :return: the page received
@@ -29,11 +32,11 @@ def get_page(page_url, **query_dict):
         page_url += "?" + query_string
 
     page = None
-    for tries in range(10):
-        print("GET: %s" % page_url)
+    for tries in range(max_retries):
+        log.info(f"GET: {page_url}")
         page = requests.get(page_url)
         if page.status_code == 492:
-            print('Too many requests. Sleeping for 10 seconds...')
+            log.warning('Too many requests. Sleeping for 10 seconds...')
             time.sleep(10)
         else:
             break
@@ -56,9 +59,9 @@ def write_submissions(db, submissions, chunk_size=100):
     """
     total_inserted = 0
     for chunk in split_into_chunks(submissions, chunk_size):
-        print("Writing chunk to database...")
+        log.info("Writing chunk to database...")
         num_inserted = database.insert_submissions(db, chunk)
-        print("%s submissions written to database." % num_inserted)
+        log.info(f"{num_inserted} submissions written to database.")
         total_inserted += num_inserted
     return total_inserted
 
@@ -73,9 +76,9 @@ def write_tasks(db, tasks, chunk_size=100):
     """
     total_inserted = 0
     for chunk in split_into_chunks(tasks, chunk_size):
-        print("Writing chunk to database...")
+        log.info("Writing chunk to database...")
         num_inserted = database.insert_tasks(db, chunk)
-        print("%s tasks written to database." % num_inserted)
+        log.info(f"{num_inserted} tasks written to database.")
         total_inserted += num_inserted
     return total_inserted
 
@@ -90,9 +93,9 @@ def write_handles(db, handles, chunk_size=100):
     """
     total_inserted = 0
     for chunk in split_into_chunks(handles, chunk_size):
-        print("Writing chunk to database...")
+        log.info("Writing chunk to database...")
         num_inserted = database.insert_handles(db, chunk)
-        print("%s handles written to database." % num_inserted)
+        log.info(f"{num_inserted} handles written to database.")
         total_inserted += num_inserted
     return total_inserted
 

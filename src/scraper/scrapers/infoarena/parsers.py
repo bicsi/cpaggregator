@@ -1,6 +1,8 @@
 import re
 import datetime
 
+from core.logging import log
+
 MONTH_ENCODINGS = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
 TAG_DICT = {
@@ -23,7 +25,7 @@ def parse_tag(tag_text):
     if tag_text in TAG_DICT:
         return TAG_DICT[tag_text]
 
-    print("WARNING: Unknown tag: %s." % tag_text)
+    log.warning(f"Unknown tag: '{tag_text}'.")
     return None
 
 

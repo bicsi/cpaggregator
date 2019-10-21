@@ -4,6 +4,8 @@ import heapq
 import requests
 import json
 
+from core.logging import log
+
 CSACADEMY_JUDGE_ID = 'csa'
 
 
@@ -66,7 +68,7 @@ def get_eval_jobs(csrftoken, contest_task_id, from_date, num_jobs=1000):
 def get_csrftoken():
     response = requests.get('https://csacademy.com/')
     csrftoken = response.cookies['csrftoken']
-    print('Got csrftoken: {}'.format(csrftoken))
+    log.info('Got csrftoken: {}'.format(csrftoken))
     return csrftoken
 
 
@@ -88,7 +90,7 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
     for eval_job in reversed(eval_jobs['evaljob']):
         submission_id = eval_job['id']
         if not eval_job['isDone']:
-            print('Skipping submission %s: Not finished evaluating.' % submission_id)
+            log.info(f'Skipping submission {submission_id}: Not finished evaluating.')
 
         # Parse easy data.
         submission = dict(
@@ -142,12 +144,10 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
 def scrape_submissions_for_task(csrftoken, task_name, task_id):
     from_date = datetime.datetime.now() + datetime.timedelta(days=2)
 
-    print(task_name)
     found = True
     while found:
         found = False
 
-        print("From date: %s" % from_date)
         submissions = parse_submissions(
             csrftoken, task_name,
             task_id,
@@ -171,7 +171,7 @@ def scrape_submissions_for_tasks(tasks):
             submissions.append(scrape_submissions_for_task(
                 csrftoken, task_name, task_name_dict[task_name]['id']))
         else:
-            print(f'ERROR: {task_name} not found.')
+            log.error(f"Task '{task_name}' not found.")
 
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
