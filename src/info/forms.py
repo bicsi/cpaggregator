@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from data.models import UserProfile, UserHandle, Judge, UserGroup
-from info.models import TaskSheet, Assignment
+from info.models import TaskSheet, Assignment, CustomTaskTag
 from info.utils import slugify_unique
 
 
@@ -143,7 +143,7 @@ class AssignmentCreateForm(forms.ModelForm):
         fields = ['assigned_on', 'use_best_recent', 'end_on']
 
     def __init__(self, **kwargs):
-        user = kwargs.pop('user')
+        kwargs.pop('user')
         super(AssignmentCreateForm, self).__init__(**kwargs)
 
 
@@ -181,3 +181,9 @@ class GroupUpdateForm(forms.ModelForm):
         help_texts = {
             'description': 'You can write your description using Markdown.',
         }
+
+
+class TaskCustomTagCreateForm(forms.ModelForm):
+    class Meta:
+        model = CustomTaskTag
+        fields = ['name']

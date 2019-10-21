@@ -1,11 +1,14 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views import generic
 from django_ajax.mixin import AJAXMixin
 
 from data.models import Submission, Task, UserHandle
-from info.models import FavoriteTask
+from info.forms import TaskCustomTagCreateForm
+from info.models import FavoriteTask, CustomTaskTag
 
 
 class TaskListView(LoginRequiredMixin, generic.ListView):
@@ -103,3 +106,37 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
             FavoriteTask.objects.create(profile=user.profile, task=task)
 
         return redirect('task-detail', judge_id=task.judge.judge_id, task_id=task.task_id)
+
+
+class TagCreateView(LoginRequiredMixin, generic.CreateView):
+    form_class = TaskCustomTagCreateForm
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def form_valid(self, form):
+        task = get_object_or_404(Task, judge__judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        tag = form.save(commit=False)
+        tag.task = task
+        tag.profile = self.request.user.profile
+        try:
+            tag.save()
+        except IntegrityError:
+            pass
+
+        return redirect('task-detail', judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+
+    def form_invalid(self, form):
+        return redirect('task-detail', judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+
+
+class TagDeleteView(LoginRequiredMixin, generic.DeleteView):
+    def get_success_url(self):
+        return reverse_lazy('task-detail', kwargs=dict(
+            judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id']))
+
+    def get_object(self, queryset=None):
+        user = self.request.user.profile
+        task = get_object_or_404(Task, judge__judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        name = self.kwargs['tag_name']
+        return CustomTaskTag.objects.get(profile=user, task=task, name=name)

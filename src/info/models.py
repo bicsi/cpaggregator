@@ -101,5 +101,16 @@ class FavoriteTask(models.Model):
         unique_together = (('task', 'profile'),)
 
 
+class CustomTaskTag(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='custom_tags')
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='custom_tags')
+    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=32)
+
+    class Meta:
+        unique_together = (('task', 'profile', 'name'),)
+
+    def __str__(self):
+        return f"#{self.name} for {self.task} from {self.profile}"
 
 

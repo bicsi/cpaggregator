@@ -69,6 +69,8 @@ urlpatterns = [
             path('', views.task.TaskDetailView.as_view(), name='task-detail'),
             path('favorite/', views.task.FavoriteToggleView.as_view(), name='task-favorite'),
             path('preview/', views.task.TaskPreviewView.as_view(), name='task-preview'),
+            path('create-tag/', views.task.TagCreateView.as_view(), name='task-tag-create'),
+            path('tag/<tag_name>/delete', views.task.TagDeleteView.as_view(), name='task-tag-delete'),
         ])),
     ])),
     path('me/', views.profile.MeDetailView.as_view(), name='me'),

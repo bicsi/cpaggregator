@@ -113,18 +113,48 @@
                     </form>
                 </div>
             </div>
-            {% if task.tags.count %}
+
+            {% if task.tags.count or task.custom_tags.count %}
             <div class="card mt-5">
                 <h6 class="card-header">Tags</h6>
-                <div class="list-group list-group-flush">
+                <ul class="list-group list-group-flush">
                     {% for tag in task.tags.all %}
-                    <span class="list-group-item list-group-item text-secondary">
+                    <li class="list-group-item list-group-item text-secondary">
                         {{ tag }}
-                    </span>
+                    </li>
                     {% endfor %}
-                </div>
+                    {% for tag in task.custom_tags.all %}
+                    <li class="list-group-item list-group-item text-secondary">
+                        <form class="d-flex" method="post" action="{% url 'task-tag-delete' judge_id=task.judge.judge_id task_id=task.task_id tag_name=tag.name %}">
+                            {% csrf_token %}
+                            <span class="flex-grow-1 text-primary font-weight-bold">#{{ tag.name }}</span>
+                            <div class="input-group-append">
+                                <button class="btn btn-sm btn-xs-adjust btn-danger my-0" type="submit">
+                                    <i class="fa fa-xs fa-times" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+
+                    {% endfor %}
+                </ul>
+
+
             </div>
             {% endif %}
+
+            <form action="{% url 'task-tag-create' judge_id=task.judge.judge_id task_id=task.task_id %}" method="post">
+                {% csrf_token %}
+                <div class="input-group mt-5">
+                        <div class="input-group-prepend">
+                          <div class="input-group-text">#</div>
+                        </div>
+                        <input type="text" class="form-control" name="name" placeholder="Add custom tag" required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">+</button>
+                      </div>
+                </div>
+            </form>
         </div>
         <div class="col col-lg-8 col-12">
             <div class="card mt-5">
