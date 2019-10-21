@@ -42,6 +42,7 @@ django-silk = "*"
 model-mommy = "*"
 psycopg2 = "==2.7.5"
 django-bootstrap-datepicker-plus = "*"
+loguru = "*"
 
 [requires]
 python_version = "3.7"
