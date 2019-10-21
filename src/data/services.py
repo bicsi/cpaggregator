@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.text import slugify
 
+from core.logging import log
 from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource
 from scraper.database import get_db
 import scraper.services as scraper_services
@@ -11,7 +12,7 @@ from celery import shared_task
 
 
 def __update_task_info(db, task):
-    print("Updating {}...".format(task))
+    log.info("Updating {}...".format(task))
 
     mongo_task_info = None
     for tries in range(3):
@@ -22,13 +23,13 @@ def __update_task_info(db, task):
         if mongo_task_info:
             break
 
-        print(f'Task info for {task} not found in mongo.')
-        print('Redirecting to scraper...')
+        log.info(f'Task info for {task} not found in mongo.')
+        log.info('Redirecting to scraper...')
         scraper_services.scrape_task_info(db, ":".join([task.judge.judge_id, task.task_id]))
-        print('Retrying...')
+        log.warning('Retrying...')
 
     if not mongo_task_info:
-        print(f'ERROR: Fetching task info for {task} failed!')
+        log.error(f'Fetching task info for {task} failed!')
         return
 
     task.name = mongo_task_info['title']
@@ -42,7 +43,7 @@ def __update_task_info(db, task):
             tag = MethodTag.objects.get(tag_id=tag_id)
             task.tags.add(tag)
         except ObjectDoesNotExist:
-            print('Skipped adding tag {}. Does not exist'.format(tag_id))
+            log.warning('Skipped adding tag {}. Does not exist'.format(tag_id))
 
     if 'source' in mongo_task_info:
         source_id = slugify(mongo_task_info['source'])
@@ -55,7 +56,7 @@ def __update_task_info(db, task):
 
 
 def __update_handle(db, handle):
-    print(f"Updating {handle}...")
+    log.info(f"Updating {handle}...")
 
     mongo_handle_info = None
     for tries in range(3):
@@ -66,12 +67,12 @@ def __update_handle(db, handle):
         if mongo_handle_info:
             break
 
-        print(f'Handle info for {handle} not found.')
-        print('Redirecting to scraper...')
+        log.info(f'Handle info for {handle} not found.')
+        log.info('Redirecting to scraper...')
         scraper_services.scrape_handle_info(db, ":".join([handle.judge.judge_id, handle.handle]))
 
     if not mongo_handle_info:
-        print("ERROR: handle info not found.")
+        log.error(f"Handle info for {handle} not found.")
         return
 
     if 'photo_url' in mongo_handle_info:
@@ -82,8 +83,11 @@ def __update_handle(db, handle):
     handle.save()
 
 
+TASKS_TO_ADD = set()
+
+
 def __update_user(db, user):
-    print(f"Updating {user.username}...")
+    log.info(f"Updating '{user.username}'...")
 
     for user_handle in user.handles.all():
         judge = user_handle.judge
@@ -94,10 +98,17 @@ def __update_user(db, user):
         ))
         # Migrate submission model to SQL model.
         for mongo_submission in mongo_submissions:
+            submission_id = mongo_submission['submission_id']
+            task_id = mongo_submission['task_id']
             try:
                 task = Task.objects.get(
                     judge=judge,
-                    task_id__iexact=mongo_submission['task_id'])
+                    task_id__iexact=task_id)
+            except ObjectDoesNotExist:
+                TASKS_TO_ADD.add(task_id)
+                continue
+
+            try:
                 update_dict = dict(
                     submitted_on=timezone.make_aware(mongo_submission['submitted_on']),
                     author=user_handle,
@@ -115,46 +126,45 @@ def __update_user(db, user):
                 update_dict = dict(filter(lambda x: x[1] and x[1], update_dict.items()))
 
                 _, created = Submission.objects.update_or_create(
-                    submission_id=mongo_submission['submission_id'],
+                    submission_id=submission_id,
                     task=task, defaults=update_dict
                 )
 
                 if created:
-                    print("Submission %s created." % mongo_submission['submission_id'])
-            except ObjectDoesNotExist as e:
-                pass
+                    log.info("Submission %s created." % mongo_submission['submission_id'])
+
             except Exception as e:
-                print('Submission %s failed. Error: %s' % (mongo_submission['submission_id'], e))
+                log.exception('Submission %s failed. Error: %s' % (mongo_submission['submission_id'], e))
 
 
 @shared_task
 def update_tasks_info(*tasks):
     db = get_db()
-    print(f'update_tasks_info got called with {tasks}')
+    log.info(f'Updating tasks info for {tasks}...')
     for task in tasks:
         try:
             judge_id, task_id = task.split(':', 1)
             task_obj = Task.objects.get(judge__judge_id=judge_id, task_id=task_id)
             __update_task_info(db, task_obj)
         except Exception as e:
-            print(f'ERROR: {e}')
+            log.exception(e)
 
 
 @shared_task
 def update_all_tasks_info():
     db = get_db()
-    print(f'update_all_tasks_info got called')
+    log.info(f'Updating all tasks info got called')
     for task in Task.objects.all():
         try:
             __update_task_info(db, task)
         except Exception as e:
-            print(f'ERROR: {e}')
+            log.exception(e)
 
 
 @shared_task
 def update_handles(*handles):
     db = get_db()
-    print(f'update_handles got called with {handles}')
+    log.info(f'Updating handles {handles}...')
 
     if handles:
         for handle in handles:
@@ -163,13 +173,13 @@ def update_handles(*handles):
                 handle_obj = UserHandle.objects.get(judge__judge_id=judge_id, handle=handle_id)
                 __update_handle(db, handle_obj)
             except Exception as e:
-                print(f'ERROR: {e}')
+                log.exception(e)
 
 
 @shared_task
 def update_all_handles():
     db = get_db()
-    print(f'update_all_handles got called')
+    log.info(f'Updating all handles...')
 
     for handle in UserHandle.objects.all():
         __update_handle(db, handle)
@@ -178,19 +188,21 @@ def update_all_handles():
 @shared_task
 def update_users(*usernames):
     db = get_db()
-    print(f'update_users got called with {usernames}')
+    log.info(f'Updating users {usernames}...')
 
     for username in usernames:
         try:
             user = UserProfile.objects.get(user__username=username)
             __update_user(db, user)
         except Exception as e:
-            print(f'ERROR: {e}')
+            log.exception(e)
 
 
 @shared_task
 def update_all_users():
+    TASKS_TO_ADD.clear()
     db = get_db()
-    print(f'update_all_users got called')
+    log.info(f'Updating all users...')
     for user in UserProfile.objects.all():
         __update_user(db, user)
+    log.info(f"TASKS TO ADD: {len(TASKS_TO_ADD)}")

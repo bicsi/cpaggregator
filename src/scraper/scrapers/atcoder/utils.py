@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import datetime
 import re
 
+from core.logging import log
 from scraper.utils import get_page
 from .parsers import parse_title, parse_time_limit, parse_memory_limit
 
@@ -14,6 +15,7 @@ ATCODER_JUDGE_ID = "ac"
 def __parse_contest_id(contest_url: str):
     result = re.search(r'https?://(.*)\.contest\.atcoder\.jp/?', contest_url)
     if result is None:
+        log.warning(f"Could not parse contest id from {contest_url}.")
         return None
     return result.group(1)
 
@@ -25,6 +27,7 @@ def __get_contest_url(contest_id: str):
 def __scrape_table_rows(node, table_css_selector):
     table = node.select_one(table_css_selector)
     if table is None:
+        log.warning(f'Could not find table with selector {table_css_selector}')
         return
 
     for row in table.find("tbody").find_all("tr"):

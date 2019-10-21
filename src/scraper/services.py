@@ -26,7 +26,7 @@ def __expand_handle(judge_id, handle):
     handles = [handle]
     if handle == '*':
         handles = [handle.handle for handle in
-                    UserHandle.objects.filter(judge__judge_id=judge_id)]
+                   UserHandle.objects.filter(judge__judge_id=judge_id)]
     log.info(f'Handles: {handles}')
     return handles
 
@@ -156,4 +156,3 @@ def scrape_handles_info():
             scrape_handle_info(db, ':'.join([handle.judge.judge_id, handle.handle]))
         except Exception as e:
             log.exception(f'Could not parse handle `{handle}`: {e}')
-
