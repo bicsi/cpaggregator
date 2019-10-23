@@ -44,10 +44,11 @@ def parse_memory_limit(memory_limit_text: str):
 
 
 def parse_score(score_text: str):
-    result = re.search(r'Evaluare completa: (\d+) puncte', score_text)
+    result = re.search(r'(Evaluare completa|Eroare de compilare): (\d+) puncte', score_text)
     if result is None:
+        log.warning(f"Could not parse score from '{score_text}'")
         return None
-    return int(result.group(1))
+    return int(result.group(2))
 
 
 def parse_verdict(verdict_text: str):
@@ -61,6 +62,7 @@ def parse_verdict(verdict_text: str):
         return 'WA'
     if verdict == 'Eroare de compilare':
         return 'CE'
+    log.warning(f"Could not parse verdict: '{verdict_text}'")
     return 'WA'
 
 
@@ -82,5 +84,5 @@ def parse_date(date_text: str):
 def parse_source_size(source_text: str):
     result = re.search(r'(\d+\.\d\d) kb', source_text)
     if result is None:
-        raise ValueError("Could not parse source size: %s" % source_text)
+        raise ValueError(f"Could not parse source size: {source_text}")
     return int(float(result.group(1)) * 1000)

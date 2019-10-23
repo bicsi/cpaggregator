@@ -1,17 +1,12 @@
 import heapq
+import itertools
 from datetime import datetime, timedelta
-from itertools import takewhile
-
-from data.models import Task, UserHandle
-from scraper import utils, database
-from scraper.scrapers.infoarena import utils as infoarena_scraper
-from scraper.scrapers.csacademy import utils as csacademy_scraper
-from scraper.scrapers.codeforces import utils as codeforces_scraper
-from scraper.scrapers.atcoder import utils as atcoder_scraper
-from scraper.scrapers.ojuz import utils as ojuz_scraper
 
 from celery import shared_task
+
 from core.logging import log
+from data.models import Task, UserHandle
+from scraper import utils, database, scrapers
 
 
 def __expand_task(judge_id, task_id):
@@ -32,42 +27,26 @@ def __expand_handle(judge_id, handle):
 
 
 def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
-    # Infoarena - special logic to optimize monitor.
-    if judge_id == 'ia':
-        if len(task_ids) == 1:
-            submissions = infoarena_scraper.scrape_submissions(task=task_ids[0])
-        else:
-            if to_date > datetime.now() - timedelta(days=100):
-                submissions = filter(lambda sub: sub['task_id'] in task_ids, infoarena_scraper.scrape_submissions())
-            else:
-                all_submissions = [infoarena_scraper.scrape_submissions(task=task_id) for task_id in task_ids]
-                submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
+    scraper = scrapers.create_scraper(judge_id)
 
-    # oj.uz - same as infoarena.
-    elif judge_id == 'ojuz':
-        if len(task_ids) == 1:
-            submissions = ojuz_scraper.scrape_submissions(problem=task_ids[0])
-        else:
-            if to_date > datetime.now() - timedelta(days=100):
-                submissions = filter(lambda sub: sub['task_id'] in task_ids, ojuz_scraper.scrape_submissions())
-            else:
-                all_submissions = [ojuz_scraper.scrape_submissions(problem=task_id) for task_id in task_ids]
-                submissions = heapq.merge(*all_submissions, key=lambda x: x['submitted_on'], reverse=True)
+    # Get submissions as list of generators.
+    submissions = []
+    for task_id in task_ids:
+        try:
+            subs = scraper.scrape_submissions_for_task(task_id)
+            submissions.append(subs)
+        except NotImplementedError:
+            log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
+            return
+        except Exception as ex:
+            log.exception(ex)
 
-    elif judge_id == 'csa':
-        submissions = csacademy_scraper.scrape_submissions_for_tasks(task_ids)
+    # Merge the generators into one and take while submitted on is good
+    submissions = heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
+    submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
 
-    elif judge_id == 'cf':
-        submissions = codeforces_scraper.scrape_submissions_for_tasks(task_ids)
-
-    elif judge_id == 'ac':
-        submissions = atcoder_scraper.scrape_submissions_for_tasks(task_ids)
-    else:
-        log.error(f"Judge id not recognized: {judge_id}")
-        return
-
-    submissions_to_write = takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
-    utils.write_submissions(db, submissions_to_write, chunk_size=1000)
+    # Write the submissions to DB.
+    utils.write_submissions(db, submissions, chunk_size=1000)
 
 
 @shared_task
@@ -98,26 +77,21 @@ def scrape_task_info(db, task):
     judge_id, task_id = task.split(':', 1)
     task_ids = __expand_task(judge_id, task_id)
 
-    if judge_id == 'ia':
-        task_infos = [infoarena_scraper.scrape_task_info(task_id)
-                      for task_id in task_ids]
+    scraper = scrapers.create_scraper(judge_id)
+    task_infos = []
+    log.info(f"Task ids: {task_ids}")
 
-    elif judge_id == 'csa':
-        task_infos = csacademy_scraper.scrape_task_info(task_ids)
-
-    elif judge_id == 'cf':
-        task_infos = codeforces_scraper.scrape_task_info(task_ids)
-
-    elif judge_id == 'ojuz':
-        task_infos = [ojuz_scraper.scrape_task_info(task_id)
-                      for task_id in task_ids]
-
-    elif judge_id == 'ac':
-        task_infos = atcoder_scraper.scrape_task_info(task_ids)
-
-    else:
-        log.error(f"Judge id not recognized: '{judge_id}'")
-        return
+    for task_id in task_ids:
+        try:
+            task_info = scraper.scrape_task_info(task_id)
+            log.debug(task_info)
+            log.info(f"Successfully scraped '{task_id}' [{task_info['title']}]...")
+            task_infos.append(task_info)
+        except NotImplementedError:
+            log.warning(f'Scraping tasks not implemented for {scraper.__class__.__name__}.')
+            return
+        except Exception as ex:
+            log.exception(ex)
 
     utils.write_tasks(db, task_infos)
 
@@ -126,16 +100,24 @@ def scrape_handle_info(db, handle):
     log.info(f"Scraping info for handle '{handle}'...")
     judge_id, handle_id = handle.split(':', 1)
     handles = __expand_handle(judge_id, handle_id)
+    log.info(f"Handles: {handles}")
 
-    if judge_id == 'cf':
-        handle_infos = codeforces_scraper.scrape_user_info(handles)
-    elif judge_id == 'ia':
-        handle_infos = infoarena_scraper.scrape_user_info(handles)
-    else:
-        log.error(f"Judge id not recognized: '{judge_id}'")
-        return
+    scraper = scrapers.create_scraper(judge_id)
 
-    utils.write_handles(db, handle_infos)
+    user_infos = []
+    for handle in handles:
+        try:
+            user_info = scraper.scrape_user_info(handle)
+            log.info(f"Successfully scraped user info for '{handle}'")
+            log.debug(user_info)
+            user_infos.append(user_info)
+        except NotImplementedError:
+            log.warning(f'Scraping handles not implemented for {scraper.__class__.__name__}.')
+            return
+        except Exception as ex:
+            log.exception(ex)
+
+    utils.write_handles(db, user_infos)
 
 
 @shared_task
@@ -145,7 +127,7 @@ def scrape_tasks_info():
         try:
             scrape_task_info(db, ':'.join([task.judge.judge_id, task.task_id]))
         except Exception as e:
-            log.exception(f'Could not parse task `{task}`: {e}')
+            log.exception(f"Could not parse task '{task}': {e}")
 
 
 @shared_task
@@ -155,4 +137,4 @@ def scrape_handles_info():
         try:
             scrape_handle_info(db, ':'.join([handle.judge.judge_id, handle.handle]))
         except Exception as e:
-            log.exception(f'Could not parse handle `{handle}`: {e}')
+            log.exception(f"Could not parse handle '{handle}': {e}")

@@ -24,7 +24,7 @@ def parse_memory_used(memory_used_text: str):
             raise Exception()
         value = int(value)
     except:
-        raise Exception(f'Time exec not parseable: {memory_used_text}')
+        raise Exception(f'Memory used not parseable: {memory_used_text}')
     return value
 
 
@@ -55,6 +55,6 @@ def parse_memory_limit(memory_limit_text: str):
         if mib != 'MiB':
             raise Exception()
         value = int(value) * 1024
-    except:
-        raise Exception(f'Time exec not parseable: {memory_limit_text}')
+    except Exception as ex:
+        raise Exception(f'Time exec not parseable: {memory_limit_text}', ex)
     return value

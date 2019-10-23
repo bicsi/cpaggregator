@@ -9,7 +9,7 @@ from core.logging import log
 CSACADEMY_JUDGE_ID = 'csa'
 
 
-def __get_headers(csrftoken):
+def __get_headers(csrf_token):
     return {
         'Pragma': 'no-cache',
         'Accept-Encoding': 'gzip, deflate, br',
@@ -20,36 +20,35 @@ def __get_headers(csrftoken):
         'x-requested-with': 'XMLHttpRequest',
         'Connection': 'keep-alive',
         'Referer': 'https://csacademy.com/contest/archive/task/addition/submissions/',
-        'x-csrftoken': csrftoken,
+        'x-csrftoken': csrf_token,
     }
 
 
-def __get_cookies(csrftoken):
+def __get_cookies(csrf_token):
     return {
         'G_AUTHUSER_H': '0',
-        'csrftoken': csrftoken,
+        'csrftoken': csrf_token,
         'G_ENABLED_IDPS': 'google',
     }
 
 
-def get_task_info(csrftoken):
+def get_task_info(csrf_token):
     response = requests.get('https://csacademy.com/contest/archive/task/addition/submissions/',
-                            headers=__get_headers(csrftoken), cookies=__get_cookies(csrftoken))
+                            headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
     json_data = json.loads(response.text)
 
     return json_data['state']['contesttask']
 
 
-def get_task_name_dict(csrftoken):
+def get_task_name_dict(csrf_token):
     task_name_to_id = {}
-    for task in get_task_info(csrftoken):
+    for task in get_task_info(csrf_token):
         task_name_to_id.update({task['name']: task})
     return task_name_to_id
 
 
-def get_eval_jobs(csrftoken, contest_task_id, from_date, num_jobs=1000):
+def get_eval_jobs(csrf_token, contest_task_id, from_date, num_jobs=1000):
     from_timestamp = from_date.timestamp()
-
     params = (
         ('numJobs', num_jobs),
         ('requestCount', 'false'),
@@ -59,22 +58,24 @@ def get_eval_jobs(csrftoken, contest_task_id, from_date, num_jobs=1000):
     )
 
     response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
-                            headers=__get_headers(csrftoken),
-                            params=params, cookies=__get_cookies(csrftoken))
+                            headers=__get_headers(csrf_token),
+                            params=params, cookies=__get_cookies(csrf_token))
     json_data = json.loads(response.text)
+    log.info(len(json_data['state']['evaljob']))
     return json_data['state']
 
 
-def get_csrftoken():
+def get_csrf_token():
     response = requests.get('https://csacademy.com/')
-    csrftoken = response.cookies['csrftoken']
-    log.info('Got csrftoken: {}'.format(csrftoken))
-    return csrftoken
+    csrf_token = response.cookies['csrftoken']
+    log.debug('Got csrf token: {}'.format(csrf_token))
+    return csrf_token
 
 
-def parse_submissions(csrftoken, task_name, task_id, from_date):
-    eval_jobs = get_eval_jobs(csrftoken, task_id, from_date)
+def parse_submissions(csrf_token, task_name, task_id, from_date):
+    eval_jobs = get_eval_jobs(csrf_token, task_id, from_date)
     if 'publicuser' not in eval_jobs:
+        log.error("'publicuser' not in eval_jobs", eval_jobs, task_name)
         return
 
     # Make user id to username map. We use usernames. :)
@@ -141,7 +142,7 @@ def parse_submissions(csrftoken, task_name, task_id, from_date):
         yield submission
 
 
-def scrape_submissions_for_task(csrftoken, task_name, task_id):
+def scrape_submissions_for_task(csrf_token, task_name, task_id):
     from_date = datetime.datetime.now() + datetime.timedelta(days=2)
 
     found = True
@@ -149,7 +150,7 @@ def scrape_submissions_for_task(csrftoken, task_name, task_id):
         found = False
 
         submissions = parse_submissions(
-            csrftoken, task_name,
+            csrf_token, task_name,
             task_id,
             from_date=from_date
         )
@@ -162,33 +163,31 @@ def scrape_submissions_for_task(csrftoken, task_name, task_id):
 
 
 def scrape_submissions_for_tasks(tasks):
-    csrftoken = get_csrftoken()
-    task_name_dict = get_task_name_dict(csrftoken)
+    csrf_token = get_csrf_token()
+    task_name_dict = get_task_name_dict(csrf_token)
 
     submissions = []
     for task_name in tasks:
         if task_name in task_name_dict:
             submissions.append(scrape_submissions_for_task(
-                csrftoken, task_name, task_name_dict[task_name]['id']))
+                csrf_token, task_name, task_name_dict[task_name]['id']))
         else:
             log.error(f"Task '{task_name}' not found.")
 
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
 
-def scrape_task_info(tasks):
-    csrftoken = get_csrftoken()
+def scrape_all_task_info(csrf_token):
     response = requests.post('https://csacademy.com/contest/archive/?',
-                             headers=__get_headers(csrftoken),
-                             cookies=__get_cookies(csrftoken))
+                             headers=__get_headers(csrf_token),
+                             cookies=__get_cookies(csrf_token))
     json_data = json.loads(response.text)
 
     for task_data in json_data['state']['contesttask']:
         task_name = task_data['name']
-        if task_name in tasks:
-            yield {
-                'judge_id': CSACADEMY_JUDGE_ID,
-                'task_id': task_name.lower(),
-                'title': task_data['longName'],
-                'tags': [],
-            }
+        yield {
+            'judge_id': CSACADEMY_JUDGE_ID,
+            'task_id': task_name.lower(),
+            'title': task_data['longName'],
+            'tags': [],
+        }

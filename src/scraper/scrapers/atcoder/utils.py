@@ -138,30 +138,25 @@ def scrape_submissions_for_tasks(task_ids):
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
 
-def scrape_task_info(task_ids):
+def scrape_task_info(task_id: str):
     """
     Scrapes the task info for given tasks.
-    :param task_ids: the id of the tasks (e.g. ['agc003_a', 'abc005_d'])
-    :return: a generator of task info objects
+    :param task_id: the id of the task (e.g. 'agc003_a')
+    :return: a task info object
     """
-    for task_id in task_ids:
-        contest_id = task_id.split('_')[0]
-        try:
-            page_url = f"https://atcoder.jp/contests/{contest_id}/tasks/{task_id}"
-            page = get_page(page_url)
-            soup = BeautifulSoup(page.content, 'html.parser')
-            main_div = soup.select_one('span.h2').parent
-            time_limit_text, memory_limit_text = map(str.strip, main_div.select_one('p').text.split('/'))
-            task_info = {
-                'judge_id': ATCODER_JUDGE_ID,
-                'task_id': task_id.lower(),
-                'title': parse_title(main_div.select_one('span.h2').text),
-                'time_limit': parse_time_limit(time_limit_text),
-                'memory_limit': parse_memory_limit(memory_limit_text),
-                'tags': [],
-                'source': soup.select_one('.contest-title').text,
-            }
-            print(task_info)
-            yield task_info
-        except Exception as e:
-            print(f'ERROR: {e}')
+    contest_id = task_id.split('_')[0]
+    page_url = f"https://atcoder.jp/contests/{contest_id}/tasks/{task_id}"
+    page = get_page(page_url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    main_div = soup.select_one('span.h2').parent
+    time_limit_text, memory_limit_text = map(str.strip, main_div.select_one('p').text.split('/'))
+    task_info = {
+        'judge_id': ATCODER_JUDGE_ID,
+        'task_id': task_id.lower(),
+        'title': parse_title(main_div.select_one('span.h2').text),
+        'time_limit': parse_time_limit(time_limit_text),
+        'memory_limit': parse_memory_limit(memory_limit_text),
+        'tags': [],
+        'source': soup.select_one('.contest-title').text,
+    }
+    return task_info

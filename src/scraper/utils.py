@@ -33,7 +33,7 @@ def get_page(page_url, max_retries=10, **query_dict):
 
     page = None
     for tries in range(max_retries):
-        log.info(f"GET: {page_url}")
+        log.debug(f"GET: {page_url}")
         page = requests.get(page_url)
         if page.status_code == 492:
             log.warning('Too many requests. Sleeping for 10 seconds...')
@@ -59,7 +59,7 @@ def write_submissions(db, submissions, chunk_size=100):
     """
     total_inserted = 0
     for chunk in split_into_chunks(submissions, chunk_size):
-        log.info("Writing chunk to database...")
+        log.info(f"Writing chunk of size {len(chunk)} to database...")
         num_inserted = database.insert_submissions(db, chunk)
         log.info(f"{num_inserted} submissions written to database.")
         total_inserted += num_inserted

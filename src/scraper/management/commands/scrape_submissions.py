@@ -15,6 +15,10 @@ class Command(BaseCommand):
         parser.add_argument('--tasks', nargs='+')
 
     def handle(self, *args, **options):
+        if not options['tasks']:
+            print('No tasks inputted.')
+            return
+
         services.scrape_submissions_for_tasks(
             *options['tasks'],
             from_days=options['from_days'],

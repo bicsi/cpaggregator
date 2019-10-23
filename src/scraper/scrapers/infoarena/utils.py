@@ -115,53 +115,56 @@ def scrape_task_info(task_id):
     }
 
 
-def scrape_user_info(handles):
+def __get_avatar_url(handle):
+    return "https://www.infoarena.ro/avatar/full/" + handle
+
+
+def get_default_avatar():
+    return get_page(__get_avatar_url(USER_WITH_DEFAULT_AVATAR)).content
+
+
+def scrape_user_info(handle, default_avatar):
     """
     Scrapes user information for given handles.
-    :param handles: the handles of infoarena users
+    :param handle: the handle of infoarena user
+    :param default_avatar: obtainable from get_default_avatar()
     :return: user information, in dict format
     """
-    def __get_avatar_url(handle):
-        return "https://www.infoarena.ro/avatar/full/" + handle
 
-    default_avatar = get_page(__get_avatar_url(USER_WITH_DEFAULT_AVATAR)).content
+    page_url = "https://www.infoarena.ro/utilizator/" + handle
+    page = get_page(page_url)
+    soup = BeautifulSoup(page.content, 'html.parser')
 
-    for handle in handles:
-        page_url = "https://www.infoarena.ro/utilizator/" + handle
-        page = get_page(page_url)
-        soup = BeautifulSoup(page.content, 'html.parser')
+    table = soup.select_one('table.compact')
+    cells = list(table.select('td'))
 
-        table = soup.select_one('table.compact')
-        cells = list(table.select('td'))
+    user_info = {
+        'judge_id': INFOARENA_JUDGE_ID,
+        'handle': handle.lower(),
+        'rating': int(cells[3].text),
+    }
 
-        user_info = {
-            'judge_id': INFOARENA_JUDGE_ID,
-            'handle': handle.lower(),
-            'rating': int(cells[3].text),
-        }
+    # FIXME: This may not be right!?
+    full_name = cells[1].text
+    if len(full_name.split()) == 1:
+        user_info.update({
+            'first_name': full_name,
+            'last_name': None,
+        })
+    else:
+        first_name, last_name = full_name.rsplit(' ', 1)
+        user_info.update({
+            'first_name': first_name,
+            'last_name': last_name,
+        })
 
-        # FIXME: This may not be right!?
-        full_name = cells[1].text
-        if len(full_name.split()) == 1:
-            user_info.update({
-                'first_name': full_name,
-                'last_name': None,
-            })
-        else:
-            first_name, last_name = full_name.rsplit(' ', 1)
-            user_info.update({
-                'first_name': first_name,
-                'last_name': last_name,
-            })
+    avatar_url = cells[0].find("a", href=True)['href']
+    if avatar_url.lower() != f'/avatar/full/{handle.lower()}':
+        raise Exception('Avatar url is not as expected.')
 
-        avatar_url = cells[0].find("a", href=True)['href']
-        if avatar_url.lower() != f'/avatar/full/{handle.lower()}':
-            raise Exception('Avatar url is not as expected.')
-
-        user_avatar = get_page(__get_avatar_url(handle)).content
-        if user_avatar == default_avatar:
-            user_info['photo_url'] = None
-        else:
-            user_info['photo_url'] = __get_avatar_url(handle)
-
-        yield user_info
+    user_avatar = get_page(__get_avatar_url(handle)).content
+    if user_avatar == default_avatar:
+        user_info['photo_url'] = None
+    else:
+        user_info['photo_url'] = __get_avatar_url(handle)
+    return user_info

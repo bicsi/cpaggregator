@@ -25,7 +25,7 @@ def __update_task_info(db, task):
 
         log.info(f'Task info for {task} not found in mongo.')
         log.info('Redirecting to scraper...')
-        scraper_services.scrape_task_info(db, ":".join([task.judge.judge_id, task.task_id]))
+        scraper_services.scrape_tasks_info(db, task.judge.judge_id, task.task_id)
         log.warning('Retrying...')
 
     if not mongo_task_info:

@@ -1,6 +1,10 @@
 import os
+from pprint import pprint
 
 from pymongo import MongoClient, ReplaceOne
+from pymongo.errors import BulkWriteError
+
+from core.logging import log
 
 
 def __insert_many_silent(coll, iterable, unique_fields):
@@ -8,8 +12,16 @@ def __insert_many_silent(coll, iterable, unique_fields):
     for elem in iterable:
         find_dict = {field: elem[field] for field in unique_fields}
         requests.append(ReplaceOne(find_dict, elem, upsert=True))
-    result = coll.bulk_write(requests)
-    return result.inserted_count
+    try:
+        result = coll.bulk_write(requests)
+        return result.inserted_count
+    except BulkWriteError as bwe:
+        for err in bwe.details['writeErrors']:
+            if err['code'] != 11000:
+                log.error(bwe.details)
+                log.error(pprint(iterable))
+                raise
+        return bwe.details['nInserted']
 
 
 def get_db():
