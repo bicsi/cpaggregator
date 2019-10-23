@@ -45,11 +45,13 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
         if len(row) != 7:
             raise Exception("Unexpected number of columns.")
         # Parse required information.
+        submission_id = None
         try:
             verdict_text = row[6].find("span").text
+            submission_id = row[0].find("a", href=True)['href'].split('/')[-1]
             submission = dict(
                 judge_id=INFOARENA_JUDGE_ID,
-                submission_id=row[0].find("a", href=True)['href'].split('/')[-1],
+                submission_id=submission_id,
                 author_id=row[1].find("a", href=True)['href'].split('/')[-1].lower(),
                 task_id=row[2].find("a", href=True)['href'].split('/')[-1].lower(),
                 source_size=parsers.parse_source_size(row[4].find("a").text),
@@ -60,7 +62,16 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
             yield submission
         except (TypeError, AttributeError) as e:
             # Probably task name was hidden.
-            log.warning(f"Skipped one submission. Error: {e}")
+            log.warning(f"Skipped submission with id {submission_id}: {e}")
+
+
+def get_submission_count(**query_dict):
+    page_url = f"https://www.infoarena.ro/monitor"
+    page = get_page(page_url, **query_dict)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    submision_count_text = soup.select_one('#monitor-table .pager .count').text
+    submission_count = parsers.parse_submission_count(submision_count_text)
+    return submission_count
 
 
 def scrape_task_ids(page_name, from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200):
@@ -104,7 +115,7 @@ def scrape_task_info(task_id):
         if tag is not None:
             tags.append(tag)
 
-    return {
+    task_info = {
         'judge_id': INFOARENA_JUDGE_ID,
         'task_id': task_id.lower(),
         'title': title,
@@ -113,6 +124,29 @@ def scrape_task_info(task_id):
         'memory_limit': parsers.parse_memory_limit(memory_limit),
         'tags': tags,
     }
+
+    try:
+        # Go to the monitor to find out submission count and first submission date.
+        task_info.update(dict(
+            total_submission_count=get_submission_count(task=task_id),
+            accepted_submission_count=get_submission_count(task=task_id, score_begin=100)))
+
+        submission_count = task_info['total_submission_count']
+        if submission_count > 0:
+            # A little hack to get only the very first submissions.
+            first_few_submissions = list(scrape_submissions(
+                from_page=max(1, submission_count // 20 - 1),
+                results_per_page=20,
+                task=task_id))
+            if len(first_few_submissions) == 0:
+                raise Exception("BUG: First few submissions are non-existant")
+
+            first_submitted_on = min([sub['submitted_on'] for sub in first_few_submissions])
+            task_info['first_submitted_on'] = first_submitted_on
+    except Exception as ex:
+        log.warning(f"Failed to parse extra data for task {task_id}: {ex}")
+
+    return task_info
 
 
 def __get_avatar_url(handle):

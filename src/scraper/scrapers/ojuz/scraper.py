@@ -14,3 +14,6 @@ class OjuzScraper(Scraper):
     def scrape_recent_submissions(self):
         return utils.scrape_submissions()
 
+    def scrape_task_info(self, task_id):
+        return utils.scrape_task_info(task_id)
+

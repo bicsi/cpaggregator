@@ -109,10 +109,11 @@ def scrape_task_info(task_id: str):
             'source': response['contest']['name'],
         }
         found = True
-        yield task_info
+        return task_info
 
     if not found:
-        raise Exception(f"Task id '{task_id}' not found.")
+        log.warning(f"Task id '{task_id}' not found.")
+        return None
 
 
 def scrape_user_info(handles):

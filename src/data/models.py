@@ -166,7 +166,6 @@ class Task(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     source = models.ForeignKey(TaskSource, blank=True, null=True, on_delete=models.SET_NULL)
-
     objects = TaskManager()
 
     def name_or_id(self):
@@ -197,6 +196,16 @@ class Task(models.Model):
 
     def __str__(self):
         return "{}:{}".format(self.judge.judge_id, self.task_id)
+
+
+class JudgeTaskStatistic(models.Model):
+    task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='judge_statistic')
+    first_submitted_on = models.DateTimeField(null=True, blank=True)
+    total_submission_count = models.IntegerField(null=True, blank=True)
+    accepted_submission_count = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Judge statistic for {self.task}"
 
 
 class UserHandle(models.Model):

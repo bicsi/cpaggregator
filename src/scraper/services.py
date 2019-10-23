@@ -84,6 +84,10 @@ def scrape_task_info(db, task):
     for task_id in task_ids:
         try:
             task_info = scraper.scrape_task_info(task_id)
+            if task_info is None:
+                log.warning(f"Did not find task info for '{task_id}'. Skipping...")
+                continue
+
             log.debug(task_info)
             log.info(f"Successfully scraped '{task_id}' [{task_info['title']}]...")
             task_infos.append(task_info)

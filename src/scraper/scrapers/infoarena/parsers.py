@@ -29,6 +29,13 @@ def parse_tag(tag_text):
     return None
 
 
+def parse_submission_count(submission_count_text: str):
+    result = re.search(r"(\d+) rezultate", submission_count_text)
+    if result is None:
+        raise ValueError(f"Cannot parse submission count: {submission_count_text}")
+    return int(result.group(1))
+
+
 def parse_time_limit(time_limit_text: str):
     result = re.search(r'(\d+(\.\d+)?) sec', time_limit_text)
     if result is None:

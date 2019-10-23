@@ -4,14 +4,14 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from core.logging import log
-from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource
+from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource, JudgeTaskStatistic
 from scraper.database import get_db
 import scraper.services as scraper_services
 
 from celery import shared_task
 
 
-def __update_task_info(db, task):
+def __update_task_info(db, task: Task):
     log.info("Updating {}...".format(task))
 
     mongo_task_info = None
@@ -25,7 +25,7 @@ def __update_task_info(db, task):
 
         log.info(f'Task info for {task} not found in mongo.')
         log.info('Redirecting to scraper...')
-        scraper_services.scrape_tasks_info(db, task.judge.judge_id, task.task_id)
+        scraper_services.scrape_task_info(db, f"{task.judge.judge_id}:{task.task_id}")
         log.warning('Retrying...')
 
     if not mongo_task_info:
@@ -49,10 +49,19 @@ def __update_task_info(db, task):
         source_id = slugify(mongo_task_info['source'])
         source, _ = TaskSource.objects.get_or_create(
             judge=task.judge, source_id=source_id,
-            defaults={'name': mongo_task_info['source']})
+            defaults={
+                'name': mongo_task_info['source']})
         task.source = source
 
     task.save()
+    statistic_defaults = dict(
+        total_submission_count=mongo_task_info.get('total_submission_count'),
+        accepted_submission_count=mongo_task_info.get('accepted_submission_count'),
+        first_submitted_on=mongo_task_info.get('first_submitted_on'),
+    )
+    statistic_defaults = {k: v for k, v in statistic_defaults.items() if v}
+    if len(statistic_defaults) > 0:
+        JudgeTaskStatistic.objects.get_or_create(task=task, defaults=statistic_defaults)
 
 
 def __update_handle(db, handle):

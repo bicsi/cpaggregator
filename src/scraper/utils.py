@@ -66,7 +66,7 @@ def write_submissions(db, submissions, chunk_size=100):
     return total_inserted
 
 
-def write_tasks(db, tasks, chunk_size=100):
+def write_tasks(db, tasks, chunk_size=3):
     """
     Writes a list of tasks to database.
     :param db: Database instance.

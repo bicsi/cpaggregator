@@ -24,41 +24,48 @@
     {% endif %}
 
     <div class="mr-1 mt-5">
-        <h1 class="d-inline-block">
-            {{ task.name_or_id }}
-        </h1>
-        <h5 style="height: 40px" class="py-1">
-            <a href="{{ task.judge.homepage }}">
-                <img class="img-fluid" style="max-height: 100%"
-                 src="{% static task.judge.get_banner_url %}"
-                 alt="{{ task.judge.judge_id }}">
-            </a>
-        </h5>
-        <h5>
-            {% if task.statistics %}
-            <span class="badge badge-pill badge-info"><i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} points</span>
-            <span class="text-light mx-2">|</span>
-            {% endif %}
-        {% if best_submission_for_user %}
-            <span class="small text-muted">Verdict:</span>
-            {% if best_submission_for_user.verdict == 'AC' %}
-            <span class="badge badge-success ml-1">
-                <i class="fa fa-check mr-1"></i>{{ best_submission_for_user.get_verdict_display }}
-            </span>
-            {% else %}
-            <span class="badge badge-danger ml-1">
-                <i class="fa fa-times mr-1"></i>
-                {{ best_submission_for_user.get_verdict_display }}
-            </span>
-            {% endif %}
-            <span class="small">
-                (<a href="{{ best_submission_for_user.get_url }}">#{{ best_submission_for_user.submission_id }}</a>)
-            </span>
-        </h5>
-        {% else %}
-        <span class="small text-muted">Not tried yet</span>
-        {% endif %}
-        </h5>
+        <div class="row d-flex align-items-center">
+            <img class="img-fluid py-2 col-2 col-lg-1 d-none d-sm-block"
+                     src="{% static task.judge.get_logo_url %}"
+                     alt="{{ task.judge.judge_id }}">
+            <div class="col-12 col-sm-10 col-lg-11">
+                <h1 class="d-inline-block">
+                    {{ task.name_or_id }}
+                </h1>
+                <h5>
+                    <div class="d-inline-block d-sm-none">
+                        <img class="d-sm-none d-inline-block img-fluid mx-1"
+                             style="width: 24px; height: 24px"
+                             src="{% static task.judge.get_logo_url %}"
+                             alt="{{ task.judge.judge_id }}">
+                    </div>
+                    {% if task.statistics %}
+                    <span class="badge badge-pill badge-info"><i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} points</span>
+
+                    <span class="text-light mx-2">|</span>
+                    {% endif %}
+                {% if best_submission_for_user %}
+                    <span class="small text-muted">Verdict:</span>
+                    {% if best_submission_for_user.verdict == 'AC' %}
+                    <span class="badge badge-success ml-1">
+                        <i class="fa fa-check mr-1"></i>{{ best_submission_for_user.get_verdict_display }}
+                    </span>
+                    {% else %}
+                    <span class="badge badge-danger ml-1">
+                        <i class="fa fa-times mr-1"></i>
+                        {{ best_submission_for_user.get_verdict_display }}
+                    </span>
+                    {% endif %}
+                    <span class="small">
+                        (<a href="{{ best_submission_for_user.get_url }}">#{{ best_submission_for_user.submission_id }}</a>)
+                    </span>
+                </h5>
+                {% else %}
+                <span class="small text-muted">Not tried yet</span>
+                {% endif %}
+                </h5>
+            </div>
+        </div>
     </div>
     <div class="row">
         <div class="col col-lg-4 col-12">
@@ -67,11 +74,6 @@
                 <div class="card-body">
                     <h4 class="card-title">{{ task.name_or_id }}</h4>
                     <h6 class="card-subtitle text-muted mb-3">@{{ task.task_id }}</h6>
-                    {% if task.source %}
-                    <p class="card-text my-2">
-                        Source: <span class="badge badge-light px-3">{{ task.source.name }}</span>
-                    </p>
-                    {% endif %}
 
                     {% if task.statistics %}
                         <p class="card-text">
@@ -112,6 +114,35 @@
                         {% endif %}
                     </form>
                 </div>
+            </div>
+
+            <div class="card mt-5">
+                <h6 class="card-header">Judge info</h6>
+                    <div class="card-body">
+                        <a href="{{ task.judge.homepage }}">
+                            <img class="img-fluid" style="max-height: 100%"
+                             src="{% static task.judge.get_banner_url %}"
+                             alt="{{ task.judge.judge_id }}">
+                        </a>
+
+                        {% if task.judge_statistic.first_submitted_on %}
+                        <p class="card-text mt-3">
+                            Added on
+                            <span class="badge badge-primary mx-1">
+                                {{ task.judge_statistic.first_submitted_on|date:"M d, Y" }}
+                            </span>
+                            <span class="text-muted small">
+                                ({{ task.judge_statistic.first_submitted_on|naturaltime }})
+                            </span>
+                        </p>
+                        {% endif %}
+
+                        {% if task.source %}
+                        <p class="card-text mt-3">
+                            Source: <span class="badge badge-light px-3">{{ task.source.name }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
             </div>
 
             {% if task.tags.count or task.custom_tags.count %}
@@ -155,6 +186,7 @@
                       </div>
                 </div>
             </form>
+
         </div>
         <div class="col col-lg-8 col-12">
             <div class="card mt-5">
