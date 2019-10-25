@@ -108,6 +108,10 @@ def scrape_task_info(task_id: str):
             'tags': tags,
             'source': response['contest']['name'],
         }
+        creation_time_seconds = response['contest'].get('startTimeSeconds')
+        if creation_time_seconds:
+            task_info['first_submitted_on'] = datetime.datetime.utcfromtimestamp(
+                creation_time_seconds)
         found = True
         return task_info
 

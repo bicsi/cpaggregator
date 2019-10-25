@@ -11,27 +11,34 @@
             </span>
 
 
-            <span class="ml-3 text-primary flex-grow-1">
-                {{ task.name_or_id }}
+            <span class="ml-3 text-primary text-truncate">{{ task.name_or_id }}</span>
+
+            <span class="flex-grow-1 small text-muted text-monospace mx-2 pt-1">
                 {% if task.statistics %}
-                <span class="small text-muted text-monospace ml-2">
-                    {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
-                </span>
+                {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
                 {% endif %}
             </span>
-            {% if task.statistics %}
-            <span class="text-info font-weight-bold mr-3">
-                <i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }}
-            </span>
-            {% endif %}
             {% if verdict_for_user == 'AC' %}
             <span class="text-success">
-                <i class="fas fa-check" style="width: 16px"></i>
+                <i class="fas fa-check"></i>
             </span>
             {% else %}
-            <span class="text-danger"{% if not verdict_for_user %}style="opacity: 0"{% endif %}>
-                <i class="fas fa-times" style="width: 16px"></i>
-            </span>
+                {% if task.statistics %}
+                <span class="text-{% if not verdict_for_user %}info{% else %}danger{% endif %} font-weight-bold">
+                    {% if not verdict_for_user %}
+                    <i class="far fa-dot-circle mr-1"></i>
+                    {% else %}
+                    <i class="fas fa-times mr-1"></i>
+                    {% endif %}
+                </span>
+                 <span class="text-{% if not verdict_for_user %}info{% else %}danger{% endif %} font-weight-bold">
+                {{ task.statistics.difficulty_score }}
+                </span>
+                {% elif not verdict_for_user %}
+                <span class="text-danger">
+                    <i class="fas fa-times"></i>
+                </span>
+                {% endif %}
             {% endif %}
         </div>
     </div>
