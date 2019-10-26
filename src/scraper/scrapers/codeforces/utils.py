@@ -2,6 +2,8 @@ import datetime
 import heapq
 from typing import Dict, Any
 
+from bs4 import BeautifulSoup
+
 from core.logging import log
 from scraper.scrapers.codeforces.parsers import parse_tag, parse_verdict
 from scraper.utils import get_page, split_into_chunks
@@ -141,3 +143,18 @@ def scrape_user_info(handles):
 
         user_infos.append(info)
     return user_infos
+
+
+def scrape_task_statement(task_id: str):
+    contest_id, task_letter = task_id.split('_')
+    contest_or_gym = "gym" if int(contest_id) >= 100000 else "contest"
+    response = get_page(f"https://codeforces.com/{contest_or_gym}/{contest_id}/problem/{task_letter}")
+    soup = BeautifulSoup(response.text)
+    statement = soup.select_one(".problem-statement")
+    section_text = []
+    for child in statement.findChildren("div", recursive=False):
+        klass = child.get("class", [])
+        if "header" in klass or "sample-tests" in klass:
+            continue
+        section_text.append(child.get_text(separator=" "))
+    return "\n".join(section_text)

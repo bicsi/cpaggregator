@@ -17,3 +17,6 @@ class Scraper:
 
     def scrape_user_info(self, handle: str) -> Dict:
         raise NotImplementedError()
+
+    def scrape_task_statement(self, task_id: str) -> str:
+        raise NotImplementedError()

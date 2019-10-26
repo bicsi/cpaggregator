@@ -37,6 +37,8 @@ def __update_task_info(db, task: Task):
         task.time_limit_ms = mongo_task_info['time_limit']
     if 'memory_limit' in mongo_task_info:
         task.memory_limit_kb = mongo_task_info['memory_limit']
+    if 'statement' in mongo_task_info:
+        task.statement = mongo_task_info['statement']
 
     for tag_id in mongo_task_info.get('tags', []):
         try:

@@ -166,6 +166,8 @@ class Task(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     source = models.ForeignKey(TaskSource, blank=True, null=True, on_delete=models.SET_NULL)
+    statement = models.TextField(null=True, blank=True)
+
     objects = TaskManager()
 
     def name_or_id(self):
