@@ -43,12 +43,14 @@ INSTALLED_APPS = [
     'markdownx',
     'django_tables2',
     'widget_tweaks',
+    'django_elasticsearch_dsl',
     'accounts',
     'data',
     'info',
     'scraper',
     'stats',
     'contact',
+    'search',
     'rest_framework',
     'silk',
     'bootstrap_datepicker_plus',
@@ -153,3 +155,9 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 CELERY_BROKER_URL = os.environ['REDIS_URL']
 USE_CELERY = True
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.environ['BONSAI_URL']
+    },
+}

@@ -195,7 +195,7 @@ class Task(models.Model):
         unique_together = (('judge', 'task_id'),)
 
     def __str__(self):
-        return "{}:{}".format(self.judge.judge_id, self.task_id)
+        return "{}:{}[{}]".format(self.judge.judge_id, self.task_id, self.name)
 
 
 class JudgeTaskStatistic(models.Model):

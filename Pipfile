@@ -43,6 +43,9 @@ model-mommy = "*"
 psycopg2 = "==2.7.5"
 django-bootstrap-datepicker-plus = "*"
 loguru = "*"
+elasticsearch = "*"
+elasticsearch-dsl = "*"
+django-elasticsearch-dsl = "*"
 
 [requires]
 python_version = "3.7"

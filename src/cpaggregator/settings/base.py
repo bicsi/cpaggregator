@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     'django_tables2',
     'widget_tweaks',
     'bootstrap4',
+    'django_elasticsearch_dsl',
     'accounts',
     'data',
     'info',
     'scraper',
     'stats',
     'contact',
+    'search',
     'rest_framework',
     'silk',
     'bootstrap_datepicker_plus',
@@ -167,5 +169,11 @@ USE_CELERY = True
 
 BOOTSTRAP4 = {
     'include_jquery': True,
+}
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.environ['BONSAI_URL']
+    },
 }
 

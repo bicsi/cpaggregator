@@ -6,17 +6,25 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django_ajax.mixin import AJAXMixin
 
+from core.logging import log
 from data.models import Submission, Task, UserHandle
 from info.forms import TaskCustomTagCreateForm
 from info.models import FavoriteTask, CustomTaskTag
+from search.queries import search_task
 
 
 class TaskListView(LoginRequiredMixin, generic.ListView):
     template_name = 'info/task_list.html'
     paginate_by = 10
     context_object_name = 'task_list'
-    queryset = Task.objects.order_by(
-        F('statistics__difficulty_score').asc(nulls_last=True))
+
+    def get_queryset(self):
+        queryset = Task.objects
+        log.error(self.request.GET)
+        if self.request.GET.get('q'):
+            queryset = search_task(self.request.GET['q'])
+        return queryset.order_by(
+            F('statistics__difficulty_score').asc(nulls_last=True))
 
     def get_context_data(self, *args, **kwargs):
         kwargs['task_count'] = self.get_queryset().count()

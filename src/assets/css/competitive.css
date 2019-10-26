@@ -27,3 +27,31 @@
     margin: 0;
     padding: 0;
 }
+
+/* Custom search form */
+#custom-search-form {
+    margin:0;
+    margin-top: 5px;
+    padding: 0;
+}
+
+#custom-search-form .search-query {
+    width: 100%;
+}
+
+#custom-search-form button {
+    border: 0;
+    background: none;
+    /** belows styles are working good */
+    position: absolute;
+    right: 0;
+    margin-top: 3px;
+}
+
+.search-query:focus + button {
+    z-index: 3;
+}
+
+.btn-link, .btn-white {
+    text-decoration: none;
+}
