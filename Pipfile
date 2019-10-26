@@ -46,6 +46,7 @@ loguru = "*"
 elasticsearch = "*"
 elasticsearch-dsl = "*"
 django-elasticsearch-dsl = "*"
+google-cloud-translate = "*"
 
 [requires]
 python_version = "3.7"

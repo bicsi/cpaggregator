@@ -202,3 +202,22 @@ def scrape_user_info(handle, default_avatar):
     else:
         user_info['photo_url'] = __get_avatar_url(handle)
     return user_info
+
+
+def scrape_task_statement(task_id: str):
+    response = get_page(f"https://www.infoarena.ro/problema/{task_id}")
+    soup = BeautifulSoup(response.text)
+    text_block = soup.select_one("#main > .wiki_text_block")
+
+    found_h1 = False
+    text_lines = []
+    for child in text_block.findChildren():
+        if child.name == 'h1':
+            found_h1 = True
+            continue
+        if not found_h1:
+            continue
+        if "Exempl" in child.text:
+            break
+        text_lines.append(child.text)
+    return " ".join(text_lines)

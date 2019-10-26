@@ -40,10 +40,10 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'scraper.services.scrape_submissions_for_tasks',
         'args': ('ia:*', 'csa:*', 'cf:*'),
     },
-    'scrape-tasks-info': {
-        'schedule': 60 * 60,
-        'task': 'scraper.services.scrape_tasks_info',
-    },
+    #'scrape-tasks-info': {
+    #    'schedule': 60 * 60,
+    #    'task': 'scraper.services.scrape_tasks_info',
+    #},
     'scrape-handles-info': {
         'schedule': 60 * 60,
         'task': 'scraper.services.scrape_handles_info',
