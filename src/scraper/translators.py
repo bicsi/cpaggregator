@@ -27,5 +27,4 @@ def translate_ro_en(text: str):
         contents=[text],
         source_language_code='ro',
         target_language_code='en')
-    return response.translations[0]['translated_text']
-
+    return response.translations[0].translated_text
