@@ -94,6 +94,7 @@ def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
         log.info(f'Task ids: {task_ids}')
         __scrape_submissions_for_tasks(db, judge_id, list(set(task_ids)), from_date, to_date)
 
+
 @shared_task
 def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
     db = database.get_db()

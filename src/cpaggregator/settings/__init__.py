@@ -42,13 +42,13 @@ CELERY_BEAT_SCHEDULE = {
     },
     'scrape-submissions-users-last-day': {
         'schedule': 5 * 60,
-        'task': 'scraper.services.scrape_submissions_for_user',
+        'task': 'scraper.services.scrape_submissions_for_users',
         'args': ('cf:*', 'ia:*'),
         'kwargs': {'to_days': 1},
     },
     'scrape-submissions-users-all-time': {
         'schedule': 10 * 60 * 60,
-        'task': 'scraper.services.scrape_submissions_for_user',
+        'task': 'scraper.services.scrape_submissions_for_users',
         'args': ('cf:*', 'ia:*'),
     },
     #'scrape-tasks-info': {
