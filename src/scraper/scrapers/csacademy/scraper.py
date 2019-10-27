@@ -1,3 +1,4 @@
+from core.logging import log
 from scraper.scrapers import Scraper
 from . import utils
 
@@ -15,8 +16,9 @@ class CSAcademyScraper(Scraper):
         # a global map. We keep `task_id` as a parameter for consistency.
         task_name = task_id
         if task_name not in self.task_name_dict:
-            raise Exception(f"Task name {task_name} not in dictionary.",
-                            self.task_name_dict)
+            log.warning(f"Task name {task_name} not in dictionary.")
+            return []
+
         task_id = self.task_name_dict[task_name]['id']
         return utils.scrape_submissions_for_task(self.csrf_token, task_name, task_id)
 

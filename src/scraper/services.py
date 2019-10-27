@@ -117,7 +117,6 @@ def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
         __scrape_submissions_for_users(db, judge_id, list(set(handles)), from_date, to_date)
 
 
-
 def scrape_task_info(db, task):
     log.info(f"Scraping task info for task '{task}'...")
     judge_id, task_id = task.split(':', 1)
