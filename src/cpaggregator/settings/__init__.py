@@ -18,7 +18,7 @@ CELERY_BEAT_SCHEDULE = {
     # Data services cronjobs.
     'update-all-users': {
         'task': 'data.services.update_all_users',
-        'schedule': 5 * 60,
+        'schedule': 15 * 60,
     },
     'update-all-tasks-info': {
         'task': 'data.services.update_all_tasks_info',
@@ -29,16 +29,27 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 30 * 60,
     },
     # Scraper services cronjobs.
-    'scrape-submissions-last-day': {
+    'scrape-submissions-tasks-last-day': {
         'schedule': 5 * 60,
         'task': 'scraper.services.scrape_submissions_for_tasks',
-        'args': ('ia:*', 'csa:*', 'cf:*'),
+        'args': ('ac:*', 'ojuz:*', 'csa:*'),
         'kwargs': {'to_days': 1},
     },
-    'scrape-submissions-all-time': {
+    'scrape-submissions-tasks-all-time': {
         'schedule': 10 * 60 * 60,
         'task': 'scraper.services.scrape_submissions_for_tasks',
-        'args': ('ia:*', 'csa:*', 'cf:*'),
+        'args': ('ac:*', 'ojuz:*', 'csa:*'),
+    },
+    'scrape-submissions-users-last-day': {
+        'schedule': 5 * 60,
+        'task': 'scraper.services.scrape_submissions_for_user',
+        'args': ('cf:*', 'ia:*'),
+        'kwargs': {'to_days': 1},
+    },
+    'scrape-submissions-users-all-time': {
+        'schedule': 10 * 60 * 60,
+        'task': 'scraper.services.scrape_submissions_for_user',
+        'args': ('cf:*', 'ia:*'),
     },
     #'scrape-tasks-info': {
     #    'schedule': 60 * 60,

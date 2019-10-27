@@ -5,10 +5,8 @@ from typing import Dict, Any
 from bs4 import BeautifulSoup
 
 from core.logging import log
-from scraper.scrapers.codeforces.parsers import parse_tag, parse_verdict
+from scraper.scrapers.codeforces.parsers import parse_tag, parse_submission, CODEFORCES_JUDGE_ID
 from scraper.utils import get_page, split_into_chunks
-
-CODEFORCES_JUDGE_ID = 'cf'
 
 
 def _get_(api_method: str, kwargs) -> Any:
@@ -48,7 +46,6 @@ def scrape_submissions_for_task(task_id, count=200):
         for submission_data in response:
             found = True
 
-            submission_id = submission_data['id']
             check_task_id = '_'.join([
                 str(submission_data['problem']['contestId']),
                 submission_data['problem']['index']])
@@ -56,28 +53,30 @@ def scrape_submissions_for_task(task_id, count=200):
             if task_id.lower() != check_task_id.lower():
                 continue
 
-            if submission_data['verdict'] == 'TESTING':
-                log.info(f'Skipped submission {submission_id}: still testing.')
-                continue
-
-            if 'verdict' not in submission_data:
-                log.warning(f'Skipped submission {submission_id}: no verdict?.')
-                continue
-
-            for author in submission_data['author']['members']:
-                author_id = author['handle']
-                submission = dict(
-                    judge_id=CODEFORCES_JUDGE_ID,
-                    submission_id=str(submission_id),
-                    task_id=task_id.lower(),
-                    submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
-                    language=submission_data['programmingLanguage'],
-                    verdict=parse_verdict(submission_data['verdict']),
-                    author_id=author_id.lower(),
-                    time_exec=submission_data['timeConsumedMillis'],
-                    memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
-                )
+            for submission in parse_submission(submission_data):
                 yield submission
+        id_from += count
+
+
+def scrape_submissions_for_user(handle, count=200):
+    id_from = 1
+    found = True
+    while found:
+        found = False
+
+        response = _get_('user.status', kwargs={
+            'handle': handle,
+            'from': id_from,
+            'count': count,
+        })
+
+        for submission_data in response:
+            found = True
+
+            for submission in parse_submission(submission_data):
+                if submission['author_id'] == handle:
+                    yield submission
+
         id_from += count
 
 

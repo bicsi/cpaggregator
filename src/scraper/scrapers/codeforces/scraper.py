@@ -8,6 +8,9 @@ class CodeforcesScraper(Scraper):
     def scrape_submissions_for_task(self, task_id):
         return utils.scrape_submissions_for_task(task_id)
 
+    def scrape_submissions_for_user(self, user_id):
+        return utils.scrape_submissions_for_user(user_id)
+
     def scrape_task_info(self, task_id):
         return utils.scrape_task_info(task_id)
 
