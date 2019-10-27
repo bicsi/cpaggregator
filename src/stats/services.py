@@ -1,6 +1,4 @@
 import json
-from types import SimpleNamespace
-from typing import NamedTuple, List
 
 from data.models import Submission, UserProfile, Task
 from stats import utils
@@ -37,51 +35,16 @@ def compute_task_statistics():
             favorited_count=favorited_count
         ))
 
-    class TaskData(SimpleNamespace):
-        users_solved: List[UserProfile]
-        difficulty: float
+    for task in Task.objects.all():
+        if judge_to_task_count[task.judge] == 0:
+            continue
 
-    # Build task data.
-    task_data = {}
-    for submission in Submission.objects.best().accepted().select_related('author').all():
-        task = task_data.get(submission.task, TaskData(
-            users_solved=[],
-            difficulty=10.
-        ))
-        task.users_solved.append(submission.author.user)
-        task_data[submission.task] = task
+        statistics = task.statistics
+        users_solved_count = statistics.users_solved_count
+        mean_users_solved_count = judge_to_total_solved[task.judge] / judge_to_task_count[task.judge]
+        multiplier = 1.0 / (users_solved_count + 10.0) / mean_users_solved_count
+        statistics.difficulty_score = min(2500, 5 * max(1, round(BASE_SCORE * multiplier / 5)))
 
-    users_rating = {}
-    for user in UserProfile.objects.all():
-        users_rating[user] = 1.0
-
-    for iteration in range(10):
-        for user in users_rating:
-            users_rating[user] = 0.
-        for task in task_data.values():
-            for user in task.users_solved:
-                users_rating[user] += task.difficulty
-
-        sum_difficulty = 0.
-        for task in task_data.values():
-            ratings = sorted([users_rating[user] for user in task.users_solved])
-            clipped = ratings[len(ratings) // 10:len(ratings) // 4 + 1]
-            task.difficulty = 50.0 / len(ratings) + sum(clipped) / len(clipped)
-            sum_difficulty += task.difficulty
-
-        norm_factor = sum_difficulty / len(task_data)
-        for task in task_data.values():
-            task.difficulty = task.difficulty / norm_factor
-
-    max_difficulty = max([task.difficulty for task in task_data.values()])
-
-    for statistics in TaskStatistics.objects.all():
-        difficulty = max_difficulty
-        if statistics.task in task_data:
-            difficulty = task_data[statistics.task].difficulty
-        difficulty_score = min(2500, max(5, 5 * round(BASE_SCORE * difficulty / 5)))
-        print(f'Task: {statistics.task} score: {difficulty_score}')
-        statistics.difficulty_score = difficulty_score
         statistics.save()
 
 
