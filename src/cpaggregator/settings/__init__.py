@@ -65,7 +65,7 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'stats.services.compute_user_statistics',
     },
     'compute-task-statistics': {
-        'schedule': 30 * 60,
+        'schedule': 60,
         'task': 'stats.services.compute_task_statistics',
     },
 }
