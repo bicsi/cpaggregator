@@ -1,11 +1,9 @@
 from django.db import models
-from django.db.models import F, Manager, Case, When, Value, IntegerField
 from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
 from data.models import UserGroup, Submission, Task, UserProfile
-from stats.models import BestSubmission
 from . import managers
 
 
@@ -23,7 +21,13 @@ class TaskSheet(models.Model):
         return markdownify(self.description)
 
     def is_owned_by(self, user):
-        return user.is_superuser or user.profile == self.author
+        if user.is_superuser:
+            return True
+        if user.profile == self.author:
+            return True
+        if self.assignment and self.assignment.group.is_owned_by(user):
+            return True
+        return False
 
     def __str__(self):
         return self.title
@@ -46,7 +50,7 @@ class TaskSheetTask(models.Model):
 
 class Assignment(models.Model):
     group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
-    sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
+    sheet = models.OneToOneField(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
     end_on = models.DateTimeField(blank=True, null=True)
     ordering_id = models.PositiveIntegerField(blank=True, null=True)

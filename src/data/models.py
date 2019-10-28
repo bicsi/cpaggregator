@@ -123,7 +123,11 @@ class UserGroup(models.Model):
         return self.description
 
     def is_owned_by(self, user):
-        return user.is_superuser or user.profile == self.author
+        if user.is_superuser:
+            return True
+        if user.profile == self.author:
+            return True
+        return False
 
     def __str__(self):
         return self.name
