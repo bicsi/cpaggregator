@@ -16,9 +16,9 @@
                     <span class="small text-muted ml-1">@{{ member_data.member.username }}</span>
                 </a>
                 {% if member_data.role == 'owner' %}
-                <span class="badge badge-warning ml-2">
+                <span class="badge badge-warning badge-pill ml-2 p-1"
+                    data-toggle="tooltip" data-placement="top" title="Owner">
                     <i class="fas fa-xs fa-crown"></i>
-                    Owner
                 </span>
                 {% endif %}
                 <span class="flex-grow-1"></span>
