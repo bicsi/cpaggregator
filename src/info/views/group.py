@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Count
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
@@ -14,7 +15,7 @@ from rest_framework.views import APIView
 from data.models import UserGroup, Submission, GroupMember
 from info import forms, queries
 from info.models import Assignment
-from info.utils import compute_asd_scores, build_group_card_context
+from info.utils import build_group_card_context
 
 
 class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
@@ -25,18 +26,15 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
     def get_form_kwargs(self):
         kwargs = super(AssignmentCreateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
-        print(kwargs)
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
-        self.group = get_object_or_404(
-            UserGroup,
-            group_id=kwargs['group_id'],
-            author=self.request.user.profile)
-        return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
+        self.group = get_object_or_404(UserGroup, group_id=kwargs['group_id'])
+        if self.group.is_owned_by(self.request.user.profile):
+            return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
+        return HttpResponseForbidden()
 
     def get_context_data(self, **kwargs):
-        print('GETTING CONTEXT DATA')
         context = super(AssignmentCreateView, self).get_context_data(**kwargs)
         context['object'] = self.group
         return context
