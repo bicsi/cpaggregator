@@ -20,7 +20,9 @@ def _get_(api_method: str, kwargs) -> Any:
     json_data = response.json()
     status = json_data['status']
     if status != 'OK':
-        log.error(f"Codeforces API error (expected status: 'OK' got: '{status}')", api_method, kwargs)
+        log.error(f"Codeforces API error "
+                  f"(expected status: 'OK' got: '{status}', '"
+                  f"message: '{json_data.get('message')}')")
         return []
     return json_data['result']
 

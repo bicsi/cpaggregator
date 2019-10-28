@@ -64,30 +64,33 @@ def parse_verdict(verdict_text):
 
 
 def parse_submission(submission_data):
-    submission_id = submission_data['id']
-    task_id = '_'.join([
-        str(submission_data['problem']['contestId']),
-        submission_data['problem']['index']])
+    try:
+        submission_id = submission_data['id']
+        task_id = '_'.join([
+            str(submission_data['problem']['contestId']),
+            submission_data['problem']['index']])
 
-    if submission_data['verdict'] == 'TESTING':
-        log.info(f'Skipped submission {submission_id}: still testing.')
-        return []
+        if submission_data['verdict'] == 'TESTING':
+            log.info(f'Skipped submission {submission_id}: still testing.')
+            return []
 
-    if 'verdict' not in submission_data:
-        log.warning(f'Skipped submission {submission_id}: no verdict?.')
-        return []
+        if 'verdict' not in submission_data:
+            log.warning(f'Skipped submission {submission_id}: no verdict?.')
+            return []
 
-    for author in submission_data['author']['members']:
-        author_id = author['handle']
-        submission = dict(
-            judge_id=CODEFORCES_JUDGE_ID,
-            submission_id=str(submission_id),
-            task_id=task_id.lower(),
-            submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
-            language=submission_data['programmingLanguage'],
-            verdict=parse_verdict(submission_data['verdict']),
-            author_id=author_id.lower(),
-            time_exec=submission_data['timeConsumedMillis'],
-            memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
-        )
-        yield submission
+        for author in submission_data['author']['members']:
+            author_id = author['handle']
+            submission = dict(
+                judge_id=CODEFORCES_JUDGE_ID,
+                submission_id=str(submission_id),
+                task_id=task_id.lower(),
+                submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
+                language=submission_data['programmingLanguage'],
+                verdict=parse_verdict(submission_data['verdict']),
+                author_id=author_id.lower(),
+                time_exec=submission_data['timeConsumedMillis'],
+                memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
+            )
+            yield submission
+    except Exception as ex:
+        log.error(f"Failed to parse submission.\nSubmission data:{submission_data}\nError: {ex}")
