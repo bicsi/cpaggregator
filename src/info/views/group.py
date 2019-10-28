@@ -90,7 +90,9 @@ class GroupMemberAddView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
             for username in map(str.strip, form.cleaned_data['usernames'].split(',')):
                 for user in User.objects.filter(username=username):
                     users.append(user.profile)
-            group.members.add(*users)
+            for profile in users:
+                GroupMember.objects.get_or_create(group=group, profile=profile)
+
         return redirect('group-detail', group_id=group.group_id)
 
 
