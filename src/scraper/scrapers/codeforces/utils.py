@@ -13,14 +13,15 @@ def _get_(api_method: str, kwargs) -> Any:
     page_url = f"http://codeforces.com/api/{api_method}"
     try:
         response = get_page(page_url, **kwargs)
-    except Exception as e:
-        log.exception(e)
+    except Exception as ex:
+        log.error(f"GET request got exception: {ex}")
         return []
 
     json_data = response.json()
     status = json_data['status']
     if status != 'OK':
-        raise Exception(f"Codeforces API error", "expected status: 'OK' got: '{status}'", api_method, kwargs)
+        log.error(f"Codeforces API error (expected status: 'OK' got: '{status}')", api_method, kwargs)
+        return []
     return json_data['result']
 
 
