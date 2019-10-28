@@ -1,5 +1,6 @@
 import json
 
+from core.logging import log
 from data.models import Submission, UserProfile, Task
 from stats import utils
 from .models import TaskStatistics, UserStatistics, BestSubmission
@@ -13,6 +14,7 @@ def compute_task_statistics():
     Computes a TaskStatistic object for each task,
     which it saves to the database
     """
+    log.info('Computing task statistics...')
 
     BASE_SCORE = 100
     judge_to_total_solved = {}
