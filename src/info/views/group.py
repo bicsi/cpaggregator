@@ -30,9 +30,10 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.group = get_object_or_404(UserGroup, group_id=kwargs['group_id'])
-        if self.group.is_owned_by(self.request.user.profile):
-            return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
-        return HttpResponseForbidden()
+        if not self.group.is_owned_by(self.request.user):
+            return HttpResponseForbidden()
+        return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         context = super(AssignmentCreateView, self).get_context_data(**kwargs)
@@ -83,14 +84,14 @@ class GroupMemberAddView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
 
     def form_valid(self, form):
         group = self.get_object()
-        if group.is_owned_by(self.request.user):
-            users = []
-            for username in map(str.strip, form.cleaned_data['usernames'].split(',')):
-                for user in User.objects.filter(username=username):
-                    users.append(user.profile)
-            for profile in users:
-                GroupMember.objects.get_or_create(group=group, profile=profile)
-
+        if not group.is_owned_by(self.request.user):
+            return HttpResponseForbidden()
+        users = []
+        for username in map(str.strip, form.cleaned_data['usernames'].split(',')):
+            for user in User.objects.filter(username=username):
+                users.append(user.profile)
+        for profile in users:
+            GroupMember.objects.get_or_create(group=group, profile=profile)
         return redirect('group-detail', group_id=group.group_id)
 
 
@@ -101,9 +102,11 @@ class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View)
 
     def post(self, request, *args, **kwargs):
         group = self.get_object()
-        if group.is_owned_by(request.user):
-            user = get_object_or_404(User, username=request.POST.get('member_username', ''))
-            group.members.remove(user.profile)
+        if not group.is_owned_by(request.user):
+            return HttpResponseForbidden()
+
+        user = get_object_or_404(User, username=request.POST.get('member_username', ''))
+        group.members.remove(user.profile)
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -111,15 +114,18 @@ class GroupMemberRoleChange(LoginRequiredMixin, SingleObjectMixin, generic.View)
     model = GroupMember
 
     def get_object(self, queryset=None):
-        return get_object_or_404(GroupMember, group__group_id=self.kwargs['group_id'],
-                                 profile__user__username=self.request.POST.get('username'))
+        return get_object_or_404(
+            GroupMember, group__group_id=self.kwargs['group_id'],
+            profile__user__username=self.request.POST.get('username'))
 
     def post(self, request, *args, **kwargs):
         group_member = self.get_object()
-        if group_member.group.is_owned_by(request.user):
-            role = request.POST.get('role')
-            group_member.role = role
-            group_member.save()
+        if not group_member.group.is_owned_by(request.user):
+            return HttpResponseForbidden()
+
+        role = request.POST.get('role')
+        group_member.role = role
+        group_member.save()
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -191,7 +197,7 @@ class GroupDetailView(generic.DetailView):
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
 
-class GroupDeleteView(generic.DeleteView):
+class GroupDeleteView(LoginRequiredMixin, generic.DeleteView):
     slug_url_kwarg = 'group_id'
     slug_field = 'group_id'
     success_url = reverse_lazy('home')
@@ -213,9 +219,9 @@ class GroupUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
         return self.request.META.get('HTTP_REFERER', reverse_lazy('home'))
 
     def form_valid(self, form):
-        if self.object.is_owned_by(self.request.user):
-            return super(GroupUpdateView, self).form_valid(form)
-        return redirect('home')
+        if not self.object.is_owned_by(self.request.user):
+            return HttpResponseForbidden()
+        return super(GroupUpdateView, self).form_valid(form)
 
 
 class GroupListView(LoginRequiredMixin, generic.ListView):
@@ -240,11 +246,11 @@ class GroupAssignmentOrderingUpdate(APIView):
         group_id = kwargs['group_id']
         ordering = json.loads(request.data.get('ordering'))
         ordering_index = {int(elem): int(idx) for idx, elem in enumerate(ordering)}
-        print(ordering_index)
 
         group = get_object_or_404(UserGroup, group_id=group_id)
-        if group.is_owned_by(request.user):
-            for idx, assignment in enumerate(Assignment.objects.filter(group=group).all()):
-                assignment.ordering_id = ordering_index.get(idx)
-                assignment.save()
-            return Response({'success': 'Success'})
+        if not group.is_owned_by(request.user):
+            return HttpResponseForbidden()
+        for idx, assignment in enumerate(Assignment.objects.filter(group=group).all()):
+            assignment.ordering_id = ordering_index.get(idx)
+            assignment.save()
+        return Response({'success': 'Success'})

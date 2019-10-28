@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
@@ -145,12 +146,14 @@ class SheetTaskDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
 
     def post(self, request, *args, **kwargs):
         sheet = self.get_object()
-        if sheet.is_owned_by(request.user):
-            task = get_object_or_404(TaskSheetTask,
-                                     sheet=sheet,
-                                     task__task_id=request.POST.get('task_id', ''),
-                                     task__judge__judge_id=request.POST.get('judge_id', ''))
-            task.delete()
+        if not sheet.is_owned_by(request.user):
+            return HttpResponseForbidden()
+
+        task = get_object_or_404(TaskSheetTask,
+                                 sheet=sheet,
+                                 task__task_id=request.POST.get('task_id', ''),
+                                 task__judge__judge_id=request.POST.get('judge_id', ''))
+        task.delete()
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -185,6 +188,8 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
 
     def dispatch(self, request, *args, **kwargs):
         self.object = get_object_or_404(TaskSheet, sheet_id=self.kwargs['sheet_id'])
+        if not self.object.is_owned_by(request.user):
+            return HttpResponseForbidden()
         return super(SheetTaskAddView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -216,8 +221,9 @@ class SheetDeleteView(LoginRequiredMixin, generic.DeleteView):
     slug_field = 'sheet_id'
 
     def delete(self, request, *args, **kwargs):
-        if self.get_object().is_owned_by(request.user):
-            return super(SheetDeleteView, self).delete(request, *args, **kwargs)
+        if not self.get_object().is_owned_by(request.user):
+            return HttpResponseForbidden()
+        return super(SheetDeleteView, self).delete(request, *args, **kwargs)
 
 
 class SheetDescriptionUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
@@ -236,9 +242,9 @@ class SheetDescriptionUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateVi
         return kwargs
 
     def form_valid(self, form):
-        if self.object.is_owned_by(self.request.user):
-            return super(SheetDescriptionUpdateView, self).form_valid(form)
-        return redirect('home')
+        if not self.object.is_owned_by(self.request.user):
+            return HttpResponseForbidden()
+        return super(SheetDescriptionUpdateView, self).form_valid(form)
 
 
 class SheetTaskOrderingUpdate(APIView):
@@ -248,11 +254,12 @@ class SheetTaskOrderingUpdate(APIView):
         ordering_index = {int(elem): int(idx) for idx, elem in enumerate(ordering)}
 
         sheet = get_object_or_404(TaskSheet, sheet_id=sheet_id)
-        if sheet.is_owned_by(request.user):
-            for idx, task in enumerate(TaskSheetTask.objects.filter(sheet=sheet).all()):
-                task.ordering_id = ordering_index.get(idx)
-                task.save()
-            return Response({'success': 'Success'})
+        if not sheet.is_owned_by(request.user):
+            return HttpResponseForbidden()
+        for idx, task in enumerate(TaskSheetTask.objects.filter(sheet=sheet).all()):
+            task.ordering_id = ordering_index.get(idx)
+            task.save()
+        return Response({'success': 'Success'})
 
 
 class AssignmentUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
@@ -267,6 +274,11 @@ class AssignmentUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
         return Assignment.objects.get(
             sheet__sheet_id=self.kwargs['sheet_id'],
             group__group_id=self.kwargs['group_id'])
+
+    def form_valid(self, form):
+        if not self.object.group.is_owned_by(self.request.user):
+            return HttpResponseForbidden()
+        return super(AssignmentUpdateView, self).form_valid(form)
 
 
 
