@@ -4,7 +4,11 @@ import sys
 import loguru
 
 
-handler = logging.handlers.SysLogHandler(address=('localhost', 514))
-loguru.logger.add(handler)
+class PropagateHandler(logging.Handler):
+    def emit(self, record):
+        logging.getLogger(record.name).handle(record)
+
+
+loguru.logger.add(PropagateHandler(), format="{message}")
 log = loguru.logger
 
