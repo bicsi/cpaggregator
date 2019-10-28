@@ -1,7 +1,6 @@
 import sys
 
-import loguru
+import logging
 
-loguru.logger.add(sys.stdout)
-log = loguru.logger
+log = logging.getLogger(__name__)
 
