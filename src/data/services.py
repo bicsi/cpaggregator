@@ -1,4 +1,6 @@
 import math
+from datetime import timedelta
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.text import slugify
@@ -214,6 +216,10 @@ def update_all_users():
     TASKS_TO_ADD.clear()
     db = get_db()
     log.info(f'Updating all users...')
-    for user in UserProfile.objects.all():
-        __update_user(db, user)
+    now = timezone.now()
+    for profile in UserProfile.objects.select_related('user').all():
+        if profile.user.last_login < now - timedelta(days=21):
+            log.info(f'Skipping user {profile.user.username}: too stale.')
+            continue
+        __update_user(db, profile)
     log.info(f"TASKS TO ADD: {len(TASKS_TO_ADD)}")
