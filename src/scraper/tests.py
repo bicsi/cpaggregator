@@ -2,7 +2,6 @@ from django.test import TestCase
 
 # Create your tests here.
 
-from scraper.services import scrape_submissions_for_tasks
+from scraper.services import scrape_submissions_for_users
 
-for submission in scrape_submissions_for_tasks('ac:*'):
-    print(submission)
+scrape_submissions_for_users('cf:*')
