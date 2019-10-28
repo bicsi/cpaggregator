@@ -1,6 +1,14 @@
+import logging
 import sys
 
-import logging
+import loguru
 
-log = logging.getLogger(__name__)
+
+class PropagateHandler(logging.Handler):
+    def emit(self, record):
+        logging.getLogger(record.name).handle(record)
+
+
+loguru.logger.add(PropagateHandler(), format="{message}")
+log = loguru.logger
 
