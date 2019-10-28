@@ -102,7 +102,7 @@ class UserProfile(models.Model):
 class UserGroup(models.Model):
     group_id = models.CharField(max_length=256, unique=True)
     name = models.CharField(max_length=256)
-    members = models.ManyToManyField(UserProfile, related_name='assigned_groups')
+    members = models.ManyToManyField(UserProfile, related_name='assigned_groups', through='GroupMember')
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(UserProfile, related_name='owned_groups', null=True, on_delete=models.SET_NULL)
     visibility = models.CharField(max_length=256, choices=VISIBILITY_CHOICES, default='PRIVATE')
@@ -127,10 +127,25 @@ class UserGroup(models.Model):
             return True
         if user.profile == self.author:
             return True
-        return False
+        if GroupMember.objects.filter(profile=user.profile, group=self, role='owner').exists():
+            return True
 
     def __str__(self):
         return self.name
+
+
+class GroupMember(models.Model):
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
+    role = models.CharField(max_length=64,
+                            choices=[('member', 'member'), ('owner', 'owner')],
+                            default='member')
+
+    def __str__(self):
+        return f'{self.profile} is {self.role} in {self.group}'
+
+    class Meta:
+        unique_together = (('profile', 'group'),)
 
 
 class MethodTag(models.Model):

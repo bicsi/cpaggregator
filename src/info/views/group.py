@@ -11,7 +11,7 @@ from django_ajax.mixin import AJAXMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from data.models import UserGroup, Submission
+from data.models import UserGroup, Submission, GroupMember
 from info import forms, queries
 from info.models import Assignment
 from info.utils import compute_asd_scores, build_group_card_context
@@ -107,6 +107,22 @@ class GroupMemberDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View)
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
+class GroupMemberRoleChange(LoginRequiredMixin, SingleObjectMixin, generic.View):
+    model = GroupMember
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(GroupMember, group__group_id=self.kwargs['group_id'],
+                                 profile__user__username=self.request.POST.get('username'))
+
+    def post(self, request, *args, **kwargs):
+        group_member = self.get_object()
+        if group_member.group.is_owned_by(request.user):
+            role = request.POST.get('role')
+            group_member.role = role
+            group_member.save()
+        return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
+
+
 class GroupJoinView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -158,14 +174,19 @@ class GroupDetailView(generic.DetailView):
         else:
             kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments.all()]
 
-        members = group.members.all()
+        members = GroupMember.objects.filter(group=group).select_related('profile').all()
 
-        if group.group_id == 'asd-seminar' and 0:
-            scores = compute_asd_scores(group)
-            kwargs['members'] = [{'member': member, 'scores': scores[member.id]} for member in members]
-            kwargs['max_score'] = 10
-        else:
-            kwargs['members'] = [{'member': member} for member in members]
+        kwargs['members'] = [{
+            'member': member.profile,
+            'role': member.role,
+        } for member in members]
+
+        # if group.group_id == 'asd-seminar' and 0:
+        #     scores = compute_asd_scores(group)
+        #
+        #         'scores': scores[member.profile.id],
+        #     } for member in members]
+        #     kwargs['max_score'] = 10
 
         return super(GroupDetailView, self).get_context_data(**kwargs)
 
@@ -201,7 +222,10 @@ class GroupListView(LoginRequiredMixin, generic.ListView):
     template_name = 'info/group_list.html'
     paginate_by = 15
     context_object_name = 'group_list'
-    queryset = UserGroup.public.annotate(member_count=Count('members')).order_by('-member_count')
+
+    def get_queryset(self):
+        return UserGroup.public.annotate(
+            member_count=Count('members')).order_by('-member_count')
 
     def get_context_data(self, *args, **kwargs):
         kwargs['group_count'] = self.get_queryset().count()

@@ -26,6 +26,7 @@ urlpatterns = [
         path('join/', views.group.GroupJoinView.as_view(), name='group-join'),
         path('leave/', views.group.GroupLeaveView.as_view(), name='group-leave'),
         path('update/', views.group.GroupUpdateView.as_view(), name='group-update'),
+        path('change-role/', views.group.GroupMemberRoleChange.as_view(), name='group-member-role-change'),
         path('delete-member/', views.group.GroupMemberDeleteView.as_view(), name='group-member-delete'),
         path('add-member/', views.group.GroupMemberAddView.as_view(), name='group-member-add'),
         path('create-assignment/', views.group.AssignmentCreateView.as_view(), name='assignment-create'),
