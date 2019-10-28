@@ -61,11 +61,11 @@ CELERY_BEAT_SCHEDULE = {
     },
     # Stats services cronjobs.
     'compute-user-statistics': {
-        'schedule': 30 * 60,
+        'schedule': 10 * 60,
         'task': 'stats.services.compute_user_statistics',
     },
     'compute-task-statistics': {
-        'schedule': 60,
+        'schedule': 10 * 60,
         'task': 'stats.services.compute_task_statistics',
     },
 }
