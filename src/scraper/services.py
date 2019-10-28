@@ -33,20 +33,15 @@ def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
     submissions = []
     for task_id in task_ids:
         try:
-            subs = scraper.scrape_submissions_for_task(task_id)
-            submissions.append(subs)
+            submissions = scraper.scrape_submissions_for_task(task_id)
+            submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+            utils.write_submissions(db, submissions, chunk_size=1000)
+
         except NotImplementedError:
             log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
             return
         except Exception as ex:
             log.exception(ex)
-
-    # Merge the generators into one and take while submitted on is good
-    submissions = heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
-    submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
-
-    # Write the submissions to DB.
-    utils.write_submissions(db, submissions, chunk_size=1000)
 
 
 def __scrape_submissions_for_users(db, judge_id, handles, from_date, to_date):
@@ -56,20 +51,14 @@ def __scrape_submissions_for_users(db, judge_id, handles, from_date, to_date):
     submissions = []
     for handle in handles:
         try:
-            subs = scraper.scrape_submissions_for_user(handle)
-            submissions.append(subs)
+            submissions = scraper.scrape_submissions_for_user(handle)
+            submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+            utils.write_submissions(db, submissions, chunk_size=1000)
         except NotImplementedError:
             log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
             return
         except Exception as ex:
             log.exception(ex)
-
-    # Merge the generators into one and take while submitted on is good
-    submissions = heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
-    submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
-
-    # Write the submissions to DB.
-    utils.write_submissions(db, submissions, chunk_size=1000)
 
 
 @shared_task
