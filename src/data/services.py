@@ -218,7 +218,7 @@ def update_all_users():
     log.info(f'Updating all users...')
     now = timezone.now()
     for profile in UserProfile.objects.select_related('user').all():
-        if profile.user.last_login < now - timedelta(days=21):
+        if not profile.user.last_login or profile.user.last_login < now - timedelta(days=21):
             log.info(f'Skipping user {profile.user.username}: too stale.')
             continue
         __update_user(db, profile)
