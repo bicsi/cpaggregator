@@ -137,7 +137,7 @@ SECURE_HSTS_SECONDS = 1000000
 SECURE_FRAME_DENY = True
 
 # Activate Django-Heroku.
-django_heroku.settings(locals(), staticfiles=False)
+django_heroku.settings(locals(), staticfiles=False, logging=False)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
