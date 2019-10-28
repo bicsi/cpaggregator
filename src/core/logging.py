@@ -1,14 +1,11 @@
 import logging
+import os
 import sys
 
 import loguru
 
-
-class PropagateHandler(logging.Handler):
-    def emit(self, record):
-        logging.getLogger(record.name).handle(record)
-
-
-loguru.logger.add(PropagateHandler(), format="{message}")
-log = loguru.logger
+if os.environ.get('PRODUCTION'):
+    log = logging.getLogger(__name__)
+else:
+    log = loguru.logger
 
