@@ -1,5 +1,6 @@
 {% load static from staticfiles %}
 {% load bootstrap4 %}
+{% load markdownify %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -116,10 +117,24 @@
 		</div>
 		<!-- /.container-->
 	</nav>
+
 	<div class="wrapper page-wrapper {% block wrapper_class %}{% endblock %} mt-3">
 		<div class="modal fade" tabindex="-1" role="dialog" id="modal">
 			<div class="modal-dialog modal-lg" id="modal-dialog" role="document">
 			</div>
+		</div>
+		<div class="container">
+		{% for message in messages %}
+		  <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+			  {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+			  	<i class="fas fa-exclamation-triangle mr-2"></i>
+			  {% endif %}
+			{{ message.message|markdownify }}
+		  </div>
+		{% endfor %}
 		</div>
         {% block body_content %}{% endblock %}
 	</div>

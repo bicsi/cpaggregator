@@ -1,5 +1,6 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
@@ -199,7 +200,9 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
     def form_valid(self, form):
         task_url = form.cleaned_data['task_url']
         parse_result = urlparsers.parse_task_url(task_url)
-        if parse_result:
+        if not parse_result:
+            messages.add_message(self.request, messages.ERROR, 'Could not parse task from url.')
+        else:
             log.info(parse_result)
             judge = Judge.objects.get(judge_id=parse_result.judge_id)
             task, _ = Task.objects.get_or_create(
@@ -210,6 +213,8 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
                 task=task,
                 sheet=self.object,
             )
+            messages.add_message(self.request, messages.SUCCESS,
+                                 f'Task __{task.name_or_id()}__ added successfully!')
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
