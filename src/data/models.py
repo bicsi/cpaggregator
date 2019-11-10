@@ -208,15 +208,15 @@ class Task(models.Model):
                 return f'https://codeforces.com/gym/{contest_id}/problem/{task_letter.upper()}'
             return f'https://codeforces.com/contest/{contest_id}/problem/{task_letter.upper()}'
         if self.judge.judge_id == 'ac':
-            contest_id, _ = self.task_id.split('_')
-            return f"https://atcoder.jp/contests/{contest_id}/tasks/{self.task_id}"
+            contest_id, _ = self.task_id.rsplit('_', 1)
+            return f"https://atcoder.jp/contests/{contest_id.replace('_', '-')}/tasks/{self.task_id}"
         return None
 
     class Meta:
         unique_together = (('judge', 'task_id'),)
 
     def __str__(self):
-        return "{}:{}[{}]".format(self.judge.judge_id, self.task_id, self.name)
+        return "{}:{} [{}]".format(self.judge.judge_id, self.task_id, self.name)
 
 
 class JudgeTaskStatistic(models.Model):

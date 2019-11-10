@@ -10,7 +10,10 @@
         </button>
       </div>
       <div class="modal-body">
-          {% block modal_body %}{% bootstrap_form form %}{% endblock %}
+          {% block modal_body %}
+            {% bootstrap_form form %}
+            {% block after_form %}{% endblock %}
+          {% endblock %}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

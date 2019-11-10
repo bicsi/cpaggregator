@@ -49,15 +49,10 @@ class ProfileUpdateForm(forms.ModelForm):
 
 
 class SheetTaskCreateForm(forms.Form):
-    judge = forms.ModelChoiceField(queryset=Judge.objects)
-    task_id = forms.CharField(
-        label='Task id',
-        help_text='Example: binar (infoarena), 505_E (codeforces), 0-k-multiple (csacademy)',
-        max_length=256)
-    is_source = forms.BooleanField(
-        label='Is source',
-        required=False,
-        help_text='Check this if the id above represents a task source id, instead of a task id')
+    task_url = forms.CharField(
+        label='Task URL',
+        help_text='Example: "http://codeforces.com/gym/102419/problem/A", "infoarena.ro/problema/adunare"'
+    )
 
 
 class SheetDescriptionUpdateForm(forms.ModelForm):

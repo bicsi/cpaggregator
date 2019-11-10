@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from core.logging import log
 from cpaggregator import settings
 from data import services
 from data.models import UserProfile, Task, UserHandle
@@ -40,9 +41,9 @@ def create_task(sender, instance, created, **kwargs):
     if created and settings.USE_CELERY:
         task_id = ":".join([instance.judge.judge_id, instance.task_id])
 
-        print(f'Created new task {task_id}: updating info async...')
+        log.info(f'Created new task {task_id}: updating info async...')
         services.update_tasks_info.si(task_id).apply_async()
-        print('Scraping submissions and updating users async...')
+        log.info('Scraping submissions and updating users async...')
         celery.chain(
             services.scraper_services.scrape_submissions_for_tasks.si(task_id),
             services.update_all_users.si(),

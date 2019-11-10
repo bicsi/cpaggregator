@@ -173,7 +173,7 @@ BOOTSTRAP4 = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.environ['BONSAI_URL']
+        'hosts': os.environ.get('BONSAI_URL')
     },
 }
 

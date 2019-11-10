@@ -10,7 +10,9 @@ from django_ajax.mixin import AJAXMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from data.models import Task, TaskSource, Submission
+from core import urlparsers
+from core.logging import log
+from data.models import Task, TaskSource, Submission, Judge
 from info import forms
 from info.models import TaskSheetTask, TaskSheet, Assignment
 from info.tables import ResultsTable
@@ -184,6 +186,8 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
 
     def get_context_data(self, **kwargs):
         kwargs['object'] = self.object
+        kwargs['judges'] = Judge.objects.filter(judge_id__in=[
+            parser.judge_id for parser in urlparsers.TASK_PARSERS])
         return super(SheetTaskAddView, self).get_context_data(**kwargs)
 
     def dispatch(self, request, *args, **kwargs):
@@ -193,18 +197,14 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
         return super(SheetTaskAddView, self).dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        if form.cleaned_data['is_source']:
-            if TaskSource.objects.filter(source_id=form.cleaned_data['task_id']).exists():
-                source = TaskSource.objects.get(source_id=form.cleaned_data['task_id'])
-                for task in source.task_set.all():
-                    TaskSheetTask.objects.create(
-                        task=task,
-                        sheet=self.object,
-                    )
-        else:
+        task_url = form.cleaned_data['task_url']
+        parse_result = urlparsers.parse_task_url(task_url)
+        if parse_result:
+            log.info(parse_result)
+            judge = Judge.objects.get(judge_id=parse_result.judge_id)
             task, _ = Task.objects.get_or_create(
-                judge=form.cleaned_data['judge'],
-                task_id=form.cleaned_data['task_id'].lower(),
+                judge=judge,
+                task_id=parse_result.task_id.lower(),
             )
             TaskSheetTask.objects.create(
                 task=task,
