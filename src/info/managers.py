@@ -4,7 +4,8 @@ from django.utils import timezone
 
 class AssignmentQuerySet(models.QuerySet):
     def active(self):
-        return self.filter(assigned_on__lte=timezone.now())
+        return self.filter(assigned_on__lte=timezone.now()) \
+                   .exclude(end_on__lt=timezone.now())
 
-    def inactive(self):
-        return self.filter(assigned_on__gt=timezone.now())
+    def visible(self):
+        return self.filter(assigned_on__lte=timezone.now())

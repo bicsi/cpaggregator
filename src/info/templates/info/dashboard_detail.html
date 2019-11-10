@@ -4,6 +4,7 @@
 {% load bootstrap4 %}
 {% load static from staticfiles %}
 {% load mathfilters %}
+{% load humanize %}
 
 {% block title_tag %}Dashboard{% endblock %}
 
@@ -12,6 +13,57 @@
 <div class="container">
     <h1 class="mt-5">Dashboard</h1>
 
+    <h5 class="mb-3 mt-5">Assignments</h5>
+    <div class="row">
+        {% for assignment_data in active_assignments_data %}
+        {% with assignment=assignment_data.assignment %}
+        <div class="col-12 col-lg-6 px-3 py-2">
+            <div class="card">
+                <div class="card-body">
+                    <div class="progress float-right" style="width: 80px; height: 80px;"
+                         data-value="{{ assignment_data.solved_count }}" data-max-value="{{ assignment_data.task_count }}">
+                      <span class="progress-left"><span class="progress-bar border-success"></span></span>
+                      <span class="progress-right"><span class="progress-bar border-success"></span></span>
+                      <div class="progress-value w-100 h-100 rounded-circle d-flex flex-column align-items-center justify-content-center">
+                            <div class="h6 mb-0">
+                                <span class="text-success font-weight-bold">{{ assignment_data.solved_count }}</span>
+                                <span class="text-muted">/ {{ assignment_data.task_count }}</span>
+                            </div>
+                            <span class="small text-muted">tasks solved</span>
+                      </div>
+                    </div>
+                    <div>
+                        <h5 class="card-title">
+                            <a href="{% url 'group-sheet-detail' group_id=assignment.group.group_id sheet_id=assignment.sheet.sheet_id %}"
+                               class="card-link text-dark">
+                            <i class="fas fa-tasks mr-2"></i>
+                            {{ assignment.sheet.title }}
+                            </a>
+                        </h5>
+
+                        <p class="card-text my-2">
+                            in <a href="{% url 'group-detail' group_id=assignment.group.group_id %}"
+                                class="card-link">
+                            <i class="fas fa-users mx-1 fa-xs"></i>
+                            {{ assignment.group.name }}
+                            </a>
+                        </p>
+                        {% if assignment.end_on %}
+                        <p class="card-text small text-muted">
+                            Ends {{ assignment.end_on|naturaltime }}
+                        </p>
+                        {% else %}
+                        <p class="card-text small text-muted">
+                            Assigned {{ assignment.assigned_on|naturaltime }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
 
     <h5 class="mb-3 mt-5">Newly added tasks</h5>
     <div class="list-group">

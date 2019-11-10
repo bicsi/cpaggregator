@@ -41,7 +41,7 @@
                 <span class="flex-grow-1">{{ assignment_data.assignment.sheet }}</span>
             {% endif %}
             {% if group_data.is_user_member %}
-            {% with assignment_data.task_count|sub:assignment_data.solved_count  as unsolved_count %}
+            {% with assignment_data.task_count|sub:assignment_data.solved_count as unsolved_count %}
                 <span data-toggle="tooltip" data-placement="top"
                       class="badge badge-pill {% if unsolved_count == 0 %}badge-success{% else %}badge-secondary{% endif %}"
                       title="Tasks solved by you">

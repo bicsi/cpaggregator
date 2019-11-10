@@ -2,6 +2,7 @@ from datetime import datetime
 import itertools
 from django.db.models import Count, Prefetch
 
+from core.logging import log
 from . import queries
 from django.utils.text import slugify
 
@@ -38,12 +39,12 @@ def build_group_card_context(request, groups):
                         .values_list('id', flat=True))
     groups = groups.prefetch_related(Prefetch(
         'assignment_set',
-        Assignment.objects.active(),
-        to_attr='active_assignments'))
+        Assignment.objects.visible(),
+        to_attr='visible_assignments'))
 
     assignments = Assignment.objects \
         .select_related('sheet') \
-        .active() \
+        .visible() \
         .filter(group__in=groups) \
         .annotate(task_count=Count('sheet__tasks'))
 
@@ -68,8 +69,8 @@ def build_group_card_context(request, groups):
             "group": group,
             "is_user_member": (group.id in member_groups),
             "assignments": [assignment_ctx[assignment]
-                            for assignment in group.active_assignments[:3]],
-            "assignment_count": len(group.active_assignments)
+                            for assignment in group.visible_assignments[:3]],
+            "assignment_count": len(group.visible_assignments)
         } for group in groups]
 
     return ret

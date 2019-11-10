@@ -82,11 +82,8 @@ class Assignment(models.Model):
     def get_all_judges(self):
         return {task.judge for task in self.sheet.tasks.all()}
 
-    def is_active(self):
-        return self.assigned_on < timezone.now()
-
     def is_future(self):
-        return not self.is_active()
+        return self.assigned_on > timezone.now()
 
     def __str__(self):
         return '{} assigned to {}'.format(self.sheet, self.group)

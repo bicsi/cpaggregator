@@ -5,7 +5,7 @@ from .models import Assignment, TaskSheetTask
 
 
 def get_all_judges(group: UserGroup) -> QuerySet:
-    assignments = Assignment.objects.active().filter(group=group)
+    assignments = Assignment.objects.visible().filter(group=group)
     judges = TaskSheetTask.objects.filter(sheet__in=assignments.values('sheet')) \
         .values_list('task__judge', flat=True) \
         .distinct().order_by()

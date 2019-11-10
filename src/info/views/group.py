@@ -161,7 +161,7 @@ class GroupDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         group = self.object
 
-        assignments = Assignment.objects.active().filter(group=group)
+        assignments = Assignment.objects.visible().filter(group=group)
         if self.request.user.is_authenticated:
             is_owner = group.is_owned_by(self.request.user)
             if is_owner:
