@@ -77,7 +77,7 @@ def scrape_submissions_for_user(handle, count=200):
             found = True
 
             for submission in parse_submission(submission_data):
-                if submission['author_id'] == handle:
+                if submission['author_id'] == handle.lower():
                     yield submission
 
         id_from += count
