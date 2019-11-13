@@ -52,6 +52,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
             'faved': task in favorite_tasks,
         } for task in task_list]
         context['custom_tags'] = CustomTaskTag.objects \
+            .filter(profile=self.request.user.profile) \
             .values_list('name', flat=True).distinct()
 
         return context
