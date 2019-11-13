@@ -23,6 +23,12 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         log.error(self.request.GET)
         if self.request.GET.get('q'):
             queryset = search_task(self.request.GET['q'])
+        if self.request.GET.get('tag'):
+            log.error(self.request.GET['tag'])
+            task_tags = CustomTaskTag.objects \
+                .filter(name=self.request.GET['tag']) \
+                .values_list('task', flat=True)
+            queryset = queryset.filter(pk__in=task_tags)
         return queryset.order_by(
             F('statistics__difficulty_score').asc(nulls_last=True))
 
@@ -44,6 +50,9 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
             'verdict_for_user': verdict_for_user_dict.get(task),
             'faved': task in favorite_tasks,
         } for task in task_list]
+        context['custom_tags'] = CustomTaskTag.objects \
+            .values_list('name', flat=True).distinct()
+
         return context
 
 
