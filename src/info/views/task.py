@@ -26,6 +26,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         if self.request.GET.get('tag'):
             log.error(self.request.GET['tag'])
             task_tags = CustomTaskTag.objects \
+                .filter(profile=self.request.user.profile) \
                 .filter(name=self.request.GET['tag']) \
                 .values_list('task', flat=True)
             queryset = queryset.filter(pk__in=task_tags)
