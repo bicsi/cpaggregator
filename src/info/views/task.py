@@ -7,7 +7,7 @@ from django.views import generic
 from django_ajax.mixin import AJAXMixin
 
 from core.logging import log
-from data.models import Submission, Task, UserHandle
+from data.models import Submission, Task, UserHandle, MethodTag
 from info.forms import TaskCustomTagCreateForm
 from info.models import FavoriteTask, CustomTaskTag
 from search.queries import search_task
@@ -20,16 +20,19 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         queryset = Task.objects
-        log.error(self.request.GET)
+        
         if self.request.GET.get('q'):
             queryset = search_task(self.request.GET['q'])
-        if self.request.GET.get('tag'):
-            log.error(self.request.GET['tag'])
+        if self.request.GET.get('ctag'):
             task_tags = CustomTaskTag.objects \
                 .filter(profile=self.request.user.profile) \
-                .filter(name=self.request.GET['tag']) \
+                .filter(name=self.request.GET['ctag']) \
                 .values_list('task', flat=True)
             queryset = queryset.filter(pk__in=task_tags)
+        if self.request.GET.get('tag'):
+            tag = MethodTag.objects.get(tag_id=self.request.GET['tag'])
+            queryset = queryset.filter(tags=tag)
+
         return queryset.order_by(
             F('statistics__difficulty_score').asc(nulls_last=True))
 
@@ -51,6 +54,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
             'verdict_for_user': verdict_for_user_dict.get(task),
             'faved': task in favorite_tasks,
         } for task in task_list]
+        context['default_tags'] = MethodTag.objects.all()
         context['custom_tags'] = CustomTaskTag.objects \
             .filter(profile=self.request.user.profile) \
             .values_list('name', flat=True).distinct()
