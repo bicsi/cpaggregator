@@ -1,25 +1,46 @@
 {% extends 'layout.html' %}
 {% load bootstrap4 %}
+{% load static from staticfiles %}
 
 {% block title_tag %}Login{% endblock %}
+{% block body_attrs %}style="background_image: url('{% static "img/bg.png" %}')"{% endblock %}
 
 {% block body_content %}
-<div class="container">
-    <h2>Login</h2>
-    <hr>
-
-    <div class="panel">
-        <div class="panel-body">
+<div class="container mt-5">
+    <div class="card col-sm-12 col-lg-6 mx-auto text-center">
+        <div class="card-body">
+            <h5 class="mx-auto text-uppercase my-2">Log in</h5>
+            <hr class="mb-4"/>
             <form method="post">
                 {% csrf_token %}
-                {% bootstrap_form form %}
+                {% if form.subject.errors %}
+                <ol role="alertdialog">
+                    {% for error in form.subject.errors %}
+                    <li role="alert"><strong>{{ error|escape }}</strong></li>
+                    {% endfor %}
+                </ol>
+                {% endif %}
+                <div class="input-group mb-4">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="Username" aria-label="Username"
+                         aria-describedby="basic-addon1" name="username">
+                </div>
+                <div class="input-group mb-4">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon2">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </span>
+                  </div>
+                  <input type="password" class="form-control" placeholder="Password" aria-label="Password"
+                         aria-describedby="basic-addon2" name="password">
+                </div>
                 <input type="submit" value="Login" class="btn btn-primary btn-block"/>
             </form>
-        </div>
-    </div>
-    <div class="alert alert-success mt-5" role="alert">
-        <strong>No Account? No Problem!</strong>
-        <a href="{% url 'register' %}">Sign Up</a>
+        <hr/>
+        <strong class="text-secondary">No Account? No Problem!</strong>
+        <a href="{% url 'register' %}" class="ml-2">Sign Up</a>
     </div>
 </div>
 {% endblock body_content %}

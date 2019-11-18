@@ -4,21 +4,19 @@
 {% block title_tag %}Sign up{% endblock %}
 
 {% block body_content %}
-<div class="container">
-    <h2>Sign up</h2>
-    <hr>
-    <div class="panel">
-        <div class="panel-body">
-            <form method="post">
+<div class="container mt-5">
+    <div class="card col-sm-12 col-lg-6 mx-auto text-center">
+        <div class="card-body">
+            <h5 class="mx-auto text-uppercase my-2">Sign up</h5>
+            <hr class="mb-4"/>
+            <form method="post" class="text-left">
                 {% csrf_token %}
                 {% bootstrap_form form %}
                 <input type="submit" value="Sign up" class="btn btn-primary btn-block"/>
             </form>
-        </div>
-    </div>
-    <div class="alert alert-success mt-5" role="alert">
-        <strong>Already have an account?</strong>
-        <a href="{% url 'login' %}">Log in</a>
+        <hr/>
+        <strong class="text-secondary">Already have an account?</strong>
+        <a href="{% url 'login' %}" class="ml-2">Log in</a>
     </div>
 </div>
 {% endblock %}

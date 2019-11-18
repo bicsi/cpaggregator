@@ -43,8 +43,11 @@
 	<script type="text/javascript" src="{% static 'js/circular-progress.js' %}"></script>
 </head>
 
-<body>
-	<nav class="navbar navbar-dark navbar-expand-lg sticky-top" role="navigation" id="navbar">
+<body style="{% if not user.is_authenticated %}background-size: cover;
+	height: 100vh; background-position: center; background-attachment: fixed;
+	background-repeat: no-repeat; background-image: url('{% static "img/bg.png" %}'){% endif %}">
+	<nav class="navbar navbar-dark {% if not user.is_authenticated %}navbar-transparent{% endif %}
+			navbar-expand-lg sticky-top" role="navigation" id="navbar">
 		<div class="container">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
@@ -146,10 +149,12 @@
         {% block body_content %}{% endblock %}
 	</div>
 
-	<footer class="footer section-dark my-3">
+	<footer class="footer my-3 {% if not user.is_authenticated %}text-center{% endif %}">
 		<div class="container">
 			<div class="copyright pull-right">
-                <span class="text-muted small">&copy; {% now "Y" %} | competitive</span>
+                <span class="{% if user.is_authenticated %}text-muted{% else %}text-white{% endif %} small">
+					&copy; {% now "Y" %} | competitive
+				</span>
 			</div>
 		</div>
 	</footer>
@@ -191,6 +196,14 @@
 				},
 			});
 		}
+	{% if not user.is_authenticated %}
+	$(function () {
+	  $(document).scroll(function () {
+		var $nav = $(".navbar");
+		$nav.toggleClass('scrolled', $(this).scrollTop() > $nav.height() * 0.5);
+	  });
+	});
+	{% endif %}
 	</script>
 	{% block js_scripts %}{% endblock %}
 </body>

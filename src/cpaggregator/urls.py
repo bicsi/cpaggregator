@@ -27,7 +27,7 @@ urlpatterns = [
     path('', include('info.urls')),
     path('', views.HomeView.as_view(), name='home'),
     path('', include('contact.urls')),
-    path('account/', include('accounts.urls')),
+    path('accounts/', include('accounts.urls')),
     path('markdownx/', include('markdownx.urls')),
     url(r'^favicon.ico$',
         RedirectView.as_view(url=staticfiles_storage.url('favicon.ico')),
