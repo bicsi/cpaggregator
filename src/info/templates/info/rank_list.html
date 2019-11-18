@@ -43,7 +43,11 @@
                 {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
             </span>
             <span class="d-inline d-sm-none">
-                {% bootstrap_paginate page_obj range=5 previous_label="<" next_label=">" %}
+                {% with pl='<i class="fas fa-caret-left"></i>' %}
+                {% with nl='<i class="fas fa-caret-right"></i>' %}
+                {% bootstrap_paginate page_obj range=7 previous_label=pl next_label=nl %}
+                {% endwith %}
+                {% endwith %}
             </span>
         </div>
     {% endif %}

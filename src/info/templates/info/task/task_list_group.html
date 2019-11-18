@@ -3,41 +3,37 @@
 <a class="list-group-item list-group-item-action"
    href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
     <div style="position: relative">
-        <div class="d-flex align-items-center">
-            <i class="fa fa-xs fa-star text-primary mr-1{% if not faved %} invisible{% endif %}"
-               style="margin-left: -10px"></i>
-            <span class="border border-light rounded">
-                {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
-            </span>
-
-
+        <div class="d-flex align-items-center align-middle">
+            <i class="fa fa-xs fa-star text-secondary {% if not faved %} invisible{% endif %}"
+               style="margin-left: -15px"></i>
+            {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
             <span class="ml-3 text-primary text-truncate">{{ task.name_or_id }}</span>
 
-            <span class="flex-grow-1 small text-muted text-monospace mx-2 pt-1">
+            <span class="d-none d-sm-inline small text-muted text-monospace ml-3 pt-1">
                 {% if task.statistics %}
                 {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
                 {% endif %}
             </span>
+            <span class="flex-grow-1"></span>
             {% if verdict_for_user == 'AC' %}
             <span class="text-success">
                 <i class="fas fa-check"></i>
             </span>
             {% else %}
                 {% if task.statistics %}
-                <span class="text-{% if not verdict_for_user %}info{% else %}danger{% endif %} font-weight-bold">
                     {% if not verdict_for_user %}
-                    <i class="far fa-dot-circle mr-1"></i>
+                    <i class="text-info far fa-dot-circle mr-1"></i>
+                    <span class="text-info font-weight-bold">
+                        {{ task.statistics.difficulty_score }}
+                    </span>
                     {% else %}
-                    <i class="fas fa-times mr-1"></i>
+                    <i class="text-danger fas fa-times mr-1"></i>
+                    <span class="text-danger font-weight-bold">
+                        {{ task.statistics.difficulty_score }}
+                    </span>
                     {% endif %}
-                </span>
-                 <span class="text-{% if not verdict_for_user %}info{% else %}danger{% endif %} font-weight-bold">
-                {{ task.statistics.difficulty_score }}
-                </span>
-                {% elif not verdict_for_user %}
-                <span class="text-danger">
-                    <i class="fas fa-times"></i>
-                </span>
+                {% elif verdict_for_user %}
+                    <i class="text-danger fas fa-times"></i>
                 {% endif %}
             {% endif %}
         </div>
