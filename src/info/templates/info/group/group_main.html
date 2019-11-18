@@ -29,18 +29,18 @@
     </div>
     <div class="mt-2">{{ group.formatted_description|safe }}</div>
     {% if is_owner %}
-    <div class="btn-group my-2" aria-label="Moderate group">
-        <a class="btn btn-primary my-2"
+    <div class="btn-group mt-2 mb-4" aria-label="Moderate group">
+        <a class="btn border btn-primary my-2 px-4"
         data-toggle="modal" href="#modal"
                onclick="loadModalForm('{% url 'assignment-create' group_id=group.group_id %}');">
             Add an assignment
         </a>
-        <a class="btn btn-secondary my-2"
+        <a class="btn border btn-secondary my-2"
         data-toggle="modal" href="#modal"
                onclick="loadModalForm('{% url 'group-member-add' group_id=group.group_id %}');">
             Add members
         </a>
-        <a class="btn btn-secondary my-2"
+        <a class="btn border btn-secondary my-2"
         data-toggle="modal" href="#modal"
                onclick="loadModalForm('{% url 'group-update' group_id=group.group_id %}');">
             Edit details
