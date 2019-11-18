@@ -7,7 +7,7 @@
             <i class="fa fa-xs fa-star text-secondary {% if not faved %} invisible{% endif %}"
                style="margin-left: -15px"></i>
             {% include 'accounts/judge_label.html' with judge=task.judge tiny=True %}
-            <span class="ml-3 text-primary text-truncate">{{ task.name_or_id }}</span>
+            <span class="mx-3 text-primary text-truncate">{{ task.name_or_id }}</span>
 
             <span class="d-none d-sm-inline small text-muted text-monospace ml-3 pt-1">
                 {% if task.statistics %}
