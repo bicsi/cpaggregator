@@ -20,7 +20,7 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         queryset = Task.objects
-        
+
         if self.request.GET.get('q'):
             queryset = search_task(self.request.GET['q'])
         if self.request.GET.get('ctag'):
