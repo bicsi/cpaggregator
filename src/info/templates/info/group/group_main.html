@@ -4,7 +4,7 @@
         Created by
         {% with group.author.user as user %}
         <a href="{% url 'profile' username=user.profile.username %}"
-           class="btn btn-link card-link btn-sm ml-2">
+           class="btn btn-link card-link btn-sm d-inline-flex ml-2">
             {% include "accounts/thumbnail_profile.html" %}
         </a>
         <span class="text-light mx-3">|</span>
