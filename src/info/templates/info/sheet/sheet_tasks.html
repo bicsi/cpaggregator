@@ -32,14 +32,15 @@
                 <span v-cloak v-show="editMode" class="pl-3 task-move">
                     <i class="fas fa-arrows-alt text-muted"></i>
                 </span>
-                <div class="py-1 px-3 border-right border-light">
+                <div class="px-3 py-1">
                     {% include 'accounts/judge_label.html' with judge=task.judge %}
-                    <span class="text-uppercase text-center text-monospace small font-weight-bold d-inline-block"
-                          style="width: 2.5em">
+                    <span class="text-uppercase text-center text-monospace small text-center
+                            font-weight-bold d-none d-sm-inline-block" style="width: 2.8em">
                         {{ task.judge.judge_id }}
                     </span>
                 </div>
-                <span class="mx-3 text-primary flex-grow-1">
+                <span class="d-none d-sm-inline mr-3 text-light">|</span>
+                <span class="text-primary flex-grow-1">
                     {{ task.name_or_id }}
                     <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"
                        @click="goExternal('{{ task.get_url }}')"></i>

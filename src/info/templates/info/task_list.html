@@ -52,7 +52,12 @@
             <span class="small text-muted my-3">
                 Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ task_count }} tasks
             </span>
-            {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
+            <span class="d-none d-sm-inline">
+                {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
+            </span>
+            <span class="d-inline d-sm-none">
+                {% bootstrap_paginate page_obj range=5 previous_label="<" next_label=">" %}
+            </span>
         </div>
     {% endif %}
 </div>
