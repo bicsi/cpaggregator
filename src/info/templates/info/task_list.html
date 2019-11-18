@@ -29,11 +29,11 @@
         <div>
             {% for tag in default_tags %}
             <a href="{% url 'task-list' %}?tag={{ tag.tag_id }}"
-               class="btn btn-sm btn-outline-secondary font-weight-bold">{{ tag }}</a>
+               class="btn btn-sm btn-outline-secondary font-weight-bold m-1">{{ tag }}</a>
             {% endfor %}
             {% for tag in custom_tags %}
             <a href="{% url 'task-list' %}?ctag={{ tag }}"
-               class="btn btn-sm btn-outline-primary font-weight-bold">#{{ tag }}</a>
+               class="btn btn-sm btn-outline-primary font-weight-bold m-1">#{{ tag }}</a>
             {% endfor %}
         </div>
     </div>
