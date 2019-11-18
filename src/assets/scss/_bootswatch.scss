@@ -209,8 +209,9 @@ $web-font-path: "https://fonts.googleapis.com/css?family=Lato:400,700,400italic"
 
 .badge {
   &-secondary,
-  &-warning {
-    color: #fff;
+  &-warning,
+  &-info {
+    color: $white;
   }
 }
 

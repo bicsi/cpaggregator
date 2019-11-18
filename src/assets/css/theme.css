@@ -9760,7 +9760,7 @@ h3 {
   opacity: 1;
 }
 
-.badge-secondary, .badge-warning {
+.badge-secondary, .badge-warning, .badge-info {
   color: #fff;
 }
 

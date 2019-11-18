@@ -4,7 +4,7 @@
         Created by
         {% with group.author.user as user %}
         <a href="{% url 'profile' username=user.profile.username %}"
-           class="btn btn-sm btn-white ml-3">
+           class="btn btn-link card-link btn-sm ml-2">
             {% include "accounts/thumbnail_profile.html" %}
         </a>
         <span class="text-light mx-3">|</span>
@@ -20,7 +20,7 @@
         </a>
         {% endwith %}
     </div>
-    <div class="mt-2 border border-secondary d-inline-block">
+    <div class="mt-2 border rounded border-light d-inline-block">
         {% for judge in judges %}
         <div class="mx-1 d-inline-block">
         {% include 'accounts/judge_label.html' with dim_if_no_account=True %}

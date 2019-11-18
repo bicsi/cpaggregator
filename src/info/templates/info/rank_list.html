@@ -21,9 +21,8 @@
                 <span class="font-weight-bold mr-3">
                     {{ profile.statistics.rank }}
                 </span>
-                <span class="flex-grow-1">
                 {% include "accounts/thumbnail_profile.html" with user=profile.user %}
-                </span>
+                <span class="flex-grow-1"></span>
                 <span class="text-info font-weight-bold">
                     <i class="far fa-dot-circle mr-1"></i>{{ profile.statistics.total_points }}
                 </span>
