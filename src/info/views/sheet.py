@@ -209,12 +209,16 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
                 judge=judge,
                 task_id=parse_result.task_id.lower(),
             )
-            TaskSheetTask.objects.create(
+            _, created = TaskSheetTask.objects.get_or_create(
                 task=task,
                 sheet=self.object,
             )
-            messages.add_message(self.request, messages.SUCCESS,
-                                 f'Task __{task.name_or_id()}__ added successfully!')
+            if created:
+                messages.add_message(self.request, messages.SUCCESS,
+                                     f'Task __{task.name_or_id()}__ added successfully!')
+            else:
+                messages.add_message(self.request, messages.ERROR,
+                                     f'Task __{task.name_or_id()}__ is already present in the sheet.')
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 

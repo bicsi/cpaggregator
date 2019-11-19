@@ -3,6 +3,8 @@ from enum import Enum, auto
 from types import SimpleNamespace
 from typing import Optional, NamedTuple, Pattern
 
+from django.urls import reverse
+
 from core.logging import log
 
 
@@ -38,6 +40,12 @@ TASK_PARSERS = [
 
 
 def parse_task_url(url: str) -> Optional[ParseTaskResult]:
+    result = re.search(r"https://competitive\.herokuapp\.com/"
+                       r"task/(?P<judge_id>[^/]+)/(?P<task_id>[^/]+)", url)
+    if result:
+        return ParseTaskResult(judge_id=result.group("judge_id"),
+                               task_id=result.group("task_id"))
+
     for parser in TASK_PARSERS:
         re_search = parser.regex.search(url)
         if not re_search:
