@@ -4,7 +4,7 @@
 
 {% if dim_if_no_account and not request.user|has_account:judge %}
 <img class="p-1"
-     style="width: 24px; height: 24px;opacity: 0.2"
+     style="width: 24px; height: 24px; opacity: 0.2"
      src="{% static judge.get_logo_url %}"
      data-toggle="tooltip" data-placement="top" title="No account"
      alt="{{ judge.judge_id }}">

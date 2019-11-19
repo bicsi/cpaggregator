@@ -34,7 +34,6 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
             return HttpResponseForbidden()
         return super(AssignmentCreateView, self).dispatch(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         context = super(AssignmentCreateView, self).get_context_data(**kwargs)
         context['object'] = self.group

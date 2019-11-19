@@ -18,14 +18,9 @@
     {% if profile.handles.exists %}
     <div class="list-group list-group-flush">
         {% for handle in profile.handles.all %}
-        <div class="list-group-item p-2 d-flex align-items-center">
-            <span class="border border-light rounded">
-            {% with handle.judge as judge %}
-            {% include 'accounts/judge_label.html' %}
-            {% endwith %}
-            </span>
-
-            <a href="{{ handle.get_url }}" class="ml-3 small text-monospace flex-grow-1">
+        <div class="list-group-item px-3 py-2 d-flex align-items-center">
+            {% include 'accounts/judge_label.html' with judge=handle.judge %}
+            <a href="{{ handle.get_url }}" class="ml-3 my-2 small text-monospace flex-grow-1">
                 {{ handle.handle }}
             </a>
             {% if is_owner %}
