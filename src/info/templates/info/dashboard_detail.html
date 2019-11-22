@@ -78,14 +78,15 @@
         <li class="list-group-item d-flex align-items-center">
             {% include 'accounts/judge_label.html' with judge=task.judge %}
             <span class="ml-2"></span>
-            <a href="{% url 'profile' username=author.user.user.username %}" class="card-link text-dark">
-                {% include 'accounts/thumbnail_profile.html' with user=author.user.user hide_thumbnail=True %}
-            </a>
-            <span class="mx-2">solved</span>
             <a href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}"
                class="ml-2 card-link">{{ task.name_or_id }}</a>
+            <span class="ml-2 text-secondary">was solved by</span>
+            <a href="{% url 'profile' username=author.user.user.username %}"
+               class="card-link text-dark font-weight-bold ml-2">
+                {{ submission.author.user.username }}
+            </a>
             <span class="flex-grow-1"></span>
-            <span class="ml-3 small text-muted">{{ submission.submitted_on|naturaltime }}</span>
+            <span class="small text-muted">{{ submission.submitted_on|naturaltime }}</span>
         </li>
         {% endwith %}
         {% endfor %}
