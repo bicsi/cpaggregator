@@ -96,7 +96,7 @@
     <h5 class="mb-3 mt-5">Popular groups</h5>
      <div class="row">
         {% for group_data in popular_group_list %}
-            <div class="col-12 col-lg-4 px-2 mb-3">
+            <div class="col-12 col-lg-4 mb-3">
              {% include 'info/group/group_card.html' %}
          </div>
         {% endfor %}
@@ -108,7 +108,7 @@
     <h5 class="mb-3 mt-5">Groups you manage</h5>
      <div class="row">
         {% for group_data in owned_groups_data %}
-         <div class="col-12 col-lg-4 px-2 mb-2">
+         <div class="col-12 col-lg-4 mb-2">
              {% include 'info/group/group_card.html' %}
          </div>
         {% endfor %}
@@ -119,7 +119,7 @@
     <h5 class="mb-3 mt-5">Assigned to you</h5>
      <div class="row">
         {% for group_data in assigned_groups_data %}
-         <div class="col-12 col-lg-4 px-2 mb-3">
+         <div class="col-12 col-lg-4 mb-3">
              {% include 'info/group/group_card.html' %}
          </div>
          {% empty %}
