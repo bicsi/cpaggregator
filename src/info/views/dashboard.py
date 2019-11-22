@@ -73,6 +73,8 @@ class DashboardView(LoginRequiredMixin, generic.TemplateView):
                 .annotate(member_count=Count('members'))
                 .order_by('-member_count')[:3])
 
+        context['recent_best_submissions'] = Submission.objects.best().order_by('-submitted_on')[:10]
+
         context['owned_groups_data'] = build_group_card_context(
             self.request,
             self.request.user.profile.owned_groups.all())

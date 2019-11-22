@@ -1,9 +1,11 @@
 <!-- Template used to a thumbnail view of a user's profile. -->
 <span class="d-inline-flex align-items-center">
+    {% if not hide_thumbnail %}
     <img class="rounded-circle border border-light" src="{{ user.profile.avatar_url_or_default }}"
          width="{% if img_dim %}{{ img_dim }}{% else %}24{% endif %}"
          height="{% if img_dim %}{{ img_dim }}{% else %}24{% endif %}"
          title="{{ user.profile.username }}" style="background-color: white; object-fit: cover">
+    {% endif %}
     {% if not hide_username %}
     <span class="my-0 ml-2 font-weight-bold">{{ user.profile.get_display_name }}</span>
     {% endif %}
