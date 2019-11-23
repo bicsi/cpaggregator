@@ -128,7 +128,6 @@ def __update_user_quick(db, user):
 
         mongo_submissions = [ms for ms in mongo_submissions
                              if str(ms['submission_id']) not in subs_already_there]
-        log.debug([ms['submission_id'] for ms in mongo_submissions])
 
         submissions_to_insert = []
         for ms in mongo_submissions:
@@ -268,9 +267,5 @@ def update_users(*usernames):
 def update_all_users():
     db = get_db()
     log.info(f'Updating all users...')
-    now = timezone.now()
     for profile in UserProfile.objects.select_related('user').all():
-        if not profile.user.last_login or profile.user.last_login < now - timedelta(days=21):
-            log.info(f'Skipping user {profile.user.username}: too stale.')
-            continue
         __update_user_quick(db, profile)
