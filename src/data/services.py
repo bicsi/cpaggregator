@@ -126,10 +126,10 @@ def __update_user_quick(db, user):
 
         log.info(f"{len(subs_already_there)}/{len(mongo_submissions)} submissions already present.")
 
-        mongo_submissions = [ms for ms in mongo_submissions if ms['submission_id']
-                             not in subs_already_there]
+        mongo_submissions = [ms for ms in mongo_submissions
+                             if str(ms['submission_id']) not in subs_already_there]
         log.debug([ms['submission_id'] for ms in mongo_submissions])
-        
+
         submissions_to_insert = []
         for ms in mongo_submissions:
             insert_kwargs = dict(

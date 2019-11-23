@@ -89,7 +89,7 @@ def parse_submissions(csrf_token, task_name, task_id, from_date):
 
     # Parse submissions.
     for eval_job in reversed(eval_jobs['evaljob']):
-        submission_id = eval_job['id']
+        submission_id = str(eval_job['id'])
         if not eval_job['isDone']:
             log.info(f'Skipping submission {submission_id}: Not finished evaluating.')
 
