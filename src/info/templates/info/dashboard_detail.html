@@ -20,7 +20,7 @@
         <div class="col-12 col-lg-6 px-3 py-2">
             <div class="card">
                 <div class="card-body">
-                    <div class="progress float-right" style="width: 80px; height: 80px;"
+                    <div class="progress float-right" style="width: 5rem; height: 5rem;"
                          data-value="{{ assignment_data.solved_count }}" data-max-value="{{ assignment_data.task_count }}">
                       <span class="progress-left"><span class="progress-bar border-success"></span></span>
                       <span class="progress-right"><span class="progress-bar border-success"></span></span>
@@ -78,15 +78,19 @@
         <li class="list-group-item d-flex align-items-center">
             {% include 'accounts/judge_label.html' with judge=task.judge %}
             <span class="ml-2"></span>
-            <a href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}"
-               class="ml-2 card-link">{{ task.name_or_id }}</a>
-            <span class="ml-2 text-secondary">was solved by</span>
-            <a href="{% url 'profile' username=author.user.user.username %}"
-               class="card-link text-dark font-weight-bold ml-2">
-                {{ submission.author.user.username }}
-            </a>
-            <span class="flex-grow-1"></span>
-            <span class="small text-muted">{{ submission.submitted_on|naturaltime }}</span>
+            <div class="flex-grow-1 d-flex align-items-center flex-wrap">
+                <a href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}"
+                   class="ml-2 card-link">{{ task.name_or_id }}</a>
+                <span class="d-sm-none" style="flex-basis: 100%"></span>
+                <span class="ml-2 text-secondary">was solved by</span>
+                <a href="{% url 'profile' username=author.user.user.username %}"
+                   class="card-link text-dark font-weight-bold ml-2">
+                    {{ submission.author.user.username }}
+                </a>
+            </div>
+            <span class="small text-muted align-self-start mt-1">
+                {{ submission.submitted_on|naturaltime }}
+            </span>
         </li>
         {% endwith %}
         {% endfor %}
