@@ -10,7 +10,7 @@ from scraper.utils import get_page, split_into_chunks
 
 
 def _get_(api_method: str, kwargs) -> Any:
-    page_url = f"http://codeforces.com/api/{api_method}"
+    page_url = f"https://codeforces.com/api/{api_method}"
     try:
         response = get_page(page_url, **kwargs)
     except Exception as ex:
