@@ -10,7 +10,7 @@
                 {{ group_data.group.name }}
             </a>
         </h5>
-        <p class="card-text text-secondary">
+        <p class="card-text text-secondary d-flex align-items-center">
             <span>
                 <i class="fas fa-xs mr-1 fa-globe-americas"></i>{{ group_data.group.get_visibility_display }}
             </span>
@@ -20,10 +20,9 @@
             {% endwith %}
             {% if group_data.is_user_member %}
                 <span class="mx-2 text-light">|</span>
-                <span>
-                    {% include "accounts/thumbnail_profile.html" with hide_username=True img_dim=16 %}
-                    <span class="small text-secondary font-weight-bold">Enrolled</span>
-                </span>
+
+                {% include "accounts/thumbnail_profile.html" with hide_username=True img_dim="1rem" %}
+                <span class="small text-secondary font-weight-bold">Enrolled</span>
             {% endif %}
         </p>
     </div>
