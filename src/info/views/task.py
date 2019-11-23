@@ -34,7 +34,8 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(tags=tag)
 
         return queryset.order_by(
-            F('statistics__difficulty_score').asc(nulls_last=True))
+            F('statistics__difficulty_score').asc(nulls_last=True),
+            'name')
 
     def get_context_data(self, *args, **kwargs):
         kwargs['task_count'] = self.get_queryset().count()

@@ -1,11 +1,16 @@
 import json
 
 from core.logging import log
-from data.models import Submission, UserProfile, Task
+from data.models import Submission, UserProfile, Task, Judge
 from stats import utils
 from .models import TaskStatistics, UserStatistics, BestSubmission
 
 from celery import shared_task
+
+
+def normalize_range(val, min=0, max=2e9, step=1):
+    val = round(val) // step * step
+    return min if val < min else (max if val > max else val)
 
 
 @shared_task
@@ -17,37 +22,58 @@ def compute_task_statistics():
     log.info('Computing task statistics...')
 
     BASE_SCORE = 100
-    judge_to_total_solved = {}
-    judge_to_task_count = {}
 
-    for task in Task.objects.all():
-        users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
-        users_tried_count = Submission.objects.best().filter(task=task).count()
-        submission_count = Submission.objects.filter(task=task).count()
-        favorited_count = task.favorite_users.count()
+    def get_multiplier(task):
+        ac_count = None
+        try:
+            if task.statistics and task.statistics.users_solved_count:
+                ac_count = task.statistics.users_solved_count
+        except Task.statistics.RelatedObjectDoesNotExist:
+            pass
+        try:
+            if task.judge_statistic and task.judge_statistic.accepted_submission_count:
+                ac_count = task.judge_statistic.accepted_submission_count
+        except Task.judge_statistic.RelatedObjectDoesNotExist:
+            pass
 
-        judge = task.judge
-        judge_to_total_solved[judge] = judge_to_total_solved.get(judge, 0) + 1.0 / (users_solved_count + 10.0)
-        judge_to_task_count[judge] = judge_to_task_count.get(judge, 0) + 1
+        if ac_count is None:
+            return 1.0
+        return 1.0 / (ac_count + 10)
 
-        TaskStatistics.objects.update_or_create(task=task, defaults=dict(
-            users_tried_count=users_tried_count,
-            users_solved_count=users_solved_count,
-            submission_count=submission_count,
-            favorited_count=favorited_count
-        ))
+    for judge in Judge.objects.all():
+        task_count = 0
 
-    for task in Task.objects.all():
-        if judge_to_task_count[task.judge] == 0:
+        log.info(f"Computing task statistics for judge {judge}")
+        for task in Task.objects.filter(judge=judge):
+            users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
+            users_tried_count = Submission.objects.best().filter(task=task).count()
+            submission_count = Submission.objects.filter(task=task).count()
+            favorited_count = task.favorite_users.count()
+
+            TaskStatistics.objects.update_or_create(
+                task=task, defaults=dict(
+                    users_tried_count=users_tried_count,
+                    users_solved_count=users_solved_count,
+                    submission_count=submission_count,
+                    favorited_count=favorited_count,
+                ))
+            task_count += 1
+
+        if task_count == 0:
             continue
 
-        statistics = task.statistics
-        users_solved_count = statistics.users_solved_count
-        mean_users_solved_count = judge_to_total_solved[task.judge] / judge_to_task_count[task.judge]
-        multiplier = 1.0 / (users_solved_count + 10.0) / mean_users_solved_count
-        statistics.difficulty_score = min(2500, 5 * max(1, round(BASE_SCORE * multiplier / 5)))
+        mean_multiplier = 1.0 / task_count * sum([
+            get_multiplier(task) for task in Task.objects.filter(judge=judge)
+                .select_related('statistics', 'judge_statistic').all()])
+        log.info(f'MEAN MULTIPLIER: {mean_multiplier}')
 
-        statistics.save()
+        for task in Task.objects.filter(judge=judge).select_related('statistics'):
+            statistics = task.statistics
+            statistics.difficulty_score = normalize_range(
+                BASE_SCORE * get_multiplier(task) / mean_multiplier,
+                min=5, max=2500, step=5)
+            log.debug(f"{task}: {statistics.difficulty_score}")
+            statistics.save()
 
 
 @shared_task
