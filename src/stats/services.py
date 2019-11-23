@@ -30,11 +30,11 @@ def compute_task_statistics():
                 ac_count = task.statistics.users_solved_count
         except Task.statistics.RelatedObjectDoesNotExist:
             pass
-        try:
-            if task.judge_statistic and task.judge_statistic.accepted_submission_count:
-                ac_count = task.judge_statistic.accepted_submission_count
-        except Task.judge_statistic.RelatedObjectDoesNotExist:
-            pass
+        # try:
+        #     if task.judge_statistic and task.judge_statistic.accepted_submission_count:
+        #         ac_count = task.judge_statistic.accepted_submission_count
+        # except Task.judge_statistic.RelatedObjectDoesNotExist:
+        #     pass
 
         if ac_count is None:
             return 1.0
