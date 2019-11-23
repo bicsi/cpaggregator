@@ -9,7 +9,7 @@ from scraper.scrapers.codeforces.parsers import parse_tag, parse_submission, COD
 from scraper.utils import get_page, split_into_chunks
 
 
-def _get_(api_method: str, kwargs) -> Any:
+def _api_get(api_method: str, kwargs) -> Any:
     page_url = f"https://codeforces.com/api/{api_method}"
     try:
         response = get_page(page_url, **kwargs)
@@ -40,7 +40,7 @@ def scrape_submissions_for_task(task_id, count=200):
     while found:
         found = False
 
-        response = _get_('contest.status', kwargs={
+        response = _api_get('contest.status', kwargs={
             'contestId': contest_id,
             'from': id_from,
             'count': count,
@@ -67,7 +67,7 @@ def scrape_submissions_for_user(handle, count=200):
     while found:
         found = False
 
-        response = _get_('user.status', kwargs={
+        response = _api_get('user.status', kwargs={
             'handle': handle,
             'from': id_from,
             'count': count,
@@ -90,7 +90,7 @@ def scrape_task_info(task_id: str):
     :return: task information, in dict format
     """
     contest_id = task_id.split('_')[0]
-    response = _get_('contest.standings', kwargs={'contestId': contest_id})
+    response = _api_get('contest.standings', kwargs={'contestId': contest_id})
 
     found = False
     for task_data in response['problems']:
@@ -129,7 +129,7 @@ def scrape_user_info(handles):
     Scrapes user information from the website.
     :param handles: a list of codeforces handles
     """
-    response = _get_('user.info', kwargs={'handles': ';'.join(handles)})
+    response = _api_get('user.info', kwargs={'handles': ';'.join(handles)})
     user_infos = []
     for user_data in response:
         info = {

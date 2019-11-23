@@ -53,7 +53,7 @@ def __scrape_submissions_for_users(db, judge_id, handles, from_date, to_date):
             submissions = scraper.scrape_submissions_for_user(handle)
             submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
             utils.write_submissions(db, submissions, chunk_size=1000)
-            
+
         except NotImplementedError:
             log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
             return

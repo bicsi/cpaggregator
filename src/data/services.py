@@ -99,6 +99,56 @@ def __update_handle(db, handle):
 TASKS_TO_ADD = set()
 
 
+def __update_user_quick(db, user):
+    log.info(f"Updating '{user.username}' quick as a fox...")
+
+    for user_handle in user.handles.select_related('judge').all():
+        log.info(f"Updating handle '{user_handle}'")
+        judge = user_handle.judge
+        # Get all submissions from mongodb.
+        mongo_submissions = list(db['submissions'].find({
+            'judge_id': judge.judge_id.lower(),
+            'author_id': user_handle.handle.lower(),
+        }))
+
+        all_task_ids = list(set([ms['task_id'] for ms in mongo_submissions]))
+        available_tasks = {task.task_id: task for task in
+                           Task.objects.filter(judge=judge, task_id__in=all_task_ids).all()}
+
+        missing_tasks = set(all_task_ids) - set(available_tasks.keys())
+        log.info(f"{len(missing_tasks)}/{len(all_task_ids)} tasks are missing.")
+
+        mongo_submissions = [ms for ms in mongo_submissions if ms['task_id'] in available_tasks]
+        all_submission_ids = [ms['submission_id'] for ms in mongo_submissions]
+        subs_already_there = set(Submission.objects.filter(submission_id__in=all_submission_ids,
+                                                           author=user_handle)
+                                 .values_list('submission_id', flat=True))
+        log.info(f"{len(subs_already_there)}/{len(mongo_submissions)} submissions already present.")
+
+        mongo_submissions = [ms for ms in mongo_submissions if ms['submission_id'] not in subs_already_there]
+
+        submissions_to_insert = []
+        for ms in mongo_submissions:
+            insert_kwargs = dict(
+                submission_id=ms['submission_id'],
+                submitted_on=timezone.make_aware(ms['submitted_on']),
+                author=user_handle,
+                task=available_tasks[ms['task_id']],
+                verdict=ms['verdict'],
+                language=ms.get('language'),
+                source_size=ms.get('source_size'),
+                score=ms.get('score'),
+                exec_time=ms.get('exec_time'),
+                memory_used=ms.get('memory_used'),
+            )
+            if insert_kwargs['score'] and math.isnan(insert_kwargs['score']):
+                insert_kwargs['score'] = None
+            insert_kwargs = {k: v for k, v in insert_kwargs.items() if v is not None}
+            submissions_to_insert.append(Submission(**insert_kwargs))
+
+        Submission.objects.bulk_create(submissions_to_insert)
+
+
 def __update_user(db, user):
     log.info(f"Updating '{user.username}'...")
 
@@ -112,11 +162,11 @@ def __update_user(db, user):
         # Migrate submission model to SQL model.
         for mongo_submission in mongo_submissions:
             submission_id = mongo_submission['submission_id']
-            task_id = mongo_submission['task_id']
+            task_id = mongo_submission['task_id'].lower()
             try:
                 task = Task.objects.get(
                     judge=judge,
-                    task_id__iexact=task_id)
+                    task_id=task_id)
             except ObjectDoesNotExist:
                 TASKS_TO_ADD.add(task_id)
                 continue
@@ -124,7 +174,7 @@ def __update_user(db, user):
             try:
                 update_dict = dict(
                     submitted_on=timezone.make_aware(mongo_submission['submitted_on']),
-                    author=user_handle,
+                    task=task,
                     verdict=mongo_submission['verdict'],
                     language=mongo_submission.get('language'),
                     source_size=mongo_submission.get('source_size'),
@@ -140,7 +190,7 @@ def __update_user(db, user):
 
                 _, created = Submission.objects.update_or_create(
                     submission_id=submission_id,
-                    task=task, defaults=update_dict
+                    author=user_handle, defaults=update_dict
                 )
 
                 if created:
@@ -206,14 +256,13 @@ def update_users(*usernames):
     for username in usernames:
         try:
             user = UserProfile.objects.get(user__username=username)
-            __update_user(db, user)
+            __update_user_quick(db, user)
         except Exception as e:
             log.exception(e)
 
 
 @shared_task
 def update_all_users():
-    TASKS_TO_ADD.clear()
     db = get_db()
     log.info(f'Updating all users...')
     now = timezone.now()
@@ -221,5 +270,4 @@ def update_all_users():
         if not profile.user.last_login or profile.user.last_login < now - timedelta(days=21):
             log.info(f'Skipping user {profile.user.username}: too stale.')
             continue
-        __update_user(db, profile)
-    log.info(f"TASKS TO ADD: {len(TASKS_TO_ADD)}")
+        __update_user_quick(db, profile)
