@@ -83,6 +83,8 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
         kwargs['user_has_handle'] = UserHandle.objects.filter(
             judge=task.judge, user=self.request.user.profile
         ).exists()
+        kwargs['custom_tags'] = CustomTaskTag.objects.filter(
+            task=task, profile=self.request.user.profile).all()
         kwargs['is_favorited'] = self.request.user.profile.favorite_tasks.filter(
             task=task).exists()
         return super(TaskDetailView, self).get_context_data(**kwargs)
