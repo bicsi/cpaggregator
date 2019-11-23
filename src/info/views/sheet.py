@@ -21,12 +21,22 @@ from info.views.generic import SubmissionDownloadCSVView
 
 
 class DownloadResultsView(SubmissionDownloadCSVView):
-    def get_queryset(self):
-        assignment = Assignment.objects \
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.assignment = None
+
+    def dispatch(self, request, *args, **kwargs):
+        self.assignment = Assignment.objects \
             .select_related('group', 'sheet') \
             .get(group__group_id=self.kwargs['group_id'],
                  sheet__sheet_id=self.kwargs['sheet_id'])
-        return assignment.get_best_submissions()
+        return super(DownloadResultsView, self).dispatch(request, *args, **kwargs)
+
+    def get_filename(self):
+        return self.assignment.sheet.title
+
+    def get_queryset(self):
+        return self.assignment.get_best_submissions()
 
 
 class ResultsDetailView(generic.DetailView):

@@ -6,15 +6,17 @@ from data.models import Submission
 
 import csv
 
-class SubmissionDownloadCSVView(LoginRequiredMixin, generic.View):
 
+class SubmissionDownloadCSVView(LoginRequiredMixin, generic.View):
     def get_queryset(self):
         return Submission.objects.best()
 
+    def get_filename(self):
+        return "results"
+
     def get(self, request, **kwargs):
-        filename = f"{self.kwargs['sheet_id']}.csv"
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response['Content-Disposition'] = f'attachment; filename="{self.get_filename()}.csv"'
 
         writer = csv.writer(response)
         writer.writerow(['ID', 'Author', 'Task', 'Verdict', 'Score', 'Submitted on', 'Link'])
@@ -24,7 +26,7 @@ class SubmissionDownloadCSVView(LoginRequiredMixin, generic.View):
             writer.writerow([
                 submission.submission_id,
                 submission.author.user,
-                submission.task,
+                submission.task.name_or_id(),
                 submission.verdict,
                 submission.score or "",
                 submission.submitted_on.strftime('%Y-%m-%d %H:%M:%S'),

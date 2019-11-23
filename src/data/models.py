@@ -5,6 +5,7 @@ from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
 
+from core import urlresolvers
 from . import managers
 
 VERDICT_CHOICES = [
@@ -195,28 +196,14 @@ class Task(models.Model):
         return self.task_id
 
     def get_url(self):
-        if self.judge.judge_id == 'ojuz':
-            return 'https://oj.uz/problem/view/%s' % self.task_id
-        if self.judge.judge_id == 'csa':
-            return 'https://csacademy.com/contest/archive/task/%s' % self.task_id
-        if self.judge.judge_id == 'ia':
-            return 'https://www.infoarena.ro/problema/%s' % self.task_id
-        if self.judge.judge_id == 'cf':
-            contest_id, task_letter = self.task_id.split('_')
-            if int(contest_id) >= 100000:
-                # Gym contest ids are always >= 100000
-                return f'https://codeforces.com/gym/{contest_id}/problem/{task_letter.upper()}'
-            return f'https://codeforces.com/contest/{contest_id}/problem/{task_letter.upper()}'
-        if self.judge.judge_id == 'ac':
-            contest_id, _ = self.task_id.rsplit('_', 1)
-            return f"https://atcoder.jp/contests/{contest_id.replace('_', '-')}/tasks/{self.task_id}"
-        return None
+        return urlresolvers.get_task_url(
+            self.judge.judge_id, self.task_id)
 
     class Meta:
         unique_together = (('judge', 'task_id'),)
 
     def __str__(self):
-        return "{}:{} [{}]".format(self.judge.judge_id, self.task_id, self.name)
+        return f"{self.judge.judge_id}:{self.task_id} [{self.name}]"
 
 
 class JudgeTaskStatistic(models.Model):
@@ -239,18 +226,8 @@ class UserHandle(models.Model):
         unique_together = (('judge', 'handle'),)
 
     def get_url(self):
-        if self.judge.judge_id == 'ojuz':
-            return "https://oj.uz/profile/%s" % self.handle
-        if self.judge.judge_id == 'csa':
-            if self.handle.startswith('_uid_'):
-                return "https://csacademy.com/userid/%s" % self.handle[5:]
-            return "https://csacademy.com/user/%s" % self.handle
-        if self.judge.judge_id == 'ia':
-            return "https://www.infoarena.ro/utilizator/%s" % self.handle
-        if self.judge.judge_id == 'cf':
-            return "https://codeforces.com/profile/%s" % self.handle
-        if self.judge.judge_id == 'ac':
-            return f"https://atcoder.jp/users/{self.handle}"
+        return urlresolvers.get_handle_url(
+            self.judge.judge_id, self.handle)
 
     def __str__(self):
         return "%s:%s" % (self.judge.judge_id, self.handle)
@@ -271,21 +248,8 @@ class Submission(models.Model):
     objects = managers.SubmissionQuerySet().as_manager()
 
     def get_url(self):
-        if self.task.judge.judge_id == 'ojuz':
-            return 'https://oj.uz/submission/%s' % self.submission_id
-        if self.task.judge.judge_id == 'csa':
-            return 'https://csacademy.com/submission/%s' % self.submission_id
-        if self.task.judge.judge_id == 'ia':
-            return 'https://www.infoarena.ro/job_detail/%s' % self.submission_id
-        if self.task.judge.judge_id == 'cf':
-            contest_id, _ = self.task.task_id.split('_')
-            return 'https://codeforces.com/contest/%s/submission/%s' % (contest_id, self.submission_id)
-        if self.task.judge.judge_id == 'ac':
-            contest_id, _ = self.task.task_id.split('_')
-            return f'https://atcoder.jp/contests/{contest_id}/submissions/{self.submission_id}'
-
-        print("Bad", self.submission_id)
-        return None
+        return urlresolvers.get_submission_url(
+            self.task.judge.judge_id, self.task.task_id, self.submission_id)
 
     class Meta:
         unique_together = (('submission_id', 'author'),)
