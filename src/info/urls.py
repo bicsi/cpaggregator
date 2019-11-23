@@ -74,6 +74,10 @@ urlpatterns = [
             path('tag/<tag_name>/delete', views.task.TagDeleteView.as_view(), name='task-tag-delete'),
         ])),
     ])),
+    path('status/', include([
+        path('', views.submission.SubmissionListView.as_view(), name='submission-list'),
+        path('download/', views.submission.AllSubmissionsDownloadCSVView.as_view(), name='submissions-download'),
+    ])),
     path('me/', views.profile.MeDetailView.as_view(), name='me'),
     path('handle/<handle_id>/delete/', views.profile.HandleDeleteView.as_view(), name='delete-handle'),
     path('handle/create/', views.profile.HandleCreateView.as_view(), name='handle-create'),

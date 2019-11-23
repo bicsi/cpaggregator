@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% load bootstrap4 %}
+{% load static from staticfiles %}
+{% load render_table from django_tables2 %}
+{% load bootstrap_pagination %}
+
+{% block title_tag %}{{ sheet.title }} - Status{% endblock %}
+
+{% block body_content %}
+
+<div class="container">
+    <h1 class="my-5">Status</h1>
+    {% if user.is_superuser %}
+    <a class="ml-2 btn btn-primary"
+       href="{% url 'submissions-download' %}">
+        <i class="fas fa-file-download mr-2"
+           aria-hidden="true" alt="download"></i>
+        Download to CSV
+    </a>
+    {% endif %}
+    <div class="card mt-5 p-0">
+        {% render_table table %}
+    </div>
+    {% if is_paginated %}
+        <div class="mx-auto d-flex flex-column align-items-center">
+            <span class="small text-muted my-3">
+                Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ submission_count }} submissions
+            </span>
+            <span class="d-none d-sm-inline">
+                {% bootstrap_paginate page_obj range=8 previous_label="Previous" next_label="Next" %}
+            </span>
+            <span class="d-inline d-sm-none">
+                {% with pl='<i class="fas fa-caret-left"></i>' %}
+                {% with nl='<i class="fas fa-caret-right"></i>' %}
+                {% bootstrap_paginate page_obj range=7 previous_label=pl next_label=nl %}
+                {% endwith %}
+                {% endwith %}
+            </span>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+

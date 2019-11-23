@@ -76,7 +76,8 @@ class ResultsDetailView(generic.DetailView):
         }
         # Build tasks as a dict.
         tasks = [{'task': task.task, 'verdict_for_user': verdict_for_user_dict.get(task.task)}
-                 for task in TaskSheetTask.objects.select_related('task', 'task__judge') \
+                 for task in TaskSheetTask.objects
+                     .select_related('task', 'task__judge')
                      .filter(sheet=self.object.sheet).all()]
 
         # Send results data.

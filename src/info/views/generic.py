@@ -12,7 +12,7 @@ class SubmissionDownloadCSVView(LoginRequiredMixin, generic.View):
         return Submission.objects.best()
 
     def get_filename(self):
-        return "results"
+        return "status"
 
     def get(self, request, **kwargs):
         response = HttpResponse(content_type='text/csv')
