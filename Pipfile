@@ -48,6 +48,7 @@ elasticsearch-dsl = "*"
 django-elasticsearch-dsl = "*"
 google-cloud-translate = "*"
 django-markdownify = "*"
+scikit-learn = "*"
 
 [requires]
 python_version = "3.7"

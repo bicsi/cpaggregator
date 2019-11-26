@@ -2,7 +2,7 @@ import json
 
 from core.logging import log
 from data.models import Submission, UserProfile, Task, Judge
-from stats import utils
+from stats import utils, multipliers
 from .models import TaskStatistics, UserStatistics, BestSubmission
 
 from celery import shared_task
@@ -11,6 +11,8 @@ from celery import shared_task
 def normalize_range(val, min=0, max=2e9, step=1):
     val = round(val) // step * step
     return min if val < min else (max if val > max else val)
+
+
 
 
 @shared_task
@@ -23,22 +25,27 @@ def compute_task_statistics():
 
     BASE_SCORE = 100
 
-    def get_multiplier(task):
-        ac_count = None
-        try:
-            if task.statistics and task.statistics.users_solved_count:
-                ac_count = task.statistics.users_solved_count
-        except Task.statistics.RelatedObjectDoesNotExist:
-            pass
-        # try:
-        #     if task.judge_statistic and task.judge_statistic.accepted_submission_count:
-        #         ac_count = task.judge_statistic.accepted_submission_count
-        # except Task.judge_statistic.RelatedObjectDoesNotExist:
-        #     pass
+    task_ratings, user_ratings = multipliers.compute_task_and_user_ratings()
 
-        if ac_count is None:
-            return 1.0
-        return 1.0 / (ac_count + 10)
+    def get_multiplier(task):
+        return task_ratings.get(task.id, 1e9)
+
+    # def get_multiplier(task):
+    #     ac_count = None
+    #     try:
+    #         if task.statistics and task.statistics.users_solved_count:
+    #             ac_count = task.statistics.users_solved_count
+    #     except Task.statistics.RelatedObjectDoesNotExist:
+    #         pass
+    #     # try:
+    #     #     if task.judge_statistic and task.judge_statistic.accepted_submission_count:
+    #     #         ac_count = task.judge_statistic.accepted_submission_count
+    #     # except Task.judge_statistic.RelatedObjectDoesNotExist:
+    #     #     pass
+    #
+    #     if ac_count is None:
+    #         return 1.0
+    #     return 1.0 / (ac_count + 10)
 
     for judge in Judge.objects.all():
         task_count = 0
@@ -71,7 +78,7 @@ def compute_task_statistics():
             statistics = task.statistics
             statistics.difficulty_score = normalize_range(
                 BASE_SCORE * get_multiplier(task) / mean_multiplier,
-                min=5, max=2500, step=5)
+                min=5, max=1000, step=5)
             log.debug(f"{task}: {statistics.difficulty_score}")
             statistics.save()
 
