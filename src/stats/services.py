@@ -26,9 +26,11 @@ def compute_task_statistics():
     BASE_SCORE = 100
 
     task_ratings, user_ratings = multipliers.compute_task_and_user_ratings()
+    log.info(task_ratings)
+    default_multiplier = max(task_ratings.values())
 
     def get_multiplier(task):
-        return task_ratings.get(task.id, 1e9)
+        return task_ratings.get(task.id, default_multiplier)
 
     # def get_multiplier(task):
     #     ac_count = None
@@ -46,41 +48,44 @@ def compute_task_statistics():
     #     if ac_count is None:
     #         return 1.0
     #     return 1.0 / (ac_count + 10)
+    #
+    # for judge in Judge.objects.all():
+    #     task_count = 0
+    #
+    #     log.info(f"Computing task statistics for judge {judge}")
+    #     for task in Task.objects.filter(judge=judge):
+    task_count = 0
+    for task in Task.objects.all():
+        users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
+        users_tried_count = Submission.objects.best().filter(task=task).count()
+        submission_count = Submission.objects.filter(task=task).count()
+        favorited_count = task.favorite_users.count()
 
-    for judge in Judge.objects.all():
-        task_count = 0
+        TaskStatistics.objects.update_or_create(
+            task=task, defaults=dict(
+                users_tried_count=users_tried_count,
+                users_solved_count=users_solved_count,
+                submission_count=submission_count,
+                favorited_count=favorited_count,
+            ))
+        task_count += 1
 
-        log.info(f"Computing task statistics for judge {judge}")
-        for task in Task.objects.filter(judge=judge):
-            users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
-            users_tried_count = Submission.objects.best().filter(task=task).count()
-            submission_count = Submission.objects.filter(task=task).count()
-            favorited_count = task.favorite_users.count()
+    if task_count == 0:
+        return
 
-            TaskStatistics.objects.update_or_create(
-                task=task, defaults=dict(
-                    users_tried_count=users_tried_count,
-                    users_solved_count=users_solved_count,
-                    submission_count=submission_count,
-                    favorited_count=favorited_count,
-                ))
-            task_count += 1
+    mean_multiplier = sum([
+        get_multiplier(task) for task in Task.objects.all()])
+    mean_multiplier /= task_count
 
-        if task_count == 0:
-            continue
+    log.info(f'MEAN MULTIPLIER: {mean_multiplier}')
 
-        mean_multiplier = 1.0 / task_count * sum([
-            get_multiplier(task) for task in Task.objects.filter(judge=judge)
-                .select_related('statistics', 'judge_statistic').all()])
-        log.info(f'MEAN MULTIPLIER: {mean_multiplier}')
-
-        for task in Task.objects.filter(judge=judge).select_related('statistics'):
-            statistics = task.statistics
-            statistics.difficulty_score = normalize_range(
-                BASE_SCORE * get_multiplier(task) / mean_multiplier,
-                min=5, max=1000, step=5)
-            log.debug(f"{task}: {statistics.difficulty_score}")
-            statistics.save()
+    for task in Task.objects.select_related('statistics'):
+        statistics = task.statistics
+        statistics.difficulty_score = normalize_range(
+            BASE_SCORE * get_multiplier(task) / mean_multiplier,
+            min=5, max=1000, step=5)
+        log.debug(f"{task}: {statistics.difficulty_score}")
+        statistics.save()
 
 
 @shared_task
