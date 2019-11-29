@@ -24,7 +24,7 @@ def compute_task_statistics():
     BASE_SCORE = 100
 
     task_ratings, user_ratings = multipliers.compute_task_and_user_ratings(
-        augment_from_mongo=True)
+        augment_from_mongo=False)
     default_multiplier = max(task_ratings.values())
 
     def get_multiplier(task):
