@@ -12,13 +12,13 @@ def make_dataset(augment_from_mongo):
                for s in Submission.objects.best().select_related(
                     'task', 'task__judge', 'author__user__user')]
 
-    mongo_task_map = {":".join([t.judge.judge_id, t.task_id]): t
-                      for t in Task.objects.select_related('judge').all()}
-    mongo_author_map = {uh.handle: uh.user.user.username
-                        for uh in UserHandle.objects.select_related("user__user").all()}
-    log.info(mongo_author_map)
     # Add mongodb submissions
     if augment_from_mongo:
+        mongo_task_map = {":".join([t.judge.judge_id, t.task_id]): t
+                          for t in Task.objects.select_related('judge').all()}
+        mongo_author_map = {uh.handle: uh.user.user.username
+                            for uh in UserHandle.objects.select_related("user__user").all()}
+
         log.info(f'Dataset size before augmentation: {len(dataset)}')
         for mongo_sub in database.find_submissions(database.get_db(), verdict='AC'):
             task = mongo_task_map.get(":".join([mongo_sub['judge_id'], mongo_sub['task_id']]))
