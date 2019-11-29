@@ -33,7 +33,7 @@ def make_dataset(augment_from_mongo):
     return tasks, users
 
 
-def compute_task_and_user_ratings(num_epochs=10, augment_from_mongo=True):
+def compute_task_and_user_ratings(num_epochs=10, augment_from_mongo=False):
     tasks, users = make_dataset(augment_from_mongo)
 
     # Transform strs into ints.
