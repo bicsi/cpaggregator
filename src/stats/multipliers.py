@@ -1,14 +1,40 @@
-from data.models import Submission
+from data.models import Submission, Task, UserHandle
 from sklearn.preprocessing import LabelEncoder
 from core.logging import log
 import numpy as np
 from scipy.optimize import minimize_scalar
 
+from scraper import database
 
-def compute_task_and_user_ratings():
-    submissions = Submission.objects.best().select_related('task', 'task__judge', 'author__user__user')
-    tasks = [s.task.id for s in submissions]
-    users = [s.author.user.user.username for s in submissions]
+
+def make_dataset(augment_from_mongo):
+    dataset = [(s.task.id, s.author.user.user.username)
+               for s in Submission.objects.best().select_related(
+                    'task', 'task__judge', 'author__user__user')]
+
+    mongo_task_map = {":".join([t.judge.judge_id, t.task_id]): t
+                      for t in Task.objects.select_related('judge').all()}
+    mongo_author_map = {uh.handle: uh.user.user.username
+                        for uh in UserHandle.objects.select_related("user__user").all()}
+    log.info(mongo_author_map)
+    # Add mongodb submissions
+    if augment_from_mongo:
+        log.info(f'Dataset size before augmentation: {len(dataset)}')
+        for mongo_sub in database.find_submissions(database.get_db(), verdict='AC'):
+            task = mongo_task_map.get(":".join([mongo_sub['judge_id'], mongo_sub['task_id']]))
+            if task:
+                username = mongo_author_map.get(mongo_sub['author_id'], mongo_sub['author_id'])
+                dataset.append((task.id, username))
+        dataset = set(dataset)
+        log.info(f'Dataset size after augmentation: {len(dataset)}')
+
+    tasks = [t for (t, _) in dataset]
+    users = [u for (_, u) in dataset]
+    return tasks, users
+
+
+def compute_task_and_user_ratings(num_epochs=10, augment_from_mongo=True):
+    tasks, users = make_dataset(augment_from_mongo)
 
     # Transform strs into ints.
     task_le = LabelEncoder().fit(tasks)
@@ -37,7 +63,7 @@ def compute_task_and_user_ratings():
 
             result = minimize_scalar(neg_log_like)
             if not result.success:
-                print('WARNING: minimization did not succeed.')
+                log.warning('Minimization did not succeed.')
             new_user_ratings[user_i] = result.x
         return new_user_ratings
 
@@ -55,14 +81,14 @@ def compute_task_and_user_ratings():
 
             result = minimize_scalar(neg_log_like)
             if not result.success:
-                print('WARNING: minimization did not succeed.')
+                log.warning('Minimization did not succeed.')
             new_task_ratings[task_i] = result.x
         return new_task_ratings
 
     task_ratings = np.ones((task_count,)) * 2
     user_ratings = np.ones((user_count,)) * 1
-    for it in range(40):
-        log.info(f'Iteration #{it}')
+    for epoch in range(1, num_epochs + 1):
+        log.info(f'Epoch {epoch}/{num_epochs}')
         user_ratings = user_step(user_ratings, task_ratings, coef=1)
         task_ratings = task_step(user_ratings, task_ratings, coef=4)
 

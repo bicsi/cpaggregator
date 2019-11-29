@@ -13,8 +13,6 @@ def normalize_range(val, min=0, max=2e9, step=1):
     return min if val < min else (max if val > max else val)
 
 
-
-
 @shared_task
 def compute_task_statistics():
     """
@@ -25,35 +23,13 @@ def compute_task_statistics():
 
     BASE_SCORE = 100
 
-    task_ratings, user_ratings = multipliers.compute_task_and_user_ratings()
-    log.info(task_ratings)
+    task_ratings, user_ratings = multipliers.compute_task_and_user_ratings(
+        augment_from_mongo=True)
     default_multiplier = max(task_ratings.values())
 
     def get_multiplier(task):
         return task_ratings.get(task.id, default_multiplier)
 
-    # def get_multiplier(task):
-    #     ac_count = None
-    #     try:
-    #         if task.statistics and task.statistics.users_solved_count:
-    #             ac_count = task.statistics.users_solved_count
-    #     except Task.statistics.RelatedObjectDoesNotExist:
-    #         pass
-    #     # try:
-    #     #     if task.judge_statistic and task.judge_statistic.accepted_submission_count:
-    #     #         ac_count = task.judge_statistic.accepted_submission_count
-    #     # except Task.judge_statistic.RelatedObjectDoesNotExist:
-    #     #     pass
-    #
-    #     if ac_count is None:
-    #         return 1.0
-    #     return 1.0 / (ac_count + 10)
-    #
-    # for judge in Judge.objects.all():
-    #     task_count = 0
-    #
-    #     log.info(f"Computing task statistics for judge {judge}")
-    #     for task in Task.objects.filter(judge=judge):
     task_count = 0
     for task in Task.objects.all():
         users_solved_count = Submission.objects.best().filter(task=task, verdict='AC').count()
@@ -79,13 +55,14 @@ def compute_task_statistics():
 
     log.info(f'MEAN MULTIPLIER: {mean_multiplier}')
 
+    scores = {task: normalize_range(BASE_SCORE * get_multiplier(task) / mean_multiplier,
+                                    min=5, max=1000, step=5)
+              for task in Task.objects.all()}
+    log.info(scores)
+
     for task in Task.objects.select_related('statistics'):
         statistics = task.statistics
-        statistics.difficulty_score = normalize_range(
-            BASE_SCORE * get_multiplier(task) / mean_multiplier,
-            min=5, max=1000, step=5)
-        log.debug(f"{task}: {statistics.difficulty_score}")
-        statistics.save()
+        statistics.difficulty_score = scores[task]
 
 
 @shared_task
