@@ -9,7 +9,7 @@ from scraper import database
 
 def make_dataset(augment_from_mongo):
     dataset = [(s.task.id, s.author.user.user.username)
-               for s in Submission.objects.best().select_related(
+               for s in Submission.objects.best().filter(verdict='AC').select_related(
                     'task', 'task__judge', 'author__user__user')]
 
     # Add mongodb submissions
