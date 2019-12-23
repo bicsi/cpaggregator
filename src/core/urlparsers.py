@@ -54,7 +54,7 @@ def parse_task_url(url: str) -> Optional[ParseTaskResult]:
         if parser.type == ParserType.SIMPLE:
             task_id = re_search.group('task_id')
         else:
-            task_id = '_'.join([re_search.group('contest_id'),
+            task_id = '/'.join([re_search.group('contest_id'),
                                 re_search.group('task_id')])
         return ParseTaskResult(judge_id=parser.judge_id, task_id=task_id)
 
