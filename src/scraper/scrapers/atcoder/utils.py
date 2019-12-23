@@ -152,7 +152,7 @@ def scrape_task_info(task_id: str):
     time_limit_text, memory_limit_text = map(str.strip, main_div.select_one('p').text.split('/'))
     task_info = {
         'judge_id': ATCODER_JUDGE_ID,
-        'task_id': task_id.lower(),
+        'task_id': "/".join([contest_id, task_id]).lower(),
         'title': parse_title(main_div.select_one('span.h2').text),
         'time_limit': parse_time_limit(time_limit_text),
         'memory_limit': parse_memory_limit(memory_limit_text),
