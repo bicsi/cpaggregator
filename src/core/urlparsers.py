@@ -30,7 +30,7 @@ TASK_PARSERS = [
                             r'(?P<contest_id>\d+)/problem/(?P<task_id>[A-Za-z](\d)?)')),
     Parser(judge_id='ia', type=ParserType.SIMPLE,
            regex=re.compile(r'infoarena\.ro/problema/(?P<task_id>[^/]+)')),
-    Parser(judge_id='ac', type=ParserType.SIMPLE,
+    Parser(judge_id='ac', type=ParserType.COMPOSED,
            regex=re.compile(r'atcoder\.jp/contests/(?P<contest_id>[^/]+)/tasks/(?P<task_id>[^/]+)')),
     Parser(judge_id='csa', type=ParserType.SIMPLE,
            regex=re.compile(r'csacademy\.com/contest/(?P<contest_id>[^/]+)/task/(?P<task_id>[^/]+)')),
