@@ -63,6 +63,7 @@ def compute_task_statistics():
     for task in Task.objects.select_related('statistics'):
         statistics = task.statistics
         statistics.difficulty_score = scores[task]
+        statistics.save()
 
 
 @shared_task
