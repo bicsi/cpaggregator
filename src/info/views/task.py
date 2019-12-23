@@ -41,22 +41,28 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         kwargs['task_count'] = self.get_queryset().count()
         context = super(TaskListView, self).get_context_data(*args, **kwargs)
         task_list = context.pop('task_list')
+
         # Map task to verdict of current user.
         verdict_for_user_dict = {
-            submission.task.pk: submission.verdict for submission in
-            Submission.objects.best()
+            submission['task']: submission['verdict']
+            for submission in Submission.objects.best()
                 .filter(author__user__user=self.request.user,
                         task__in=task_list)
+                .values("task", "verdict")
         }
+
         favorite_tasks = set(
             self.request.user.profile.favorite_tasks.all()
                 .values_list('task', flat=True))
+
         context['task_list'] = [{
             'task': task,
             'verdict_for_user': verdict_for_user_dict.get(task.pk),
             'faved': task.pk in favorite_tasks,
         } for task in task_list]
+
         context['default_tags'] = MethodTag.objects.all()
+
         context['custom_tags'] = CustomTaskTag.objects \
             .filter(profile=self.request.user.profile) \
             .values_list('name', flat=True).distinct()
