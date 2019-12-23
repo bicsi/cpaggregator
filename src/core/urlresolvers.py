@@ -23,14 +23,14 @@ def get_submission_url(judge_id: str, task_id: str, submission_id: str):
     if judge_id == 'ia':
         return f'https://www.infoarena.ro/job_detail/{submission_id}'
     if judge_id == 'cf':
-        contest_id, _ = task_id.split('_')
+        contest_id, _ = task_id.split('/')
         if int(contest_id) >= 100000:
             return f'https://codeforces.com/gym/{contest_id}/submission/{submission_id}'
         else:
             return f'https://codeforces.com/contest/{contest_id}/submission/{submission_id}'
     if judge_id == 'ac':
-        contest_id, _ = task_id.rsplit('_', 1)
-        return f'https://atcoder.jp/contests/{contest_id.replace("_", "-")}/submissions/{submission_id}'
+        contest_id, _ = task_id.split('/')
+        return f'https://atcoder.jp/contests/{contest_id}/submissions/{submission_id}'
 
 
 def get_task_url(judge_id, task_id):
@@ -41,11 +41,11 @@ def get_task_url(judge_id, task_id):
     if judge_id == 'ia':
         return 'https://www.infoarena.ro/problema/%s' % task_id
     if judge_id == 'cf':
-        contest_id, task_letter = task_id.split('_')
+        contest_id, task_letter = task_id.split('/')
         if int(contest_id) >= 100000:
             return f'https://codeforces.com/gym/{contest_id}/problem/{task_letter.upper()}'
         else:
             return f'https://codeforces.com/problemset/problem/{contest_id}/{task_letter.upper()}'
     if judge_id == 'ac':
-        contest_id, _ = task_id.rsplit('_', 1)
-        return f"https://atcoder.jp/contests/{contest_id.replace('_', '-')}/tasks/{task_id}"
+        contest_id, task_id = task_id.rsplit('/')
+        return f"https://atcoder.jp/contests/{contest_id}/tasks/{task_id}"

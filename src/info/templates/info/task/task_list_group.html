@@ -1,7 +1,7 @@
 {% for task_verdict in task_list %}
 {% with task=task_verdict.task verdict_for_user=task_verdict.verdict_for_user faved=task_verdict.faved %}
 <a class="list-group-item list-group-item-action"
-   href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
+   href="{% url 'task-detail' task_path=task.get_path %}">
     <div style="position: relative">
         <div class="d-flex align-items-center align-middle">
             <i class="fa fa-xs fa-star text-secondary {% if not faved %} invisible{% endif %}"

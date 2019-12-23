@@ -33,7 +33,7 @@ def scrape_submissions_for_tasks(task_ids, count=200):
 
 
 def scrape_submissions_for_task(task_id, count=200):
-    contest_id = task_id.split('_')[0]
+    contest_id = task_id.split('/')[0]
 
     id_from = 1
     found = True
@@ -49,7 +49,7 @@ def scrape_submissions_for_task(task_id, count=200):
         for submission_data in response:
             found = True
 
-            check_task_id = '_'.join([
+            check_task_id = '/'.join([
                 str(submission_data['problem']['contestId']),
                 submission_data['problem']['index']])
 
@@ -89,12 +89,12 @@ def scrape_task_info(task_id: str):
     :param task_id: the id of the task
     :return: task information, in dict format
     """
-    contest_id = task_id.split('_')[0]
+    contest_id = task_id.split('/')[0]
     response = _api_get('contest.standings', kwargs={'contestId': contest_id})
 
     found = False
     for task_data in response['problems']:
-        curr_task_id = '_'.join([str(task_data['contestId']), task_data['index']]).lower()
+        curr_task_id = '/'.join([str(task_data['contestId']), task_data['index']]).lower()
         if task_id != curr_task_id:
             continue
 
@@ -148,7 +148,7 @@ def scrape_user_info(handles):
 
 
 def scrape_task_statement(task_id: str):
-    contest_id, task_letter = task_id.split('_')
+    contest_id, task_letter = task_id.split('/')
     contest_or_gym = "gym" if int(contest_id) >= 100000 else "contest"
     response = get_page(f"https://codeforces.com/{contest_or_gym}/{contest_id}/problem/{task_letter}")
     soup = BeautifulSoup(response.text)

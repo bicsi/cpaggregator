@@ -79,7 +79,7 @@
             {% include 'accounts/judge_label.html' with judge=task.judge %}
             <span class="ml-2"></span>
             <div class="flex-grow-1 d-flex align-items-center flex-wrap">
-                <a href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}"
+                <a href="{% url 'task-detail' task_path=task.get_path %}"
                    class="ml-2 card-link">{{ task.name_or_id }}</a>
                 <span class="d-sm-none" style="flex-basis: 100%"></span>
                 <span class="ml-2 text-secondary">was solved by</span>

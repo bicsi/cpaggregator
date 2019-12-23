@@ -24,10 +24,6 @@ def __get_contest_url(contest_id: str):
     return f'https://{contest_id}.contest.atcoder.jp/'
 
 
-def __get_contest_id(task_id: str):
-    return task_id.rsplit('_', 1)[0].replace('_', '-')
-
-
 def __scrape_table_rows(node, table_css_selector):
     table = node.select_one(table_css_selector)
     if table is None:
@@ -132,7 +128,7 @@ def scrape_submissions_for_task(task_id):
     :param task_id: the id of the task (e.g. 'agc003_a')
     :return: a generator of submission objects
     """
-    contest_id = __get_contest_id(task_id)
+    contest_id, task_id = task_id.split('/')
     return scrape_submissions_for_contest(
         contest_id, task_screen_name=task_id)
 
@@ -145,10 +141,10 @@ def scrape_submissions_for_tasks(task_ids):
 def scrape_task_info(task_id: str):
     """
     Scrapes the task info for given tasks.
-    :param task_id: the id of the task (e.g. 'agc003_a')
+    :param task_id: the id of the task (e.g. 'agc003/agc003_a')
     :return: a task info object
     """
-    contest_id = __get_contest_id(task_id)
+    contest_id, task_id = task_id.split('/')
     page_url = f"https://atcoder.jp/contests/{contest_id}/tasks/{task_id}"
     page = get_page(page_url)
     soup = BeautifulSoup(page.content, 'html.parser')

@@ -43,11 +43,11 @@
         <a href="{{ task.get_url }}" class="btn btn-primary mt-3 mr-2" target="_blank">
             <i class="fas fa-external-link-alt mr-1"></i> Go to task
         </a>
-        <a href="{% url 'task-detail' task_id=task.task_id judge_id=task.judge.judge_id %}" class="btn btn-secondary mt-3 mr-2">
+        <a href="{% url 'task-detail' task_path=task.get_path %}" class="btn btn-secondary mt-3 mr-2">
             See details
         </a>
         <form class="form-inline d-inline" method="post"
-              action="{% url 'task-favorite' judge_id=task.judge.judge_id task_id=task.task_id %}">
+              action="{% url 'task-favorite' task_path=task.get_path %}">
             {% csrf_token %}
             {% if is_favorited %}
             <button class="btn submit-btn btn-warning active mt-3" aria-pressed="true">

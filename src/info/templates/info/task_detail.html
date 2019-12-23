@@ -99,7 +99,7 @@
                         <i class="fas fa-external-link-alt mr-1"></i> Go to task
                     </a>
                     <form class="form-inline d-inline" method="post"
-                          action="{% url 'task-favorite' judge_id=task.judge.judge_id task_id=task.task_id %}">
+                          action="{% url 'task-favorite' task_path=task.get_path %}">
                         {% csrf_token %}
                         {% if is_favorited %}
                         <button class="btn submit-btn btn-warning active mt-3" aria-pressed="true">
@@ -157,7 +157,7 @@
                     {% endfor %}
                     {% for tag in custom_tags %}
                     <li class="list-group-item list-group-item text-secondary">
-                        <form class="d-flex" method="post" action="{% url 'task-tag-delete' judge_id=task.judge.judge_id task_id=task.task_id tag_name=tag.name %}">
+                        <form class="d-flex" method="post" action="{% url 'task-tag-delete' task_path=task.get_path tag_name=tag.name %}">
                             {% csrf_token %}
                             <span class="flex-grow-1 text-primary font-weight-bold">#{{ tag.name }}</span>
                             <div class="input-group-append">
@@ -175,7 +175,7 @@
             </div>
             {% endif %}
 
-            <form action="{% url 'task-tag-create' judge_id=task.judge.judge_id task_id=task.task_id %}" method="post">
+            <form action="{% url 'task-tag-create' task_path=task.get_path %}" method="post">
                 {% csrf_token %}
                 <div class="input-group mt-5">
                         <div class="input-group-prepend">

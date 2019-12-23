@@ -69,11 +69,7 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     model = Task
 
     def get_object(self, queryset=None):
-        return get_object_or_404(
-            Task,
-            task_id=self.kwargs['task_id'],
-            judge__judge_id=self.kwargs['judge_id'],
-        )
+        return Task.objects.filter_path(self.kwargs['task_path']).get()
 
     def get_context_data(self, **kwargs):
         task = self.object
@@ -97,11 +93,7 @@ class TaskPreviewView(LoginRequiredMixin, AJAXMixin, generic.DetailView):
     model = Task
 
     def get_object(self, queryset=None):
-        return get_object_or_404(
-            Task,
-            task_id=self.kwargs['task_id'],
-            judge__judge_id=self.kwargs['judge_id'],
-        )
+        return Task.objects.filter_path(self.kwargs['task_path']).get()
 
     def get_context_data(self, **kwargs):
         task = self.object
@@ -120,10 +112,7 @@ class TaskPreviewView(LoginRequiredMixin, AJAXMixin, generic.DetailView):
 class FavoriteToggleView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
         user = request.user
-        task = get_object_or_404(
-            Task,
-            judge__judge_id=self.kwargs['judge_id'],
-            task_id=self.kwargs['task_id'])
+        task = Task.objects.filter_path(self.kwargs['task_path']).get()
 
         queryset = FavoriteTask.objects.filter(profile=user.profile, task=task)
         if queryset.exists():
@@ -131,7 +120,7 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
         else:
             FavoriteTask.objects.create(profile=user.profile, task=task)
 
-        return redirect('task-detail', judge_id=task.judge.judge_id, task_id=task.task_id)
+        return redirect('task-detail', task_path=self.kwargs['task_path'])
 
 
 class TagCreateView(LoginRequiredMixin, generic.CreateView):
@@ -141,7 +130,7 @@ class TagCreateView(LoginRequiredMixin, generic.CreateView):
         super().__init__(**kwargs)
 
     def form_valid(self, form):
-        task = get_object_or_404(Task, judge__judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        task = Task.objects.filter_path(self.kwargs['task_path']).get()
         tag = form.save(commit=False)
         tag.task = task
         tag.profile = self.request.user.profile
@@ -158,11 +147,10 @@ class TagCreateView(LoginRequiredMixin, generic.CreateView):
 
 class TagDeleteView(LoginRequiredMixin, generic.DeleteView):
     def get_success_url(self):
-        return reverse_lazy('task-detail', kwargs=dict(
-            judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id']))
+        return reverse_lazy('task-detail', kwargs={self.kwargs['task_path']})
 
     def get_object(self, queryset=None):
         user = self.request.user.profile
-        task = get_object_or_404(Task, judge__judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        task = Task.objects.filter_path(self.kwargs['task_path']).get()
         name = self.kwargs['tag_name']
         return CustomTaskTag.objects.get(profile=user, task=task, name=name)

@@ -13,9 +13,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include
+
+from django.urls import path, include, register_converter
 
 from info import views
+
+
+class TaskPathConverter:
+    regex = "((cf|ac)/([^/]+)/([^/]+))|" \
+            "((ia|ojuz|csa)/([^/]+))"
+
+    def to_python(self, value):
+        return str(value)
+
+    def to_url(self, value):
+        return str(value)
+
+
+register_converter(TaskPathConverter, "task-path")
 
 urlpatterns = [
     path('dashboard/', views.dashboard.DashboardView.as_view(), name='dashboard'),
@@ -66,7 +81,7 @@ urlpatterns = [
     ])),
     path('task/', include([
         path('', views.task.TaskListView.as_view(), name='task-list'),
-        path('<judge_id>/<task_id>/', include([
+        path('<task-path:task_path>/', include([
             path('', views.task.TaskDetailView.as_view(), name='task-detail'),
             path('favorite/', views.task.FavoriteToggleView.as_view(), name='task-favorite'),
             path('preview/', views.task.TaskPreviewView.as_view(), name='task-preview'),

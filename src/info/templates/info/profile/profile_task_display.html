@@ -3,7 +3,7 @@
     {% for task in tasks %}
     <li class="list-inline-item">
         <a class="badge badge-primary"
-           href="{% url 'task-detail' judge_id=task.judge.judge_id task_id=task.task_id %}">
+           href="{% url 'task-detail' task_path=task.get_path %}">
             {{ task.name_or_id }}
         </a>
     </li>

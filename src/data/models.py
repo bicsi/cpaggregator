@@ -175,6 +175,10 @@ class TaskManager(models.Manager):
     def get_queryset(self):
         return super(TaskManager, self).get_queryset().select_related('judge')
 
+    def filter_path(self, path):
+        judge_id, task_id = path.split('/', 1)
+        return self.get_queryset().filter(judge__judge_id=judge_id, task_id=task_id)
+
 
 class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
@@ -198,6 +202,9 @@ class Task(models.Model):
     def get_url(self):
         return urlresolvers.get_task_url(
             self.judge.judge_id, self.task_id)
+
+    def get_path(self):
+        return f"{self.judge.judge_id}/{self.task_id}"
 
     class Meta:
         unique_together = (('judge', 'task_id'),)
