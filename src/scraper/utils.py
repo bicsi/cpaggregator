@@ -35,7 +35,7 @@ def get_page(page_url, max_retries=10, **query_dict):
     for tries in range(max_retries):
         log.debug(f"GET: {page_url}")
         page = requests.get(page_url)
-        if page.status_code == 200 or page.status_code == 400:
+        if page.status_code == 200 or page.status_code == 400 or page.status_code == 404:
             break
         else:
             log.warning(f'Request failed (status code: {page.status_code}). Sleeping for 2 seconds...')
