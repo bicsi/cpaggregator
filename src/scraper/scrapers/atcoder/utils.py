@@ -59,7 +59,7 @@ def scrape_submissions_for_contest(contest_id, from_page=1, to_page=PAGE_LIMIT, 
                 'submission_id': row[-1].find('a', href=True)['href'].split('/')[-1],
                 'submitted_on': datetime.datetime.strptime(
                     row[0].find('time').text, "%Y/%m/%d %H:%M:%S +0000"),
-                'task_id': row[1].find('a', href=True)['href'].split('/')[-1].lower(),
+                'task_id': "/".join([contest_id, row[1].find('a', href=True)['href'].split('/')[-1]]).lower(),
                 'author_id': row[2].find('a', href=True)['href'].split('/')[-1].lower(),
                 'language': row[3].text,
                 'source_size': int(row[5].text.split()[0]),

@@ -66,7 +66,7 @@ def parse_verdict(verdict_text):
 def parse_submission(submission_data):
     try:
         submission_id = submission_data['id']
-        task_id = '_'.join([
+        task_id = '/'.join([
             str(submission_data['problem']['contestId']),
             submission_data['problem']['index']])
 
