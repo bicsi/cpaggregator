@@ -73,7 +73,7 @@
                 <h6 class="card-header">Task information</h6>
                 <div class="card-body">
                     <h4 class="card-title">{{ task.name_or_id }}</h4>
-                    <h6 class="card-subtitle text-muted mb-3">@{{ task.task_id }}</h6>
+                    <h6 class="card-subtitle text-muted mb-3">@{{ task.get_path }}</h6>
 
                     {% if task.statistics %}
                         <p class="card-text">

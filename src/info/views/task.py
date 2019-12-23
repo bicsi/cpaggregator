@@ -15,7 +15,7 @@ from search.queries import search_task
 
 class TaskListView(LoginRequiredMixin, generic.ListView):
     template_name = 'info/task_list.html'
-    paginate_by = 10
+    paginate_by = 50
     context_object_name = 'task_list'
 
     def get_queryset(self):
