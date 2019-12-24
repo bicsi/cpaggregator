@@ -264,17 +264,21 @@ def scrape_task_statement(task_id: str):
 
     examples = []
     for table in soup.select("table.example"):
-        tds = list(table.select("td"))
-        if len(tds) % 2 != 0:
-            log.critical(f"Failed parsing example for task: {task_id} -- odd number of tds")
-            break
-        for idx in range(len(tds) // 2):
+        for tr in table.select("tr"):
+            tds = list(tr.select("td"))
+            if len(tds) == 0:
+                continue
+
+            if len(tds) == 1:
+                log.critical(f"Failed parsing example for task: {task_id} -- odd number of tds")
+                continue
+
             examples.append({
-                "input": tds[2 * idx].text,
-                "output": tds[2 * idx + 1].text,
+                "input": tds[0].text,
+                "output": tds[1].text,
             })
 
-    print(examples)
+    log.info(f"Examples: {examples}")
 
     md = html2text(html)
 
