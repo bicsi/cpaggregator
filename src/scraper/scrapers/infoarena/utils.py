@@ -129,8 +129,6 @@ def scrape_task_info(task_id):
         'tags': tags,
     }
 
-    return task_info
-
     try:
         # Go to the monitor to find out submission count and first submission date.
         task_info.update(dict(

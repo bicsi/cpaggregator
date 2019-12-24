@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 
 from google.cloud import translate_v3 as translate
 from google.oauth2 import service_account
@@ -37,11 +38,22 @@ def translate_ro_en(text: str):
     html_text = re.sub("(<h.>)[^<>]*estric[^<>]*(</h.>)", r"\g<1><constraints/>\g<2>", html_text)
     html_text = re.sub("(<h.>)[^<>]*recizar[^<>]*(</h.>)", r"\g<1><notes/>\g<2>", html_text)
 
-    response = client.translate_text(
-        parent=parent,
-        contents=[html_text],
-        source_language_code='ro',
-        target_language_code='en')
+    response = None
+    for tries in range(3):
+        try:
+            response = client.translate_text(
+                parent=parent,
+                contents=[html_text],
+                source_language_code='ro',
+                target_language_code='en')
+            break
+        except Exception as ex:
+            if tries == 2:
+                raise
+
+            if "RESOURCE_EXHAUSTED" in str(ex):
+                log.warning("RESOURCE_EXHAUSTED. Sleeping for 60s...")
+                time.sleep(60)
 
     translated = response.translations[0].translated_text
     translated = translated\
