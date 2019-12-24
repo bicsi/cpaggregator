@@ -17,7 +17,7 @@ class TaskDocument(Document):
 
     class Django:
         model = Task
-        fields = ['name', 'statement', 'task_id']
+        fields = ['name', 'task_id']
 
     def get_queryset(self):
         return super(TaskDocument, self).get_queryset().select_related('source')

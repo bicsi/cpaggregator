@@ -22,5 +22,5 @@ class CodeforcesScraper(Scraper):
 
         return None if len(result) == 0 else result[0]
 
-    def scrape_task_statement(self, task_id):
-        return utils.scrape_task_statement(task_id)
+    #def scrape_task_statement(self, task_id):
+    #    return utils.scrape_task_statement(task_id)

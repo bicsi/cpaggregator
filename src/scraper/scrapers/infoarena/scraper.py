@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from scraper import translators
@@ -27,6 +28,7 @@ class InfoarenaScraper(Scraper):
         return utils.scrape_user_info(handle, self.default_avatar)
 
     def scrape_task_statement(self, task_id):
-        statement_ro = utils.scrape_task_statement(task_id)
-        statement_en = translators.translate_ro_en(statement_ro)
-        return statement_en
+        statement = utils.scrape_task_statement(task_id)
+        statement['text'] = translators.translate_ro_en(statement['text'])
+        return statement
+

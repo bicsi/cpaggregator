@@ -6,7 +6,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from core.logging import log
-from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource, JudgeTaskStatistic
+from data.models import MethodTag, Task, Submission, UserProfile, UserHandle, TaskSource, JudgeTaskStatistic, \
+    TaskStatement
 from scraper.database import get_db
 import scraper.services as scraper_services
 
@@ -40,7 +41,13 @@ def __update_task_info(db, task: Task):
     if 'memory_limit' in mongo_task_info:
         task.memory_limit_kb = mongo_task_info['memory_limit']
     if 'statement' in mongo_task_info:
-        task.statement = mongo_task_info['statement']
+        statement, _ = TaskStatement.objects.get_or_create(task=task)
+        if statement.modified_by_user:
+            log.info(f"Skipped updating statement for {task}: modified by user")
+        else:
+            statement.text = mongo_task_info['statement']['text']
+            statement.examples = mongo_task_info['statement']['examples']
+            statement.save()
 
     for tag_id in mongo_task_info.get('tags', []):
         try:

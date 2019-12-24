@@ -1,8 +1,12 @@
+import re
+
 from bs4 import BeautifulSoup
 
+from core import markdown
 from core.logging import log
 from scraper.utils import get_page
 from scraper.scrapers.infoarena import parsers
+from html2text import html2text
 
 SCRAPER_LIMIT = 1000 * 1000 * 1000
 INFOARENA_JUDGE_ID = "ia"
@@ -125,6 +129,8 @@ def scrape_task_info(task_id):
         'tags': tags,
     }
 
+    return task_info
+
     try:
         # Go to the monitor to find out submission count and first submission date.
         task_info.update(dict(
@@ -206,12 +212,13 @@ def scrape_user_info(handle, default_avatar):
 
 def scrape_task_statement(task_id: str):
     response = get_page(f"https://www.infoarena.ro/problema/{task_id}")
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, 'html.parser')
     text_block = soup.select_one("#main > .wiki_text_block")
 
     found_h1 = False
     text_lines = []
-    for child in text_block.findChildren():
+    html = ""
+    for child in text_block.find_all(recursive=False):
         if child.name == 'h1':
             found_h1 = True
             continue
@@ -220,4 +227,59 @@ def scrape_task_statement(task_id: str):
         if "Exempl" in child.text:
             break
         text_lines.append(child.text)
-    return " ".join(text_lines)
+        html += str(child)
+
+    html = html\
+        .replace('`', '\'')\
+        .replace('<var>', '<code>')\
+        .replace('</var>', '</code>')\
+        .replace('<h2>', '<h3>')\
+        .replace('</h2>', '</h3>')\
+
+    html = re.sub(r"([(\[])<code>(.*?)</code>([)\]])", r"<code>\g<1>\g<2>\g<3></code>", html)
+
+    for match in re.findall(r'<code>(.*?)</code>', html):
+        if '.in' in match or '.out' in match:
+            continue
+
+        for c in ['\'', '\"']:
+            if match.startswith(c) and match.endswith(c):
+                continue
+
+        latex = match
+        for c in "&%$#_{}":
+            latex = latex.replace(c, '\\' + c)
+
+        latex = latex.replace('\\\'', '\'')\
+            .replace('<sub>', '_{')\
+            .replace('</sub>', '}')\
+            .replace('<sup>', '^{')\
+            .replace('</sup>', '}')
+
+        for occ in set(re.findall(f'[a-zA-Z]+', latex)):
+            if len(occ) >= 3:
+                latex = re.sub(rf"( *{occ} *)", r"\\text{\g<1>}", latex)
+
+        html = html.replace(f"<code>{match}</code>", f"<code>${latex}$</code>")
+
+    examples = []
+    for table in soup.select("table.example"):
+        tds = list(table.select("td"))
+        if len(tds) % 2 != 0:
+            log.critical(f"Failed parsing example for task: {task_id} -- odd number of tds")
+            break
+        for idx in range(len(tds) // 2):
+            examples.append({
+                "input": tds[2 * idx].text,
+                "output": tds[2 * idx + 1].text,
+            })
+
+    print(examples)
+
+    md = html2text(html)
+
+    return {
+        "text": markdown.prettify(md),
+        "examples": examples,
+    }
+

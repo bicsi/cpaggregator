@@ -18,6 +18,11 @@
   position: relative;
 }
 
+.markdown img {
+  display: block;
+  margin: 0 auto;
+}
+
 .no-underline {
   text-decoration: none !important;
 }

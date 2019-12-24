@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'silk',
     'bootstrap_datepicker_plus',
     'markdownify',
+    'django_mathjax',
 ]
 
 DATABASES = {

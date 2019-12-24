@@ -3,6 +3,7 @@
 {% load bootstrap4 %}
 {% load static from staticfiles %}
 {% load humanize %}
+{% load markdownify %}
 
 {% block title_tag %}{{ task.name_or_id }}{% endblock %}
 
@@ -65,6 +66,32 @@
                 {% endif %}
                 </h5>
             </div>
+
+            {% if task.statement %}
+                <div class="col-12 mt-3">
+                    {{ task.statement.formatted|safe }}
+                </div>
+
+                {% if task.statement.examples %}
+                    <div class="examples col-12">
+                         <h3>Examples</h3>
+                        <table class="table table-bordered">
+                            <thead class="text-monospace">
+                                <th>Input</th>
+                                <th>Output</th>
+                            </thead>
+                            <tbody>
+                                {% for example in task.statement.examples %}
+                                <tr>
+                                    <td><pre>{{ example.input }}</pre></td>
+                                    <td><pre>{{ example.output }}</pre></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            {% endif %}
         </div>
     </div>
     <div class="row">

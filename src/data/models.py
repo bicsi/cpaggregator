@@ -1,9 +1,12 @@
+import re
+
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.db import models
 from django.utils import timezone
 from markdownx.models import MarkdownxField
 from markdownx.utils import markdownify
+from django.contrib.postgres.fields import JSONField
 
 from core import urlresolvers
 from . import managers
@@ -190,7 +193,6 @@ class Task(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     source = models.ForeignKey(TaskSource, blank=True, null=True, on_delete=models.SET_NULL)
-    statement = models.TextField(null=True, blank=True)
 
     objects = TaskManager()
 
@@ -211,6 +213,20 @@ class Task(models.Model):
 
     def __str__(self):
         return f"{self.judge.judge_id}:{self.task_id} [{self.name}]"
+
+
+class TaskStatement(models.Model):
+    task = models.OneToOneField(Task, related_name='statement', on_delete=models.CASCADE)
+    text = models.TextField()
+    examples = JSONField(null=True, blank=True)
+    modified_by_user = models.BooleanField(default=False)
+
+    @property
+    def formatted(self):
+        ret = markdownify(self.text)
+        ret = re.sub(r"<code>\$([^<>]*)\$<\/code>", r'\\(\g<1>\\)', ret)
+        ret = f"<div class=\"markdown\">{ret}</div>"
+        return ret
 
 
 class JudgeTaskStatistic(models.Model):

@@ -160,3 +160,38 @@ def scrape_task_statement(task_id: str):
             continue
         section_text.append(child.get_text(separator=" "))
     return "\n".join(section_text)
+
+
+def crawl(output_path):
+    queue = ['/']
+    seen = {'/'}
+
+    with open(output_path, 'w') as out:
+        def process(url):
+            log.info(f"Processing {url}")
+            response = get_page(f"https://codeforces.com{url}", max_retries=1)
+            soup = BeautifulSoup(response.content, "html.parser")
+            for a in soup.find_all('a', href=True):
+                href = a['href']
+                href = href.split('codeforces.com')[-1].rstrip('/')
+                if '#' in href or '?' in href or href.startswith('http'):
+                    continue
+
+                out.write(f"{url} {href}\n")
+                if '/problem/' in href:
+                    log.info(f"Found edge: {url}->{href}")
+
+                if href in seen:
+                    continue
+
+                href = href.replace('profile', 'blog')
+
+                if 'blog' in href:
+                    seen.add(href)
+                    queue.append(href)
+
+        for it in range(10):
+            now_queue = queue.copy()
+            queue.clear()
+            for url in now_queue:
+                process(url)
