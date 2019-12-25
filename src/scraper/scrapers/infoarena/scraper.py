@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from core.logging import log
 from scraper import translators
 from scraper.scrapers import Scraper
 from scraper.scrapers.infoarena import utils
@@ -30,6 +31,6 @@ class InfoarenaScraper(Scraper):
     def scrape_task_statement(self, task_id):
         statement = utils.scrape_task_statement(task_id)
         statement['statement'] = translators.translate_ro_en(statement['statement'])
-        print(statement['statement'])
+        log.debug(statement['statement'])
         return statement
 
