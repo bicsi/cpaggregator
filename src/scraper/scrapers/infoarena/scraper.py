@@ -29,6 +29,7 @@ class InfoarenaScraper(Scraper):
 
     def scrape_task_statement(self, task_id):
         statement = utils.scrape_task_statement(task_id)
-        statement['text'] = translators.translate_ro_en(statement['text'])
+        # statement['statement'] = translators.translate_ro_en(statement['statement'])
+        print(statement['statement'])
         return statement
 

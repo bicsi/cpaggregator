@@ -237,8 +237,6 @@ def scrape_task_statement(task_id: str):
         .replace('<h2>', '<h3>')\
         .replace('</h2>', '</h3>')\
 
-    html = re.sub(r"([(\[])<code>(.*?)</code>([)\]])", r"<code>\g<1>\g<2>\g<3></code>", html)
-
     for match in re.findall(r'<code>(.*?)</code>', html):
         if '.in' in match or '.out' in match:
             continue
@@ -256,12 +254,15 @@ def scrape_task_statement(task_id: str):
             .replace('</sub>', '}')\
             .replace('<sup>', '^{')\
             .replace('</sup>', '}')
+        latex = re.sub('<[^>]+>', '', latex)
 
         for occ in set(re.findall(f'[a-zA-Z]+', latex)):
             if len(occ) >= 3:
                 latex = re.sub(rf"( *{occ} *)", r"\\text{\g<1>}", latex)
 
         html = html.replace(f"<code>{match}</code>", f"<code>${latex}$</code>")
+
+    html = re.sub(r"([(\[])<code>\$([^<]+)\$</code>([)\]])", r"<code>$\g<1>\g<2>\g<3>$</code>", html)
 
     examples = []
     for table in soup.select("table.example"):
