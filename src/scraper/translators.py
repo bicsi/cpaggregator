@@ -41,6 +41,12 @@ def translate_ro_en(text: str, use_glossary=False):
     html_text = re.sub(r"(<h.>)[^<>]*estric[^<>]*(</h.>)", r"\g<1><constraints/>\g<2>", html_text)
     html_text = re.sub(r"(<h.>)[^<>]*reciz.r[^<>]*(</h.>)", r"\g<1><notes/>\g<2>", html_text)
 
+    replace = {}
+    for idx, code in enumerate(set(re.findall(r"<code>(.*?)<\/code>", html_text))):
+        placeholder = f"<span id=\"{idx}\">0</span>"
+        replace[code] = placeholder
+        html_text = html_text.replace(code, placeholder)
+
     glossary_config = None
     if use_glossary:
         glossary = client.glossary_path(
@@ -69,14 +75,17 @@ def translate_ro_en(text: str, use_glossary=False):
 
     translated = response.translations
     translated = translated[0].translated_text
+    for code, placeholder in replace.items():
+        translated = translated.replace(placeholder, code)
+
     translated = translated \
         .replace('<task/>', 'Task') \
         .replace('<input/>', 'Input')\
         .replace('<output/>', 'Output')\
         .replace('<constraints/>', 'Constraints')\
         .replace('<notes/>', 'Notes')
-    translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
-    translated = re.sub(r"<code>[^<>]*\.out<\/code>([^\n]{1,25}<code>[^<>]*\.out<\/code>)", r"\g<1>", translated)
+    # translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
+    # translated = re.sub(r"<code>[^<>]*\.out<\/code>([^\n]{1,25}<code>[^<>]*\.out<\/code>)", r"\g<1>", translated)
     translated = html2text(translated)
     return markdown.prettify(translated)
 

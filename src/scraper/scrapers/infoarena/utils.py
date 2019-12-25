@@ -237,7 +237,7 @@ def scrape_task_statement(task_id: str):
         .replace('<h2>', '<h3>')\
         .replace('</h2>', '</h3>')\
 
-    for match in re.findall(r'<code>(.*?)</code>', html):
+    for match in set(re.findall(r'<code>(.*?)<\/code>', html)):
         if '.in' in match or '.out' in match:
             continue
 
@@ -251,16 +251,27 @@ def scrape_task_statement(task_id: str):
         for c in "&%$#_{}":
             latex = latex.replace(c, '\\' + c)
 
-        latex = latex.replace('\\\'', '\'')\
-            .replace('<sub>', '_{')\
-            .replace('</sub>', '}')\
-            .replace('<sup>', '^{')\
-            .replace('</sup>', '}')
+        latex = latex.replace('\\\'', '\'') \
+            .replace('<sub>', '_{') \
+            .replace('</sub>', '}') \
+            .replace('<sup>', '^{') \
+            .replace('</sup>', '}') \
+            .replace('<b>', '\\textbf{') \
+            .replace('</b>', '}') \
+            .replace('<i>', '\\textit{') \
+            .replace('</i>', '}')
         latex = re.sub('<[^>]+>', '', latex)
 
-        for occ in set(re.findall(f'[a-zA-Z]+', latex)):
-            if len(occ) >= 3:
-                latex = re.sub(rf"( *{occ} *)", r"\\text{\g<1>}", latex)
+        sub = {}
+        for idx, occ in enumerate(set(re.findall(r"\{([^\}]*)\}", latex))):
+            nidx = f"__{idx}__"
+            latex = latex.replace("{" + occ + "}", "{" + nidx + "}")
+            sub[nidx] = occ
+
+        latex = re.sub(r'([^a-zA-Z\\]|^)([a-zA-Z][a-zA-Z ]*[a-zA-Z])', r"\g<1>\\text{\g<2>}", latex)
+
+        for nidx, occ in sub.items():
+            latex = latex.replace("{" + nidx + "}", "{" + occ + "}")
 
         html = html.replace(f"<code>{match}</code>", f"<code>${latex}$</code>")
 
