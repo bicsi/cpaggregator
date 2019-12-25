@@ -128,7 +128,10 @@ def scrape_task_info(db, task):
 
             try:
                 statement = scraper.scrape_task_statement(task_id)
-                task_info['statement'] = statement
+                if "text" in statement:
+                    task_info['statement'] = statement["text"]
+                if "examples" in statement:
+                    task_info["examples"] = statement["examples"]
                 log.info("Statement scraped successfully.")
             except NotImplementedError:
                 log.warning(f"Could not get statement of task {task_id}: not implemented.")

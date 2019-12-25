@@ -187,8 +187,6 @@ class Task(models.Model):
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
     task_id = models.CharField(max_length=256)
     name = models.CharField(null=True, blank=True, max_length=256)
-    time_limit_ms = models.IntegerField(null=True, blank=True)
-    memory_limit_kb = models.IntegerField(null=True, blank=True)
     tags = models.ManyToManyField(MethodTag, blank=True)
     modified_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -219,6 +217,10 @@ class TaskStatement(models.Model):
     task = models.OneToOneField(Task, related_name='statement', on_delete=models.CASCADE)
     text = models.TextField()
     examples = JSONField(null=True, blank=True)
+    input_file = models.CharField(max_length=256, null=True, blank=True)
+    output_file = models.CharField(max_length=256, null=True, blank=True)
+    memory_limit_kb = models.IntegerField(null=True, blank=True)
+    time_limit_ms = models.IntegerField(null=True, blank=True)
     modified_by_user = models.BooleanField(default=False)
 
     @property

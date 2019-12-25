@@ -4,6 +4,7 @@
 {% load static from staticfiles %}
 {% load humanize %}
 {% load markdownify %}
+{% load task_extras %}
 
 {% block title_tag %}{{ task.name_or_id }}{% endblock %}
 
@@ -68,6 +69,27 @@
             </div>
 
             {% if task.statement %}
+                <div class="mt-3 col-12">
+                    <table class="table table-sm d-lg-inline table-borderless mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="pr-4">Time limit:</th>
+                                <td>{{ task.statement.time_limit_ms|time_limit }}</td>
+                                <td style="width: 5em"></td>
+                                <th class="pr-4">Input file:</th>
+                                <td><code>{{ task.statement.input_file }}</code></td>
+                            </tr>
+                            <tr>
+                                <th class="pr-4">Memory limit:</th>
+                                <td>{{ task.statement.memory_limit_kb|memory_limit }}</td>
+                                <td style="width: 5em"></td>
+                                <th class="pr-4">Output file:</th>
+                                <td><code>{{ task.statement.output_file }}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="col-12 mt-3">
                     {{ task.statement.formatted|safe }}
                 </div>

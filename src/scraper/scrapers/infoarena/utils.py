@@ -109,6 +109,7 @@ def scrape_task_info(task_id):
     info_table = main_view.find('table')
 
     title = main_view.find('h1').text.strip()
+    input_file, output_file = map(str.strip, info_table.find_all('tr')[0].find_all('td')[1].text.split(','))
     time_limit = info_table.find_all('tr')[2].find_all('td')[1].text
     memory_limit = info_table.find_all('tr')[2].find_all('td')[3].text
     source = info_table.find_all('tr')[0].find_all('td')[3].text
@@ -126,6 +127,8 @@ def scrape_task_info(task_id):
         'source': source,
         'time_limit': parsers.parse_time_limit(time_limit),
         'memory_limit': parsers.parse_memory_limit(memory_limit),
+        'input_file': input_file,
+        'output_file': output_file,
         'tags': tags,
     }
 

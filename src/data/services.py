@@ -36,18 +36,24 @@ def __update_task_info(db, task: Task):
         return
 
     task.name = mongo_task_info['title']
-    if 'time_limit' in mongo_task_info:
-        task.time_limit_ms = mongo_task_info['time_limit']
-    if 'memory_limit' in mongo_task_info:
-        task.memory_limit_kb = mongo_task_info['memory_limit']
+    print(mongo_task_info)
     if 'statement' in mongo_task_info:
         statement, _ = TaskStatement.objects.get_or_create(task=task)
+        if 'time_limit' in mongo_task_info:
+            statement.time_limit_ms = mongo_task_info['time_limit']
+        if 'memory_limit' in mongo_task_info:
+            statement.memory_limit_kb = mongo_task_info['memory_limit']
+        if 'input_file' in mongo_task_info:
+            statement.input_file = mongo_task_info['input_file']
+        if 'output_file' in mongo_task_info:
+            statement.output_file = mongo_task_info['output_file']
+
         if statement.modified_by_user:
             log.info(f"Skipped updating statement for {task}: modified by user")
         else:
-            statement.text = mongo_task_info['statement']['text']
-            statement.examples = mongo_task_info['statement']['examples']
-            statement.save()
+            statement.text = mongo_task_info['statement']
+            statement.examples = mongo_task_info['examples']
+        statement.save()
 
     for tag_id in mongo_task_info.get('tags', []):
         try:
