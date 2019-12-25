@@ -256,6 +256,7 @@ def scrape_task_statement(task_id: str):
             stripped = __strip_accents(token)
             for c in string.punctuation:
                 stripped = stripped.rstrip(c)
+            stripped = "".join([c for c in stripped if c != '-'])
 
             if (len(stripped) > 1 or stripped.lower() in ['o', 'a']) and stripped.isalpha():
                 is_word = True
