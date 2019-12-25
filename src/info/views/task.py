@@ -155,7 +155,8 @@ class TagCreateView(LoginRequiredMixin, generic.CreateView):
 
 class TagDeleteView(LoginRequiredMixin, generic.DeleteView):
     def get_success_url(self):
-        return reverse_lazy('task-detail', kwargs=self.kwargs)
+        return reverse_lazy('task-detail', kwargs={
+            "task_path": self.kwargs["task_path"]})
 
     def get_object(self, queryset=None):
         user = self.request.user.profile
