@@ -128,7 +128,7 @@ class FavoriteToggleView(LoginRequiredMixin, generic.View):
         else:
             FavoriteTask.objects.create(profile=user.profile, task=task)
 
-        return redirect('task-detail', task_path=self.kwargs['task_path'])
+        return redirect('task-detail', **self.kwargs)
 
 
 class TagCreateView(LoginRequiredMixin, generic.CreateView):
@@ -147,15 +147,15 @@ class TagCreateView(LoginRequiredMixin, generic.CreateView):
         except IntegrityError:
             pass
 
-        return redirect('task-detail', judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        return redirect('task-detail', **self.kwargs)
 
     def form_invalid(self, form):
-        return redirect('task-detail', judge_id=self.kwargs['judge_id'], task_id=self.kwargs['task_id'])
+        return redirect('task-detail', **self.kwargs)
 
 
 class TagDeleteView(LoginRequiredMixin, generic.DeleteView):
     def get_success_url(self):
-        return reverse_lazy('task-detail', kwargs={self.kwargs['task_path']})
+        return reverse_lazy('task-detail', kwargs=self.kwargs)
 
     def get_object(self, queryset=None):
         user = self.request.user.profile
