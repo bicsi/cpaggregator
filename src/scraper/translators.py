@@ -54,7 +54,6 @@ def translate_ro_en(text: str, use_glossary=False):
         try:
             response = client.translate_text(
                 parent=parent,
-                glossary_config=glossary_config,
                 contents=[html_text],
                 source_language_code='ro',
                 target_language_code='en',
@@ -68,7 +67,7 @@ def translate_ro_en(text: str, use_glossary=False):
                 log.warning("RESOURCE_EXHAUSTED. Sleeping for 60s...")
                 time.sleep(60)
 
-    translated = response.glossary_translations if use_glossary else response.translations
+    translated = response.translations
     translated = translated[0].translated_text
     translated = translated \
         .replace('<task/>', 'Task') \
@@ -76,6 +75,8 @@ def translate_ro_en(text: str, use_glossary=False):
         .replace('<output/>', 'Output')\
         .replace('<constraints/>', 'Constraints')\
         .replace('<notes/>', 'Notes')
+    translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
+    translated = re.sub(r"<code>[^<>]*\.out<\/code>([^\n]{1,25}<code>[^<>]*\.out<\/code>)", r"\g<1>", translated)
     translated = html2text(translated)
     return markdown.prettify(translated)
 
