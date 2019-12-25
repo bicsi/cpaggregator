@@ -33,10 +33,11 @@ def translate_ro_en(text: str):
     parent = client.location_path("competitive-257117", 'global')
 
     html_text = markdownify(text)
-    html_text = re.sub("(<h.>)[^<>]*intrare[^<>]*(</h.>)", r"\g<1><input/>\g<2>", html_text)
-    html_text = re.sub("(<h.>)[^<>]*ie.ire[^<>]*(</h.>)", r"\g<1><output/>\g<2>", html_text)
-    html_text = re.sub("(<h.>)[^<>]*estric[^<>]*(</h.>)", r"\g<1><constraints/>\g<2>", html_text)
-    html_text = re.sub("(<h.>)[^<>]*recizar[^<>]*(</h.>)", r"\g<1><notes/>\g<2>", html_text)
+    html_text = re.sub(r"(<h.>)[^<>]*[Cc]erin[^<>]*(</h.>)", r"\g<1><task/>\g<2>", html_text)
+    html_text = re.sub(r"(<h.>)[^<>]*ntrare[^<>]*(</h.>)", r"\g<1><input/>\g<2>", html_text)
+    html_text = re.sub(r"(<h.>)[^<>]*e.ire[^<>]*(</h.>)", r"\g<1><output/>\g<2>", html_text)
+    html_text = re.sub(r"(<h.>)[^<>]*estric[^<>]*(</h.>)", r"\g<1><constraints/>\g<2>", html_text)
+    html_text = re.sub(r"(<h.>)[^<>]*reciz.r[^<>]*(</h.>)", r"\g<1><notes/>\g<2>", html_text)
 
     response = None
     for tries in range(3):
@@ -56,7 +57,8 @@ def translate_ro_en(text: str):
                 time.sleep(60)
 
     translated = response.translations[0].translated_text
-    translated = translated\
+    translated = translated \
+        .replace('<task/>', 'Task') \
         .replace('<input/>', 'Input')\
         .replace('<output/>', 'Output')\
         .replace('<constraints/>', 'Constraints')\
