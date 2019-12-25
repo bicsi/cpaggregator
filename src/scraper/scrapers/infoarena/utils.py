@@ -246,6 +246,8 @@ def scrape_task_statement(task_id: str):
                 continue
 
         latex = match
+        latex = latex.replace('&lt;', '<').replace('&gt;', '>')
+
         for c in "&%$#_{}":
             latex = latex.replace(c, '\\' + c)
 

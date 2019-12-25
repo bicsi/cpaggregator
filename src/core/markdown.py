@@ -9,6 +9,8 @@ def prettify(md: str):
         md = re.sub(r' +', ' ', md)
         md = re.sub(rf"{pat2} ([^{pat2}]*) {pat2}", rf"{pat}\g<1>{pat}", md)
 
+    md = md.replace("* _", "*_").replace("_ *", "_*")
+
     md = re.sub(r' +', ' ', md)
     for pct in [':', ';', '.', '?', '!', ',', ')']:
         md = md.replace(f' {pct}', f"{pct} ")
