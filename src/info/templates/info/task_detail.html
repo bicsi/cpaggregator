@@ -34,7 +34,7 @@
                 <h1 class="d-inline-block">
                     {{ task.name_or_id }}
                 </h1>
-                <h5>
+                <h5 class="d-flex align-items-center">
                     <div class="d-inline-block d-sm-none">
                         <img class="d-sm-none d-inline-block img-fluid mx-1"
                              style="width: 24px; height: 24px"
@@ -42,28 +42,32 @@
                              alt="{{ task.judge.judge_id }}">
                     </div>
                     {% if task.statistics %}
-                    <span class="badge badge-pill badge-info"><i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} points</span>
-
-                    <span class="text-light mx-2">|</span>
+                    <span class="badge badge-pill badge-info">
+                        <i class="far fa-dot-circle mr-1"></i>
+                        {{ task.statistics.difficulty_score }} points
+                    </span>
+                    <span class="text-light mx-3">|</span>
                     {% endif %}
                 {% if best_submission_for_user %}
-                    <span class="small text-muted">Verdict:</span>
-                    {% if best_submission_for_user.verdict == 'AC' %}
-                    <span class="badge badge-success ml-1">
-                        <i class="fa fa-check mr-1"></i>{{ best_submission_for_user.get_verdict_display }}
-                    </span>
-                    {% else %}
-                    <span class="badge badge-danger ml-1">
-                        <i class="fa fa-times mr-1"></i>
+                    {% with submission=best_submission_for_user %}
+                    {% with badge_color=submission.is_ac|yesno:"success,danger" %}
+                    {% with badge_icon=submission.is_ac|yesno:"check,times" %}
+                    <span class="small text-muted mr-2">Verdict:</span>
+                    <a href="#!" tabindex="0" data-toggle="popover"
+                       data-trigger="focus" data-html="true" data-placement="top"
+                       title="Submission <a href='{{ submission.get_url }}'>#{{ submission.submission_id }}</a>"
+                       data-content="Submitted on {{ submission.submitted_on|date:'M d, Y H:m'}} <br/> <strong class='text-{{ badge_color}}'>{{ submission.get_verdict_display }}</strong>"
+                       class="badge badge-{{ badge_color }} ml-1">
+                        <i class="fa fa-{{ badge_icon }} mr-1"></i>
                         {{ best_submission_for_user.get_verdict_display }}
-                    </span>
-                    {% endif %}
-                    <span class="small">
-                        (<a href="{{ best_submission_for_user.get_url }}">#{{ best_submission_for_user.submission_id }}</a>)
-                    </span>
-                </h5>
+                    </a>
+                    {% endwith %}
+                    {% endwith %}
+                    {% endwith %}
                 {% else %}
-                <span class="small text-muted">Not tried yet</span>
+                    <span class="small text-muted">
+                        Not tried yet
+                    </span>
                 {% endif %}
                 </h5>
             </div>

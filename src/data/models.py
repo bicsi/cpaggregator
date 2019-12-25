@@ -279,6 +279,9 @@ class Submission(models.Model):
         return urlresolvers.get_submission_url(
             self.task.judge.judge_id, self.task.task_id, self.submission_id)
 
+    def is_ac(self):
+        return self.verdict == 'AC'
+
     class Meta:
         unique_together = (('submission_id', 'author'),)
         ordering = ['-submitted_on']
