@@ -6,7 +6,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-from data.models import UserProfile, UserHandle, Judge, UserGroup
+from data.models import UserProfile, UserHandle, Judge, UserGroup, TaskStatement
 from info.models import TaskSheet, Assignment, CustomTaskTag
 from info.utils import slugify_unique
 
@@ -182,3 +182,19 @@ class TaskCustomTagCreateForm(forms.ModelForm):
     class Meta:
         model = CustomTaskTag
         fields = ['name']
+
+
+class TaskStatementUpdateForm(forms.ModelForm):
+    class Meta:
+        model = TaskStatement
+        fields = ['text', 'examples']
+        help_texts = {
+            'text': 'Text is Markdown. Support for LaTeX is done via `$ LATEX TEXT $`.',
+        }
+
+    def save(self, commit=True):
+        obj = super(TaskStatementUpdateForm, self).save(commit=False)
+        obj.modified_by_user = True
+        if commit:
+            obj.save()
+        return obj

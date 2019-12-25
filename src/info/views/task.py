@@ -7,7 +7,8 @@ from django.views import generic
 from django_ajax.mixin import AJAXMixin
 
 from core.logging import log
-from data.models import Submission, Task, UserHandle, MethodTag
+from data.models import Submission, Task, UserHandle, MethodTag, TaskStatement
+from info import forms
 from info.forms import TaskCustomTagCreateForm
 from info.models import FavoriteTask, CustomTaskTag
 from search.queries import search_task
@@ -161,3 +162,17 @@ class TagDeleteView(LoginRequiredMixin, generic.DeleteView):
         task = Task.objects.filter_path(self.kwargs['task_path']).get()
         name = self.kwargs['tag_name']
         return CustomTaskTag.objects.get(profile=user, task=task, name=name)
+
+
+class TaskStatementUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    template_name = 'info/modal/task_statement_update.html'
+    context_object_name = 'task_statement'
+    model = TaskStatement
+    form_class = forms.TaskStatementUpdateForm
+
+    def get_success_url(self):
+        return reverse_lazy("task-detail", kwargs=self.kwargs)
+
+    def get_object(self, queryset=None):
+        return Task.objects.filter_path(self.kwargs['task_path']).get().statement
+

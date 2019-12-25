@@ -91,6 +91,12 @@
                         </table>
                     </div>
                 {% endif %}
+                {% if request.user.is_superuser %}
+                    <a class="btn btn-primary ml-3" data-toggle="modal" href="#modal"
+                       onclick="loadModalForm('{% url 'task-statement-update' task_path=task.get_path %}');">
+                        Edit statement
+                    </a>
+                {% endif %}
             {% endif %}
         </div>
     </div>

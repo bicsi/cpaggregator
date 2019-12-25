@@ -228,6 +228,9 @@ class TaskStatement(models.Model):
         ret = f"<div class=\"markdown\">{ret}</div>"
         return ret
 
+    def __str__(self):
+        return f"Task statement for {self.task}"
+
 
 class JudgeTaskStatistic(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='judge_statistic')
