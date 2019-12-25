@@ -23,6 +23,10 @@
   margin: 0 auto;
 }
 
+.markdown ul {
+    padding-left: 2em;
+}
+
 .no-underline {
   text-decoration: none !important;
 }
