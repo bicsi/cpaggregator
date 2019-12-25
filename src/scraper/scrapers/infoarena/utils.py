@@ -260,12 +260,12 @@ def scrape_task_statement(task_id: str):
 
             if (len(stripped) > 1 or stripped.lower() in ['o', 'a']) and stripped.isalpha():
                 is_word = True
-                found_words += 1
+                found_words += len(stripped)
             if not is_word:
                 ret.append(f"<code>{token}</code>")
             else:
                 ret.append(token)
-        if found_words <= 5:
+        if found_words <= 12:
             return None
         return " ".join(ret)
 
