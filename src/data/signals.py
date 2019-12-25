@@ -39,13 +39,12 @@ def save_user_profile(sender, instance, **kwargs):
 @receiver(post_save, sender=Task)
 def create_task(sender, instance, created, **kwargs):
     if created and settings.USE_CELERY:
-        task_id = ":".join([instance.judge.judge_id, instance.task_id])
-
-        log.info(f'Created new task {task_id}: updating info async...')
-        services.update_tasks_info.si(task_id).apply_async()
+        task_path = instance.get_path()
+        log.info(f'Created new task {task_path}: updating info async...')
+        services.update_tasks_info.si(task_path).apply_async()
         log.info('Scraping submissions and updating users async...')
         celery.chain(
-            services.scraper_services.scrape_submissions_for_tasks.si(task_id),
+            services.scraper_services.scrape_submissions_for_tasks.si(task_path),
             services.update_all_users.si(),
         ).apply_async()
 
@@ -59,7 +58,7 @@ def create_handle(sender, instance, created, **kwargs):
     if created and settings.USE_CELERY:
         print('Created new handle: updating info...')
         celery.chain(
-            services.update_handles.si(':'.join([instance.judge.judge_id, instance.handle])),
+            services.update_handles.si('/'.join([instance.judge.judge_id, instance.handle])),
             services.update_users.si(instance.user.user.username),
         ).apply_async()
 

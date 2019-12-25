@@ -1,16 +1,21 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.db.models import F
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import generic
+from django.views.generic.detail import SingleObjectMixin
 from django_ajax.mixin import AJAXMixin
 
 from core.logging import log
 from data.models import Submission, Task, UserHandle, MethodTag, TaskStatement
+from data.services import update_tasks_info
 from info import forms
 from info.forms import TaskCustomTagCreateForm
 from info.models import FavoriteTask, CustomTaskTag
+from scraper import database
+from scraper.services import scrape_task_info
 from search.queries import search_task
 
 
@@ -175,5 +180,20 @@ class TaskStatementUpdateView(LoginRequiredMixin, AJAXMixin, generic.UpdateView)
         return reverse_lazy("task-detail", kwargs=self.kwargs)
 
     def get_object(self, queryset=None):
+        if not self.request.user.is_superuser:
+            raise Http404()
         return Task.objects.filter_path(self.kwargs['task_path']).get().statement
+
+
+class TaskStatementScrapeView(LoginRequiredMixin, generic.View):
+    model = TaskStatement
+
+    def post(self, *args, **kwargs):
+        if not self.request.user.is_superuser:
+            raise Http404()
+        task = Task.objects.filter_path(kwargs['task_path']).get()
+        scrape_task_info(database.get_db(), task.get_path())
+        update_tasks_info(task.get_path())
+        return redirect("task-detail", **kwargs)
+
 

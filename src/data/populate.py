@@ -2,6 +2,7 @@ import sys
 
 from data.models import Judge, UserProfile, UserHandle, Task
 
+
 def create_judge(judge_id, name, homepage):
     judge, created = Judge.objects.update_or_create(
         judge_id=judge_id,
@@ -42,7 +43,7 @@ def create_user_handle(username, judge_id, handle):
 
 
 def create_task(task_id):
-    judge_id, task_id = task_id.split(':')
+    judge_id, task_id = task_id.split('/', 1)
     judge = Judge.objects.get(judge_id=judge_id)
 
     task, created = Task.objects.update_or_create(judge=judge, task_id=task_id)

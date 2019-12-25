@@ -74,7 +74,7 @@ def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
 
     task_dict = {}
     for task in tasks:
-        judge_id, task_id = task.split(':', 1)
+        judge_id, task_id = task.split('/', 1)
         task_ids = __expand_task(judge_id, task_id)
         task_dict[judge_id] = task_dict.get(judge_id, []) + task_ids
 
@@ -97,7 +97,7 @@ def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
 
     handle_dict = {}
     for user in user_ids:
-        judge_id, handle = user.split(':', 1)
+        judge_id, handle = user.split('/', 1)
         handles = __expand_handle(judge_id, handle)
         handle_dict[judge_id] = handle_dict.get(judge_id, []) + handles
 
@@ -109,7 +109,7 @@ def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
 
 def scrape_task_info(db, task):
     log.info(f"Scraping task info for task '{task}'...")
-    judge_id, task_id = task.split(':', 1)
+    judge_id, task_id = task.split('/', 1)
     task_ids = __expand_task(judge_id, task_id)
 
     scraper = scrapers.create_scraper(judge_id)
@@ -146,7 +146,7 @@ def scrape_task_info(db, task):
 
 def scrape_handle_info(db, handle):
     log.info(f"Scraping info for handle '{handle}'...")
-    judge_id, handle_id = handle.split(':', 1)
+    judge_id, handle_id = handle.split('/', 1)
     handles = __expand_handle(judge_id, handle_id)
     log.info(f"Handles: {handles}")
 
@@ -173,7 +173,7 @@ def scrape_tasks_info():
     db = database.get_db()
     for task in Task.objects.all():
         try:
-            scrape_task_info(db, ':'.join([task.judge.judge_id, task.task_id]))
+            scrape_task_info(db, task.get_path())
         except Exception as e:
             log.exception(f"Could not parse task '{task}': {e}")
 
@@ -183,6 +183,6 @@ def scrape_handles_info():
     db = database.get_db()
     for handle in UserHandle.objects.all():
         try:
-            scrape_handle_info(db, ':'.join([handle.judge.judge_id, handle.handle]))
+            scrape_handle_info(db, '/'.join([handle.judge.judge_id, handle.handle]))
         except Exception as e:
             log.exception(f"Could not parse handle '{handle}': {e}")

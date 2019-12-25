@@ -122,15 +122,6 @@
                         </table>
                     </section>
                 {% endif %}
-
-                {% if request.user.is_superuser %}
-                <div class="col-12 mt-3">
-                    <a class="btn btn-primary" data-toggle="modal" href="#modal"
-                       onclick="loadModalForm('{% url 'task-statement-update' task_path=task.get_path %}');">
-                        Edit statement
-                    </a>
-                </div>
-                {% endif %}
             </div>
         {% endif %}
         <div class="row">
@@ -154,11 +145,26 @@
                     {% endif %}
                 </form>
             </div>
+        </div>
+        {% if request.user.is_superuser %}
+            <div class="row mt-3 d-flex border rounded border-warning p-3">
+                <a class="btn btn-outline btn-warning" data-toggle="modal" href="#modal"
+                   onclick="loadModalForm('{% url 'task-statement-update' task_path=task.get_path %}');">
+                    Edit statement
+                </a>
+                <form class="form-inline ml-2" method="post"
+                      action="{% url 'task-statement-scrape' task_path=task.get_path %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-warning">
+                        Rescrape task info
+                    </button>
+                </form>
             </div>
-        <div class="row">
+        {% endif %}
+        <div class="row mt-4">
             <div class="col col-lg-4 col-12">
                 {% if not task.statement %}
-                    <div class="card mt-5">
+                    <div class="card mb-5">
                         <h6 class="card-header">Task information</h6>
                         <div class="card-body">
                             <h4 class="card-title">{{ task.name_or_id }}</h4>
@@ -186,7 +192,7 @@
                         </div>
                     </div>
                 {% endif %}
-                <div class="card mt-5">
+                <div class="card mb-5">
                     <h6 class="card-header">Judge info</h6>
                         <div class="card-body">
                             <a href="{{ task.judge.homepage }}">
@@ -217,7 +223,7 @@
                 </div>
 
                 {% if task.tags.count or task.custom_tags.count %}
-                <div class="card mt-5">
+                <div class="card mb-5">
                     <h6 class="card-header">Tags</h6>
                     <ul class="list-group list-group-flush">
                         {% for tag in task.tags.all %}
@@ -225,7 +231,7 @@
                             {{ tag }}
                         </li>
                         {% endfor %}
-                        {% for tag in custom_tags %}
+                        {% for tag in task.custom_tags.all %}
                         <li class="list-group-item list-group-item text-secondary">
                             <form class="d-flex" method="post" action="{% url 'task-tag-delete' task_path=task.get_path tag_name=tag.name %}">
                                 {% csrf_token %}
@@ -243,7 +249,7 @@
                 </div>
             {% endif %}
 
-            <form action="{% url 'task-tag-create' task_path=task.get_path %}" method="post">
+            <form class="mb-5" action="{% url 'task-tag-create' task_path=task.get_path %}" method="post">
                 {% csrf_token %}
                 <div class="input-group mt-5">
                         <div class="input-group-prepend">
@@ -258,7 +264,7 @@
 
         </div>
         <div class="col col-lg-8 col-12">
-            <div class="card mt-5">
+            <div class="card mb-5">
                 <h6 class="card-header">Users who solved this task</h6>
                 <div class="card-body">
                     {% for ac_submission in accepted_submissions %}

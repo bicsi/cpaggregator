@@ -36,7 +36,6 @@ def __update_task_info(db, task: Task):
         return
 
     task.name = mongo_task_info['title']
-    print(mongo_task_info)
     if 'statement' in mongo_task_info:
         statement, _ = TaskStatement.objects.get_or_create(task=task)
         if 'time_limit' in mongo_task_info:
@@ -221,8 +220,7 @@ def update_tasks_info(*tasks):
     log.info(f'Updating tasks info for {tasks}...')
     for task in tasks:
         try:
-            judge_id, task_id = task.split(':', 1)
-            task_obj = Task.objects.get(judge__judge_id=judge_id, task_id=task_id)
+            task_obj = Task.objects.filter_path(task).get()
             __update_task_info(db, task_obj)
         except Exception as e:
             log.exception(e)
@@ -247,7 +245,7 @@ def update_handles(*handles):
     if handles:
         for handle in handles:
             try:
-                judge_id, handle_id = handle.split(':', 1)
+                judge_id, handle_id = handle.split('/', 1)
                 handle_obj = UserHandle.objects.get(judge__judge_id=judge_id, handle=handle_id)
                 __update_handle(db, handle_obj)
             except Exception as e:
