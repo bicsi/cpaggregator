@@ -251,6 +251,7 @@ def scrape_task_statement(task_id: str):
 
         ret = []
         found_words = 0
+        word_streak = 0
         for token in match.split():
             is_word = False
             stripped = __strip_accents(token)
@@ -258,13 +259,17 @@ def scrape_task_statement(task_id: str):
                 stripped = stripped.rstrip(c)
             stripped = "".join([c for c in stripped if c != '-'])
 
-            if (len(stripped) > 1 or stripped.lower() in ['o', 'a']) and stripped.isalpha():
+            if (len(stripped) > 1 and stripped.isalpha()) or \
+                    (stripped.lower() in ['o', 'a', 'e'] and word_streak >= 2):
                 is_word = True
                 found_words += len(stripped)
             if not is_word:
                 ret.append(f"<code>{token}</code>")
+                word_streak = 0
             else:
                 ret.append(token)
+                word_streak += 1
+
         if found_words <= 12:
             return None
         return " ".join(ret)
