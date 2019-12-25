@@ -1,4 +1,5 @@
 import re
+import string
 
 from bs4 import BeautifulSoup
 
@@ -7,6 +8,13 @@ from core.logging import log
 from scraper.utils import get_page
 from scraper.scrapers.infoarena import parsers
 from html2text import html2text
+import unicodedata
+
+
+def __strip_accents(s):
+    return ''.join(c for c in unicodedata.normalize('NFD', s)
+                   if unicodedata.category(c) != 'Mn')
+
 
 SCRAPER_LIMIT = 1000 * 1000 * 1000
 INFOARENA_JUDGE_ID = "ia"
@@ -235,7 +243,37 @@ def scrape_task_statement(task_id: str):
         .replace('<var>', '<code>')\
         .replace('</var>', '</code>')\
         .replace('<h2>', '<h3>')\
-        .replace('</h2>', '</h3>')\
+        .replace('</h2>', '</h3>')
+
+    def remove_text(match):
+        if len(match.split()) <= 6:
+            return None
+
+        ret = []
+        found_words = 0
+        for token in match.split():
+            is_word = False
+            stripped = __strip_accents(token)
+            for c in string.punctuation:
+                stripped = stripped.rstrip(c)
+
+            if (len(stripped) > 1 or stripped.lower() in ['o', 'a']) and stripped.isalpha():
+                is_word = True
+                found_words += 1
+            if not is_word:
+                ret.append(f"<code>{token}</code>")
+            else:
+                ret.append(token)
+        if found_words <= 5:
+            return None
+        return " ".join(ret)
+
+    for match in set(re.findall(r'<code>(.*?)<\/code>', html)):
+        if '.in' in match or '.out' in match:
+            continue
+        replace = remove_text(match)
+        if replace:
+            html = html.replace(f"<code>{match}</code>", f"{replace}")
 
     for match in set(re.findall(r'<code>(.*?)<\/code>', html)):
         if '.in' in match or '.out' in match:
@@ -296,7 +334,7 @@ def scrape_task_statement(task_id: str):
                 "output": tds[1].text,
             })
 
-    md = html2text(html)
+    md = html2text(html, bodywidth=0)
 
     return {
         "statement": markdown.prettify(md),

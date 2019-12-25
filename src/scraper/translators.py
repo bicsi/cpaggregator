@@ -31,6 +31,7 @@ def __get_client():
 
 
 def translate_ro_en(text: str, use_glossary=False):
+
     client = __get_client()
     parent = client.location_path(PROJECT_ID, 'us-central1')
 
@@ -47,13 +48,16 @@ def translate_ro_en(text: str, use_glossary=False):
         replace[code] = placeholder
         html_text = html_text.replace(code, placeholder)
 
-    glossary_config = None
-    if use_glossary:
-        glossary = client.glossary_path(
-            PROJECT_ID, 'us-central1', 'ro-en')
-        glossary_config = translate.types.TranslateTextGlossaryConfig(
-            glossary=glossary)
-    print(glossary_config)
+    # Ro glossary
+
+    html_text = re.sub(r"Sa( se)? ", "Trebuie sa ", html_text)
+    html_text = re.sub(r"Să( se)? ", "Trebuie să ", html_text)
+    html_text = re.sub("Fie ", "Consideră ", html_text)
+    html_text = re.sub("Se da ", "Se consideră ", html_text)
+    html_text = re.sub("Se dau ", "Se consideră ", html_text)
+    html_text = re.sub("Se dă ", "Se consideră ", html_text)
+    html_text = re.sub(' mod ', ' modulo ', html_text)
+    html_text = re.sub('modulo', 'mmoodduulloo', html_text)
 
     response = None
     for tries in range(3):
@@ -76,13 +80,15 @@ def translate_ro_en(text: str, use_glossary=False):
     translated = response.translations
     translated = translated[0].translated_text
 
+    # En glossary
+
     glossary = [
         ('peak', 'vertex'),
         ('peaks', 'vertices'),
         ('tip', 'vertex'),
         ('tips', 'vertices'),
+        ('mmoodduulloo', 'modulo'),
     ]
-
     for word, rep in glossary:
         translated = re.sub(rf'([^a-zA-Z]|^){word}([^a-zA-Z]|$)',
                             rf'\g<1>{rep}\g<2>', translated)
@@ -102,7 +108,7 @@ def translate_ro_en(text: str, use_glossary=False):
 
     # translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
     # translated = re.sub(r"<code>[^<>]*\.out<\/code>([^\n]{1,25}<code>[^<>]*\.out<\/code>)", r"\g<1>", translated)
-    translated = html2text(translated)
+    translated = html2text(translated, bodywidth=0)
     return markdown.prettify(translated)
 
 
