@@ -282,7 +282,7 @@ def scrape_task_statement(task_id: str):
     md = html2text(html)
 
     return {
-        "text": markdown.prettify(md),
+        "statement": markdown.prettify(md),
         "examples": examples,
     }
 

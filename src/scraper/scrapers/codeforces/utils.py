@@ -8,7 +8,9 @@ from html2text import html2text
 from markdownx.utils import markdownify
 
 from core.logging import log
-from scraper.scrapers.codeforces.parsers import parse_tag, parse_submission, CODEFORCES_JUDGE_ID
+from scraper.scrapers.codeforces.parsers import \
+    parse_tag, parse_submission, CODEFORCES_JUDGE_ID, \
+    parse_time_limit, parse_memory_limit, parse_filename
 from scraper.utils import get_page, split_into_chunks
 
 
@@ -158,6 +160,20 @@ def scrape_task_statement(task_id: str):
     statement = soup.select_one(".problem-statement")
     result = ""
 
+    print(statement.select_one('.time-limit'))
+    print(statement.select_one('.time-limit').string)
+
+    task_info = {
+        "time_limit": parse_time_limit(
+            statement.select_one('.time-limit').find(text=True, recursive=False)),
+        "memory_limit": parse_memory_limit(
+            statement.select_one('.memory-limit').find(text=True, recursive=False)),
+        "input_file": parse_filename(
+            statement.select_one(".input-file").find(text=True, recursive=False)),
+        "output_file": parse_filename(
+            statement.select_one(".output-file").find(text=True, recursive=False)),
+    }
+
     inputs = []
     outputs = []
     for child in statement.find_all("div", recursive=False):
@@ -217,10 +233,11 @@ def scrape_task_statement(task_id: str):
     else:
         log.critical(f"Could not parse examples for {task_id}: unequal number of inputs and outputs")
 
-    return {
-        "text": md,
+    task_info.update({
+        "statement": md,
         "examples": examples,
-    }
+    })
+    return task_info
 
 
 def crawl(output_path):

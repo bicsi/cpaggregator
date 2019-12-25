@@ -10,7 +10,7 @@ def memory_limit(value):
     """Removes all values of arg from the given string"""
     if not value:
         return ""
-    if value < 80000:
+    if value < 50000:
         return f"{value} KB"
     else:
         return f"{value // 1024} MB"
@@ -21,10 +21,15 @@ def time_limit(value):
     if not value:
         return ""
 
+    def formatted(x):
+        x = format(x, '.2f')
+        return x.rstrip('0').rstrip('.')
+
     if value < 1000:
         return f"{value} ms"
     else:
-        return f"{(value / 1000.):.2f} seconds"
+        value = formatted(value / 1000.)
+        return f"{value} second{'s' if value != '1' else ''}"
 
 
 @register.filter(needs_autoescape=True)

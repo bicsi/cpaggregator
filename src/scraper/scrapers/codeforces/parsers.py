@@ -94,3 +94,26 @@ def parse_submission(submission_data):
             yield submission
     except Exception as ex:
         log.error(f"Failed to parse submission.\nSubmission data:{submission_data}\nError: {ex}")
+
+
+def parse_time_limit(time_limit: str):
+    num, unit = time_limit.strip().split()
+    if unit.startswith('second'):
+        return int(num) * 1000.
+    raise ValueError(f"Cannot parse unit '{unit}'")
+
+
+def parse_memory_limit(memory_limit: str):
+    num, unit = memory_limit.strip().split()
+    if unit == 'megabytes':
+        return int(num) * 1024.
+    raise ValueError(f"Cannot parse unit '{unit}'")
+
+
+def parse_filename(filename: str):
+    filename = filename.strip()
+    if filename == "standard input":
+        return "stdin"
+    if filename == "standard output":
+        return "stdout"
+    return filename
