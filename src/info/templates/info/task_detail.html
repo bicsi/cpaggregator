@@ -71,38 +71,39 @@
                 {% endif %}
                 </h5>
             </div>
+        </div>
+        {% if task.statement %}
+            <div class="row mt-3">
+                {% if task.statement.time_limit_ms %}
+                    <table class="col-12 table table-sm d-lg-inline table-borderless mb-3">
+                                <tbody>
+                                    <tr>
+                                        <th class="pr-4">Time limit:</th>
+                                        <td>{{ task.statement.time_limit_ms|time_limit }}</td>
+                                        <td style="width: 5em"></td>
+                                        <th class="pr-4">Input file:</th>
+                                        <td>{{ task.statement.input_file|filename }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pr-4">Memory limit:</th>
+                                        <td>{{ task.statement.memory_limit_kb|memory_limit }}</td>
+                                        <td style="width: 5em"></td>
+                                        <th class="pr-4">Output file:</th>
+                                        <td>{{ task.statement.output_file|filename }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                {% endif %}
 
-            {% if task.statement %}
-                <div class="mt-3 col-12">
-                    {% if task.statement.time_limit_ms %}
-                        <table class="table table-sm d-lg-inline table-borderless mb-0">
-                            <tbody>
-                                <tr>
-                                    <th class="pr-4">Time limit:</th>
-                                    <td>{{ task.statement.time_limit_ms|time_limit }}</td>
-                                    <td style="width: 5em"></td>
-                                    <th class="pr-4">Input file:</th>
-                                    <td>{{ task.statement.input_file|filename }}</td>
-                                </tr>
-                                <tr>
-                                    <th class="pr-4">Memory limit:</th>
-                                    <td>{{ task.statement.memory_limit_kb|memory_limit }}</td>
-                                    <td style="width: 5em"></td>
-                                    <th class="pr-4">Output file:</th>
-                                    <td>{{ task.statement.output_file|filename }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    {% endif %}
-                </div>
-
-                <div class="col-12 mt-3">
-                    {{ task.statement.formatted|safe }}
-                </div>
+                {% if task.statement %}
+                    <section class="col-12">
+                        {{ task.statement.formatted|safe }}
+                    </section>
+                {% endif %}
 
                 {% if task.statement.examples %}
-                    <div class="examples col-12">
-                         <h3>Examples</h3>
+                    <section class="col-12">
+                        <h3>Examples</h3>
                         <table class="table table-bordered">
                             <thead class="text-monospace">
                                 <th>Input</th>
@@ -117,8 +118,9 @@
                                 {% endfor %}
                             </tbody>
                         </table>
-                    </div>
+                    </section>
                 {% endif %}
+
                 {% if request.user.is_superuser %}
                 <div class="col-12 mt-3">
                     <a class="btn btn-primary" data-toggle="modal" href="#modal"
@@ -127,8 +129,10 @@
                     </a>
                 </div>
                 {% endif %}
-            {% endif %}
-            <div class="col-12 mt-3">
+            </div>
+        {% endif %}
+        <div class="row">
+            <div class="col-12 mt-1">
                 <a href="{{ task.get_url }}" class="btn btn-primary mt-3 mr-2" target="_blank">
                     <i class="fas fa-external-link-alt mr-1"></i> Go to task
                 </a>
@@ -148,96 +152,93 @@
                     {% endif %}
                 </form>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col col-lg-4 col-12">
-            {% if not task.statement %}
-            <div class="card mt-5">
-                <h6 class="card-header">Task information</h6>
-                <div class="card-body">
-                    <h4 class="card-title">{{ task.name_or_id }}</h4>
-                    <h6 class="card-subtitle text-muted mb-3">@{{ task.get_path }}</h6>
-
-                    {% if task.statistics %}
-                        <p class="card-text">
-                            Solved by <span class="badge badge-primary">
-                            {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
-                        </span> users (acceptance rate: <span class="badge badge-secondary">
-                            {{ task.statistics.acceptance_rate|floatformat:0 }}%</span>)
-                        </p>
-                        <p class="card-text">
-                            Average number of submissions per user:
-                                <span class="badge badge-primary">
-                                    {{ task.statistics.mean_submission_count|floatformat:2 }}
-                                </span>
-                        </p>
-                        <p class="card-text">
-                            Favorited by <span class="badge badge-primary">
-                                {{ task.statistics.favorited_count }}
-                            </span> user{{ task.statistics.favorited_count|pluralize }}
-                        </p>
-                    {% endif %}
-                </div>
             </div>
-            {% endif %}
-            <div class="card mt-5">
-                <h6 class="card-header">Judge info</h6>
-                    <div class="card-body">
-                        <a href="{{ task.judge.homepage }}">
-                            <img class="img-fluid" style="max-height: 80px"
-                             src="{% static task.judge.get_banner_url %}"
-                             alt="{{ task.judge.judge_id }}">
-                        </a>
+        <div class="row">
+            <div class="col col-lg-4 col-12">
+                {% if not task.statement %}
+                    <div class="card mt-5">
+                        <h6 class="card-header">Task information</h6>
+                        <div class="card-body">
+                            <h4 class="card-title">{{ task.name_or_id }}</h4>
+                            <h6 class="card-subtitle text-muted mb-3">@{{ task.get_path }}</h6>
 
-                        {% if task.judge_statistic.first_submitted_on %}
-                        <p class="card-text mt-3">
-                            Added on
-                            <span class="badge badge-primary mx-1">
-                                {{ task.judge_statistic.first_submitted_on|date:"M d, Y" }}
-                            </span>
-                            <span class="text-muted small">
-                                ({{ task.judge_statistic.first_submitted_on|naturaltime }})
-                            </span>
-                        </p>
-                        {% endif %}
-
-                        {% if task.source %}
-                        <div class="mt-3 d-flex align-items-center">
-                            <span class="card-text">Source: </span>
-                            <span class="small ml-2 badge badge-primary text-truncate">{{ task.source.name }}</span>
+                            {% if task.statistics %}
+                                <p class="card-text">
+                                    Solved by <span class="badge badge-primary">
+                                    {{ task.statistics.users_solved_count }}/{{ task.statistics.users_tried_count }}
+                                </span> users (acceptance rate: <span class="badge badge-secondary">
+                                    {{ task.statistics.acceptance_rate|floatformat:0 }}%</span>)
+                                </p>
+                                <p class="card-text">
+                                    Average number of submissions per user:
+                                        <span class="badge badge-primary">
+                                            {{ task.statistics.mean_submission_count|floatformat:2 }}
+                                        </span>
+                                </p>
+                                <p class="card-text">
+                                    Favorited by <span class="badge badge-primary">
+                                        {{ task.statistics.favorited_count }}
+                                    </span> user{{ task.statistics.favorited_count|pluralize }}
+                                </p>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
-            </div>
+                {% endif %}
+                <div class="card mt-5">
+                    <h6 class="card-header">Judge info</h6>
+                        <div class="card-body">
+                            <a href="{{ task.judge.homepage }}">
+                                <img class="img-fluid" style="max-height: 80px"
+                                 src="{% static task.judge.get_banner_url %}"
+                                 alt="{{ task.judge.judge_id }}">
+                            </a>
 
-            {% if task.tags.count or task.custom_tags.count %}
-            <div class="card mt-5">
-                <h6 class="card-header">Tags</h6>
-                <ul class="list-group list-group-flush">
-                    {% for tag in task.tags.all %}
-                    <li class="list-group-item list-group-item text-secondary">
-                        {{ tag }}
-                    </li>
-                    {% endfor %}
-                    {% for tag in custom_tags %}
-                    <li class="list-group-item list-group-item text-secondary">
-                        <form class="d-flex" method="post" action="{% url 'task-tag-delete' task_path=task.get_path tag_name=tag.name %}">
-                            {% csrf_token %}
-                            <span class="flex-grow-1 text-primary font-weight-bold">#{{ tag.name }}</span>
-                            <div class="input-group-append">
-                                <button class="btn btn-sm btn-xs-adjust btn-danger my-0" type="submit">
-                                    <i class="fa fa-xs fa-times" aria-hidden="true"></i>
-                                </button>
+                            {% if task.judge_statistic.first_submitted_on %}
+                            <p class="card-text mt-3">
+                                Added on
+                                <span class="badge badge-primary mx-1">
+                                    {{ task.judge_statistic.first_submitted_on|date:"M d, Y" }}
+                                </span>
+                                <span class="text-muted small">
+                                    ({{ task.judge_statistic.first_submitted_on|naturaltime }})
+                                </span>
+                            </p>
+                            {% endif %}
+
+                            {% if task.source %}
+                            <div class="mt-3 d-flex align-items-center">
+                                <span class="card-text">Source: </span>
+                                <span class="small ml-2 badge badge-primary text-truncate">{{ task.source.name }}</span>
                             </div>
-                        </form>
-                    </li>
+                            {% endif %}
+                        </div>
+                </div>
 
-                    {% endfor %}
-                </ul>
+                {% if task.tags.count or task.custom_tags.count %}
+                <div class="card mt-5">
+                    <h6 class="card-header">Tags</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for tag in task.tags.all %}
+                        <li class="list-group-item list-group-item text-secondary">
+                            {{ tag }}
+                        </li>
+                        {% endfor %}
+                        {% for tag in custom_tags %}
+                        <li class="list-group-item list-group-item text-secondary">
+                            <form class="d-flex" method="post" action="{% url 'task-tag-delete' task_path=task.get_path tag_name=tag.name %}">
+                                {% csrf_token %}
+                                <span class="flex-grow-1 text-primary font-weight-bold">#{{ tag.name }}</span>
+                                <div class="input-group-append">
+                                    <button class="btn btn-sm btn-xs-adjust btn-danger my-0" type="submit">
+                                        <i class="fa fa-xs fa-times" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
 
-
-            </div>
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endif %}
 
             <form action="{% url 'task-tag-create' task_path=task.get_path %}" method="post">

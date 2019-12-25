@@ -1,8 +1,11 @@
 import datetime
 import heapq
+import re
 from typing import Dict, Any
 
 from bs4 import BeautifulSoup
+from html2text import html2text
+from markdownx.utils import markdownify
 
 from core.logging import log
 from scraper.scrapers.codeforces.parsers import parse_tag, parse_submission, CODEFORCES_JUDGE_ID
@@ -151,15 +154,73 @@ def scrape_task_statement(task_id: str):
     contest_id, task_letter = task_id.split('/')
     contest_or_gym = "gym" if int(contest_id) >= 100000 else "contest"
     response = get_page(f"https://codeforces.com/{contest_or_gym}/{contest_id}/problem/{task_letter}")
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, 'html.parser')
     statement = soup.select_one(".problem-statement")
-    section_text = []
-    for child in statement.findChildren("div", recursive=False):
+    result = ""
+
+    inputs = []
+    outputs = []
+    for child in statement.find_all("div", recursive=False):
         klass = child.get("class", [])
-        if "header" in klass or "sample-tests" in klass:
+        if "header" in klass:
             continue
-        section_text.append(child.get_text(separator=" "))
-    return "\n".join(section_text)
+        if "sample-tests" in klass:
+            for test in child.select('.sample-test'):
+                for br in test.find_all('br'):
+                    br.replace_with("\n" + br.text)
+                for tag in test.select('.input pre'):
+                    inputs.append(tag.text)
+                for tag in test.select(".output pre"):
+                    outputs.append(tag.text)
+            continue
+        result += str(child)
+
+    result = f"<div>{result}</div>"
+    soup = BeautifulSoup(result, 'html.parser')
+
+    for node in soup.select(".section-title"):
+        node.wrap(soup.new_tag("h3"))
+
+    for node in soup.select(".tex-span"):
+        code = soup.new_tag("code")
+
+        inner_text = str(node)
+        inner_text = inner_text.replace("&lt;", "<")
+        inner_text = inner_text.replace("&gt;", ">")
+
+        for c in "&%$#_{}":
+            inner_text = inner_text.replace(c, '\\' + c)
+
+        inner_text = re.sub(r"<span[^>]*>(.*)<\/span>", r"\g<1>", inner_text)
+        inner_text = re.sub(r"<sub[^>]*>(.*?)<\/sub>", r"_{\g<1>}", inner_text)
+        inner_text = re.sub(r"<sup[^>]*>(.*?)<\/sup>", r"^{\g<1>}", inner_text)
+        inner_text = re.sub(r"<i[^>]*>(.*?)<\/i>", r"\g<1>", inner_text)
+
+        inner_text = "$" + inner_text + "$"
+        code.string = inner_text
+        node.replace_with(code)
+
+    for node in soup.select(".tex-font-style-tt"):
+        code = soup.new_tag("code")
+        code.string = node.text
+        node.replace_with(code)
+
+    result = str(soup)
+    result = re.sub(r'\$\$\$(.*?)\$\$\$', r"<code>$\g<1>$</code>", result)
+
+    md = html2text(result)
+    md = re.sub(r"###\s+", "###", md)
+
+    examples = None
+    if len(inputs) == len(outputs):
+        examples = [{"input": i, "output": o} for i, o in zip(inputs, outputs)]
+    else:
+        log.critical(f"Could not parse examples for {task_id}: unequal number of inputs and outputs")
+
+    return {
+        "text": md,
+        "examples": examples,
+    }
 
 
 def crawl(output_path):

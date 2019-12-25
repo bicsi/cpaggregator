@@ -279,8 +279,6 @@ def scrape_task_statement(task_id: str):
                 "output": tds[1].text,
             })
 
-    log.info(f"Examples: {examples}")
-
     md = html2text(html)
 
     return {
