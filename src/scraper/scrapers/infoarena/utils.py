@@ -258,6 +258,7 @@ def scrape_task_statement(task_id: str):
             .replace('</sup>', '}') \
             .replace('<b>', '\\textbf{') \
             .replace('</b>', '}') \
+            .replace(' * ', ' \\cdot ') \
             .replace('<i>', '\\textit{') \
             .replace('</i>', '}')
         latex = re.sub('<[^>]+>', '', latex)
@@ -268,8 +269,10 @@ def scrape_task_statement(task_id: str):
             latex = latex.replace("{" + occ + "}", "{" + nidx + "}")
             sub[nidx] = occ
 
-        latex = re.sub(r'([^a-zA-Z\\]|^)([a-zA-Z][a-zA-Z ]*[a-zA-Z])', r"\g<1>\\text{\g<2>}", latex)
+        latex = re.sub(r'([^a-zA-Z\\]|^)([a-zA-Z][a-zA-Z]*[a-zA-Z])', r"\g<1>\\text{\g<2>}", latex)
 
+        latex = re.sub(r"\s+", ' ', latex)
+        latex = latex.replace(" ", "$</code> <code>$")
         for nidx, occ in sub.items():
             latex = latex.replace("{" + nidx + "}", "{" + occ + "}")
 
