@@ -103,7 +103,10 @@ def translate_ro_en(text: str, use_glossary=False):
         .replace('<constraints/>', 'Constraints')\
         .replace('<notes/>', 'Notes')\
 
-
+    for pref, header_text, suff in set(re.findall(r"(<h.>)([^<>]*)(</h.>)", translated)):
+        print(pref, header_text, suff)
+        translated = translated.replace(pref + header_text + suff,
+                                        pref + header_text.strip().capitalize() + suff)
 
 
     # translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
