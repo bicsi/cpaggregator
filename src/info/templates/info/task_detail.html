@@ -78,14 +78,14 @@
                                     <td>{{ task.statement.time_limit_ms|time_limit }}</td>
                                     <td style="width: 5em"></td>
                                     <th class="pr-4">Input file:</th>
-                                    <td><code>{{ task.statement.input_file|filename }}</code></td>
+                                    <td>{{ task.statement.input_file|filename }}</td>
                                 </tr>
                                 <tr>
                                     <th class="pr-4">Memory limit:</th>
                                     <td>{{ task.statement.memory_limit_kb|memory_limit }}</td>
                                     <td style="width: 5em"></td>
                                     <th class="pr-4">Output file:</th>
-                                    <td><code>{{ task.statement.output_file|filename }}</code></td>
+                                    <td>{{ task.statement.output_file|filename }}</td>
                                 </tr>
                             </tbody>
                         </table>
