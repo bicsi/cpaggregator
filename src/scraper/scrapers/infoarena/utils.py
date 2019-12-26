@@ -276,6 +276,9 @@ def scrape_task_statement(task_id: str):
 
     for match in set(re.findall(r'<code>(.*?)<\/code>', html)):
         if '.in' in match or '.out' in match:
+            if '<' in match:
+                repl = re.sub(r"<[^>]*>", "", match)
+                html = html.replace(match, repl)
             continue
         replace = remove_text(match)
         if replace:
@@ -339,6 +342,15 @@ def scrape_task_statement(task_id: str):
                 "input": tds[0].text,
                 "output": tds[1].text,
             })
+
+    soup = BeautifulSoup(html, 'html.parser')
+    for img in soup.find_all('img'):
+        if 'latex' in img['src']:
+            latex_formula = img['alt']
+            latex_tag = soup.new_tag('code')
+            latex_tag.string = "$" + latex_formula + "$"
+            img.replace_with(latex_tag)
+    html = str(soup)
 
     md = html2text(html, bodywidth=0)
 
