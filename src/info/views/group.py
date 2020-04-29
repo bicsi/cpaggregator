@@ -16,7 +16,7 @@ from data.models import UserGroup, Submission, GroupMember
 from info import forms, queries
 from info.models import Assignment
 from info.utils import build_group_card_context
-
+from loguru import logger as log
 
 class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
     form_class = forms.AssignmentSheetCreateMultiForm
@@ -135,19 +135,24 @@ class GroupJoinView(LoginRequiredMixin, generic.View):
             UserGroup,
             group_id=self.kwargs['group_id'],
             visibility='PUBLIC')
-        group.members.add(user.profile)
-        group.save()
+        GroupMember.objects.create(
+            group=group,
+            profile=user.profile,
+            role='member')
         return redirect('group-detail', group_id=group.group_id)
 
 
 class GroupLeaveView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
+        group_id = self.kwargs['group_id']
         user = request.user
-        group = get_object_or_404(UserGroup, group_id=self.kwargs['group_id'])
-        group.members.remove(user.profile)
-        group.save()
+        group_member = get_object_or_404(
+            GroupMember,
+            group__group_id=group_id,
+            profile=user.profile)
+        group_member.delete()
 
-        return redirect('group-detail', group_id=group.group_id)
+        return redirect('group-detail', group_id=group_id)
 
 
 class GroupDetailView(generic.DetailView):
