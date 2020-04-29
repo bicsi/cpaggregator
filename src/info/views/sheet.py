@@ -75,7 +75,8 @@ class ResultsDetailView(generic.DetailView):
             submissions_for_user_and_task.items() if user == request_profile
         }
         # Build tasks as a dict.
-        tasks = [{'task': task.task, 'verdict_for_user': verdict_for_user_dict.get(task.task)}
+        tasks = [{'task': task.task, 'score': task.score,
+                  'verdict_for_user': verdict_for_user_dict.get(task.task)}
                  for task in TaskSheetTask.objects
                      .select_related('task', 'task__judge')
                      .filter(sheet=self.object.sheet).all()]
@@ -86,23 +87,23 @@ class ResultsDetailView(generic.DetailView):
         for user in self.object.group.members.all():
             user_submissions = []
             has_one_submission = False
-            total_solved = 0
+            total_score = 0
             for task in tasks:
                 submission = submissions_for_user_and_task.get((user, task['task']), None)
                 if submission:
                     user_submissions.append(submission)
                     has_one_submission = True
                     if submission.verdict == 'AC':
-                        total_solved += 1
+                        total_score += task['score']
                 else:
                     user_submissions.append(None)
             if has_one_submission:
                 results_data.append({
                     'user': user,
                     'results': user_submissions,
-                    'total_solved': total_solved,
+                    'total_score': total_score,
                 })
-        results_data.sort(key=lambda x: x['total_solved'], reverse=True)
+        results_data.sort(key=lambda x: x['total_score'], reverse=True)
 
         context['tasks'] = tasks
         context['is_owner'] = self.object.sheet.is_owned_by(request_user)
@@ -153,21 +154,17 @@ class SheetDetailView(generic.DetailView):
         return super(SheetDetailView, self).get_context_data(**kwargs)
 
 
-class SheetTaskDeleteView(LoginRequiredMixin, SingleObjectMixin, generic.View):
-    model = TaskSheet
-    slug_field = 'sheet_id'
-    slug_url_kwarg = 'sheet_id'
-
+class SheetTaskDeleteView(LoginRequiredMixin, generic.View):
     def post(self, request, *args, **kwargs):
-        sheet = self.get_object()
-        if not sheet.is_owned_by(request.user):
-            return HttpResponseForbidden()
+        task = get_object_or_404(
+            TaskSheetTask,
+            sheet__sheet_id=self.kwargs['sheet_id'],
+            task=self.kwargs['task_id'])
 
-        task = get_object_or_404(TaskSheetTask,
-                                 sheet=sheet,
-                                 task__task_id=request.POST.get('task_id', ''),
-                                 task__judge__judge_id=request.POST.get('judge_id', ''))
+        if not task.sheet.is_owned_by(request.user):
+            return HttpResponseForbidden()
         task.delete()
+
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
@@ -231,6 +228,38 @@ class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,
                 messages.add_message(self.request, messages.ERROR,
                                      f'Task __{task.name_or_id()}__ is already present in the sheet.')
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
+
+
+class SheetTaskEditView(LoginRequiredMixin, AJAXMixin, generic.UpdateView):
+    form_class = forms.SheetTaskEditForm
+    template_name = 'info/modal/sheet_task_edit.html'
+    object = TaskSheetTask
+    context_object_name = 'task'
+
+    def get_object(self, queryset=None):
+        sheet_id = self.kwargs['sheet_id']
+        task_id = self.kwargs['task_id']
+        log.warning("HERE")
+        return get_object_or_404(
+            TaskSheetTask,
+            task=task_id,
+            sheet__sheet_id=sheet_id)
+
+    def get_form_kwargs(self):
+        kwargs = super(SheetTaskEditView, self).get_form_kwargs()
+        task = self.get_object()
+        kwargs['initial']['task_url'] = task.task.get_url()
+        return kwargs
+
+    def get_success_url(self):
+        return self.request.META.get('HTTP_REFERER', reverse_lazy('home'))
+
+    def get_context_data(self, **kwargs):
+        context = super(SheetTaskEditView, self).get_context_data(**kwargs)
+        context['sheet_id'] = self.kwargs['sheet_id']
+        context['task_id'] = self.kwargs['task_id']
+        log.error(context)
+        return context
 
 
 class SheetDeleteView(LoginRequiredMixin, generic.DeleteView):

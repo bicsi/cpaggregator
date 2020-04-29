@@ -47,10 +47,10 @@ urlpatterns = [
         path('create-assignment/', views.group.AssignmentCreateView.as_view(), name='assignment-create'),
         path('sheet/<sheet_id>/', include([
                 path('', views.sheet.ResultsDetailView.as_view(
-                    show_results=False,
-                    show_submissions=True,
+                    show_results=True,
+                    show_submissions=False,
                 ), name='group-sheet-detail'),
-                path('update', views.sheet.AssignmentUpdateView.as_view(),
+                path('update/', views.sheet.AssignmentUpdateView.as_view(),
                      name='assignment-update'),
                 path('results/', views.sheet.ResultsDetailView.as_view(
                     show_results=True,
@@ -71,12 +71,13 @@ urlpatterns = [
     path('create-sheet/', views.sheet.SheetCreateView.as_view(), name='sheet-create'),
     path('sheet/<sheet_id>/', include([
         path('', views.sheet.SheetDetailView.as_view(), name='sheet-detail'),
-        path('add-task/', views.sheet.SheetTaskAddView.as_view(), name='sheet-task-add'),
-        path('delete-task/', views.sheet.SheetTaskDeleteView.as_view(), name='sheet-task-delete'),
+        path('task/add/', views.sheet.SheetTaskAddView.as_view(), name='sheet-task-add'),
+        path('task/<task_id>/edit/', views.sheet.SheetTaskEditView.as_view(), name='sheet-task-edit'),
+        path('task/<task_id>/delete/', views.sheet.SheetTaskDeleteView.as_view(), name='sheet-task-delete'),
         path('delete/', views.sheet.SheetDeleteView.as_view(), name='sheet-delete'),
-        path('update-description/', views.sheet.SheetDescriptionUpdateView.as_view(),
+        path('description/update/', views.sheet.SheetDescriptionUpdateView.as_view(),
              name='sheet-description-update'),
-        path('reorder-tasks/', views.sheet.SheetTaskOrderingUpdate.as_view(),
+        path('task/reorder/', views.sheet.SheetTaskOrderingUpdate.as_view(),
              name='sheet-task-reorder')
     ])),
     path('task/', include([

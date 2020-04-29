@@ -18,9 +18,9 @@
     {% if tasks %}
     <div class="list-group list-group-flush" id="taskList">
         {% for task_status in tasks %}
-        {% with task=task_status.task verdict_for_user=task_status.verdict_for_user %}
+        {% with task=task_status.task verdict_for_user=task_status.verdict_for_user score=task_status.score %}
         {% with idx=forloop.counter0 %}
-        <a class="list-group-item list-group-item-action px-0 py-2"
+        <span class="list-group-item list-group-item-action px-0 py-2"
            style="cursor: pointer;"
            data-id="{{ idx }}"
            @mouseover="hoverIndex = {{ idx }}" @mouseout="hoverIndex = null"
@@ -60,22 +60,23 @@
                             {% endif %}
                         {% endif %}
                         </div>
+                        <span class="text-info font-weight-bold">
+                            <i class="far fa-dot-circle mr-1"></i>
+                            {{ score }}
+                        </span>
                         {% if is_owner %}
-                        <form v-cloak v-show="editMode"
-                              class="ml-3"
-                              method="post" action="{% url 'sheet-task-delete' sheet_id=sheet.sheet_id %}">
-                            {% csrf_token %}
-                            <input type="hidden" value="{{ task.judge.judge_id }}" name="judge_id" />
-                            <input type="hidden" value="{{ task.task_id }}" name="task_id" />
-                            <button class="btn btn-danger btn-sm btn-xs-adjust align-middle my-0" type="submit">
-                                <strong>Delete</strong>
-                            </button>
-                        </form>
+                        <div v-cloak v-show="editMode">
+                            <a data-toggle="modal" href="#modal"
+                               onclick="loadModalForm('{% url 'sheet-task-edit' sheet_id=sheet.sheet_id task_id=task.id %}');"
+                               class="badge badge-secondary badge-pill ml-3 py-2">
+                                <i class="fas fa-fw fa-pen"></i>
+                            </a>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-        </a>
+        </span>
         {% endwith %}
         {% endwith %}
         {% endfor %}

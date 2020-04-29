@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from data.models import UserProfile, UserHandle, Judge, UserGroup, TaskStatement
-from info.models import TaskSheet, Assignment, CustomTaskTag
+from info.models import TaskSheet, Assignment, CustomTaskTag, TaskSheetTask
 from info.utils import slugify_unique
 
 
@@ -53,6 +53,17 @@ class SheetTaskCreateForm(forms.Form):
         label='Task URL',
         help_text='Example: "http://codeforces.com/gym/102419/problem/A", "infoarena.ro/problema/adunare"'
     )
+
+
+class SheetTaskEditForm(forms.ModelForm):
+    task_url = forms.CharField(
+        label="Task URL",
+        disabled=True,
+        help_text='You cannot change the task URL once it\'s added')
+
+    class Meta:
+        model = TaskSheetTask
+        fields = ['score']
 
 
 class SheetDescriptionUpdateForm(forms.ModelForm):

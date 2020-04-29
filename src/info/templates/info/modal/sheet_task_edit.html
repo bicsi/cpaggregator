@@ -1,0 +1,11 @@
+{% extends "info/modal/generic_form_modal.html" %}
+{% block modal_title %}Edit task{% endblock %}
+{% block after_form %}
+<button type="submit"
+        formaction="{% url 'sheet-task-delete' sheet_id=sheet_id task_id=task_id %}"
+        class="btn btn-danger">
+    Remove task
+</button>
+{% endblock %}
+{% block action_text %}Save{% endblock %}
+{% block submit_url %}{% url 'sheet-task-edit' sheet_id=sheet_id task_id=task_id %}{% endblock %}

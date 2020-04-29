@@ -37,10 +37,11 @@ class TaskSheetTask(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     sheet = models.ForeignKey(TaskSheet, on_delete=models.CASCADE)
     ordering_id = models.PositiveIntegerField(blank=True, null=True)
+    score = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.sheet} -> {self.task.judge.judge_id}:{self.task.task_id}'
+        return f'{self.sheet} -> {self.task.judge.judge_id}/{self.task.task_id} ({self.score})'
 
     class Meta:
         db_table = 'info_tasksheet_x_task'
