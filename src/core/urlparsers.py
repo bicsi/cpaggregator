@@ -26,7 +26,7 @@ class Parser(NamedTuple):
 
 TASK_PARSERS = [
     Parser(judge_id='cf', type=ParserType.COMPOSED,
-           regex=re.compile(r'codeforces.com/(gym|contest|problemset)/'
+           regex=re.compile(r'codeforces\.com/(gym|contest)/'
                             r'(?P<contest_id>\d+)/problem/(?P<task_id>[A-Za-z](\d)?)')),
     Parser(judge_id='ia', type=ParserType.SIMPLE,
            regex=re.compile(r'infoarena\.ro/problema/(?P<task_id>[^/]+)')),
@@ -36,6 +36,8 @@ TASK_PARSERS = [
            regex=re.compile(r'csacademy\.com/contest/(?P<contest_id>[^/]+)/task/(?P<task_id>[^/]+)')),
     Parser(judge_id='ojuz', type=ParserType.SIMPLE,
            regex=re.compile(r'oj\.uz/problem/(?P<action>[^/]+)/(?P<task_id>[^/]+)')),
+    Parser(judge_id='cf', type=ParserType.COMPOSED,
+           regex=re.compile(r'codeforces\.com/problemset/problem/(?P<contest_id>\d+)/(?P<task_id>[A-Za-z](\d)?)'))
 ]
 
 
