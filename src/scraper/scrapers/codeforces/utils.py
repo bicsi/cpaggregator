@@ -37,7 +37,7 @@ def scrape_submissions_for_tasks(task_ids, count=200):
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
 
-def scrape_submissions_for_task(task_id, count=200):
+def scrape_submissions_for_task(task_id, count=1000):
     contest_id = task_id.split('/')[0]
 
     id_from = 1

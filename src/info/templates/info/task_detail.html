@@ -159,6 +159,13 @@
                         Rescrape task info
                     </button>
                 </form>
+                <form class="form-inline ml-2" method="post"
+                      action="{% url 'task-submissions-scrape' task_path=task.get_path %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-warning">
+                        Rescrape submissions
+                    </button>
+                </form>
             </div>
         {% endif %}
         <div class="row mt-4">

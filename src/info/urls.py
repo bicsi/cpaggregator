@@ -89,7 +89,8 @@ urlpatterns = [
             path('create-tag/', views.task.TagCreateView.as_view(), name='task-tag-create'),
             path('tag/<tag_name>/delete', views.task.TagDeleteView.as_view(), name='task-tag-delete'),
             path('update/', views.task.TaskStatementUpdateView.as_view(), name='task-statement-update'),
-            path('scrape/', views.task.TaskStatementScrapeView.as_view(), name='task-statement-scrape'),
+            path('stm-scrape/', views.task.TaskStatementScrapeView.as_view(), name='task-statement-scrape'),
+            path('sub-scrape/', views.task.TaskSubmissionsScrapeView.as_view(), name='task-submissions-scrape'),
         ])),
     ])),
     path('status/', include([

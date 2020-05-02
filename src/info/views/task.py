@@ -1,9 +1,12 @@
+import math
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.db.models import F
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 from django_ajax.mixin import AJAXMixin
@@ -14,8 +17,8 @@ from data.services import update_tasks_info
 from info import forms
 from info.forms import TaskCustomTagCreateForm
 from info.models import FavoriteTask, CustomTaskTag
-from scraper import database
-from scraper.services import scrape_task_info
+from scraper import database, scrapers
+from scraper.services import scrape_task_info, scrape_submissions_for_tasks
 from search.queries import search_task
 
 
@@ -197,3 +200,36 @@ class TaskStatementScrapeView(LoginRequiredMixin, generic.View):
         return redirect("task-detail", **kwargs)
 
 
+class TaskSubmissionsScrapeView(LoginRequiredMixin, generic.View):
+    def post(self, *args, **kwargs):
+        if not self.request.user.is_superuser:
+            raise Http404()
+
+        task = Task.objects.filter_path(kwargs['task_path']).get()
+        scraper = scrapers.create_scraper(task.judge.judge_id)
+        submissions = scraper.scrape_submissions_for_task(task.task_id)
+        handles = {handle.handle: handle for handle in UserHandle.objects.all()}
+        for sub in submissions:
+            author = handles.get(sub['author_id'])
+            if not author:
+                continue
+
+            defaults = dict(
+                submitted_on=timezone.make_aware(sub['submitted_on']),
+                task=task,
+                verdict=sub['verdict'],
+                language=sub.get('language'),
+                source_size=sub.get('source_size'),
+                score=sub.get('score'),
+                exec_time=sub.get('exec_time'),
+                memory_used=sub.get('memory_used'),
+            )
+            if defaults['score'] and math.isnan(defaults['score']):
+                defaults['score'] = None
+            log.info(f"Upserting: {sub['submission_id']}")
+            defaults = {k: v for k, v in defaults.items() if v is not None}
+            Submission.objects.update_or_create(
+                submission_id=sub["submission_id"], author=author,
+                defaults=defaults)
+
+        return redirect("task-detail", **kwargs)
