@@ -33,11 +33,13 @@ def __get_cookies(csrf_token):
 
 
 def get_task_info(csrf_token):
-    response = requests.get('https://csacademy.com/contest/archive/task/addition/submissions/',
-                            headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
-    json_data = json.loads(response.text)
-
-    return json_data['state']['contesttask']
+    task_info = []
+    for archive in ['archive', 'interview-archive']:
+        response = requests.get(f'https://csacademy.com/contest/{archive}/tasks/?',
+                                headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
+        json_data = json.loads(response.text)
+        task_info.extend(json_data['state']['contesttask'])
+    return task_info
 
 
 def get_task_name_dict(csrf_token):
@@ -178,12 +180,7 @@ def scrape_submissions_for_tasks(tasks):
 
 
 def scrape_all_task_info(csrf_token):
-    response = requests.post('https://csacademy.com/contest/archive/?',
-                             headers=__get_headers(csrf_token),
-                             cookies=__get_cookies(csrf_token))
-    json_data = json.loads(response.text)
-
-    for task_data in json_data['state']['contesttask']:
+    for task_data in get_task_info(csrf_token):
         task_name = task_data['name']
         yield {
             'judge_id': CSACADEMY_JUDGE_ID,
