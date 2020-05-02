@@ -7,6 +7,8 @@ import json
 from core.logging import log
 
 CSACADEMY_JUDGE_ID = 'csa'
+ARCHIVE_CONTEST_ID = '1'
+INTERVIEW_ARCHIVE_CONTEST_ID = '136'
 
 
 def __get_headers(csrf_token):
@@ -51,20 +53,24 @@ def get_task_name_dict(csrf_token):
 
 def get_eval_jobs(csrf_token, contest_task_id, from_date, num_jobs=1000):
     from_timestamp = from_date.timestamp()
-    params = (
-        ('numJobs', num_jobs),
-        ('requestCount', 'false'),
-        ('contestId', '1'),
-        ('contestTaskId', contest_task_id),
-        ('endTime', from_timestamp),
-    )
 
-    response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
-                            headers=__get_headers(csrf_token),
-                            params=params, cookies=__get_cookies(csrf_token))
-    json_data = json.loads(response.text)
-    log.info(len(json_data['state']['evaljob']))
-    return json_data['state']
+    publicuser, evaljob = [], []
+    for contest_id in ARCHIVE_CONTEST_ID, INTERVIEW_ARCHIVE_CONTEST_ID:
+        params = (
+            ('numJobs', num_jobs),
+            ('requestCount', 'false'),
+            ('contestId', contest_id),
+            ('contestTaskId', contest_task_id),
+            ('endTime', from_timestamp),
+        )
+
+        response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
+                                headers=__get_headers(csrf_token),
+                                params=params, cookies=__get_cookies(csrf_token))
+        json_data = json.loads(response.text)
+        publicuser.extend(json_data['state'].get('publicuser', []))
+        evaljob.extend(json_data['state'].get('evaljob', []))
+    return publicuser, evaljob
 
 
 def get_csrf_token():
@@ -75,14 +81,11 @@ def get_csrf_token():
 
 
 def parse_submissions(csrf_token, task_name, task_id, from_date):
-    eval_jobs = get_eval_jobs(csrf_token, task_id, from_date)
-    if 'publicuser' not in eval_jobs:
-        log.error("'publicuser' not in eval_jobs", eval_jobs, task_name)
-        return
+    publicuser, evaljob = get_eval_jobs(csrf_token, task_id, from_date)
 
     # Make user id to username map. We use usernames. :)
     user_id_to_username = {}
-    for user in eval_jobs['publicuser']:
+    for user in publicuser:
         username = user['username']
         user_id = user['id']
         if username:
@@ -90,7 +93,7 @@ def parse_submissions(csrf_token, task_name, task_id, from_date):
         user_id_to_username[user_id] = username
 
     # Parse submissions.
-    for eval_job in reversed(eval_jobs['evaljob']):
+    for eval_job in sorted(evaljob, key=lambda ej: ej['id'], reverse=True):
         submission_id = str(eval_job['id'])
         if not eval_job['isDone']:
             log.info(f'Skipping submission {submission_id}: Not finished evaluating.')
