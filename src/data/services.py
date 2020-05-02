@@ -143,14 +143,9 @@ def __update_user_quick(db, user):
 
         submissions_to_insert = []
         for ms in mongo_submissions:
-
-            submitted_on = ms['submitted_on']
-            if not timezone.is_aware(submitted_on):
-                timezone.make_aware(submitted_on)
-
             insert_kwargs = dict(
                 submission_id=ms['submission_id'],
-                submitted_on=submitted_on,
+                submitted_on=timezone.make_aware(ms['submitted_on']),
                 author=user_handle,
                 task=available_tasks[ms['task_id']],
                 verdict=ms['verdict'],

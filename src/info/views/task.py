@@ -214,12 +214,8 @@ class TaskSubmissionsScrapeView(LoginRequiredMixin, generic.View):
             if not author:
                 continue
 
-            submitted_on = sub['submitted_on']
-            if not timezone.is_aware(submitted_on):
-                timezone.make_aware(submitted_on)
-
             defaults = dict(
-                submitted_on=submitted_on,
+                submitted_on=timezone.make_aware(sub['submitted_on']),
                 task=task,
                 verdict=sub['verdict'],
                 language=sub.get('language'),

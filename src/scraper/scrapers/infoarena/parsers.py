@@ -1,6 +1,7 @@
 import re
 import datetime
 import pytz
+import time
 
 from core.logging import log
 
@@ -75,19 +76,19 @@ def parse_verdict(verdict_text: str):
 
 
 def parse_date(date_text: str):
-    day, month, year, time = date_text.split()
-    hour, minute, second = time.split(':')
+    day, month, year, tm = date_text.split()
+    hour, minute, second = tm.split(':')
 
-    return datetime.datetime(
+    dt = datetime.datetime(
         year=2000 + int(year),
         month=MONTH_ENCODINGS.index(month) + 1,
         day=int(day),
         hour=int(hour),
         minute=int(minute),
         second=int(second),
-        tzinfo=pytz.timezone("Europe/Bucharest"),
-        # TODO: Account for timezone difference.
     )
+    ts = time.mktime(pytz.timezone("Europe/Bucharest").localize(dt).utctimetuple())
+    return datetime.datetime.utcfromtimestamp(ts)
 
 
 def parse_source_size(source_text: str):

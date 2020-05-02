@@ -2,6 +2,7 @@ from django.test import TestCase
 
 # Create your tests here.
 from scraper.scrapers.csacademy.scraper import CSAcademyScraper
+from scraper.scrapers.infoarena.scraper import InfoarenaScraper
 from scraper.services import scrape_submissions_for_users
 
 
@@ -16,3 +17,9 @@ class CSAScraperTestCase(TestCase):
             if total > 5:
                 break
             total += 1
+
+class IATC(TestCase):
+    def test_tz(self):
+        for submission in InfoarenaScraper().scrape_recent_submissions():
+            print(submission['submitted_on'])
+            break
