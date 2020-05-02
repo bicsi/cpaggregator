@@ -1,5 +1,6 @@
 import re
 import datetime
+import pytz
 
 from core.logging import log
 
@@ -84,6 +85,7 @@ def parse_date(date_text: str):
         hour=int(hour),
         minute=int(minute),
         second=int(second),
+        tzinfo=pytz.timezone("Europe/Bucharest"),
         # TODO: Account for timezone difference.
     )
 
