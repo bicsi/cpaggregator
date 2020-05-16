@@ -7,8 +7,7 @@ import json
 from core.logging import log
 
 CSACADEMY_JUDGE_ID = 'csa'
-ARCHIVE_CONTEST_ID = '1'
-INTERVIEW_ARCHIVE_CONTEST_ID = '136'
+CONTESTS = [('archive', 1), ('interview-archive', 136)]
 
 
 def __get_headers(csrf_token):
@@ -36,40 +35,40 @@ def __get_cookies(csrf_token):
 
 def get_task_info(csrf_token):
     task_info = []
-    for archive in ['archive', 'interview-archive']:
+    for archive, contest_id in CONTESTS:
         response = requests.get(f'https://csacademy.com/contest/{archive}/tasks/?',
                                 headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
         json_data = json.loads(response.text)
-        task_info.extend(json_data['state']['contesttask'])
+        task_info.extend([
+            (contest_id, ct)
+            for ct in json_data['state']['contesttask']])
     return task_info
 
 
 def get_task_name_dict(csrf_token):
-    task_name_to_id = {}
-    for task in get_task_info(csrf_token):
-        task_name_to_id.update({task['name']: task})
+    task_name_to_id = []
+    for contest_id, task in get_task_info(csrf_token):
+        task_name_to_id.append((task['name'], contest_id, task['id']))
     return task_name_to_id
 
 
-def get_eval_jobs(csrf_token, contest_task_id, from_date, num_jobs=1000):
+def get_eval_jobs(csrf_token, contest_id, contest_task_id, from_date, num_jobs=1000):
     from_timestamp = from_date.timestamp()
 
-    publicuser, evaljob = [], []
-    for contest_id in ARCHIVE_CONTEST_ID, INTERVIEW_ARCHIVE_CONTEST_ID:
-        params = (
-            ('numJobs', num_jobs),
-            ('requestCount', 'false'),
-            ('contestId', contest_id),
-            ('contestTaskId', contest_task_id),
-            ('endTime', from_timestamp),
-        )
+    params = (
+        ('numJobs', num_jobs),
+        ('requestCount', 'false'),
+        ('contestId', contest_id),
+        ('contestTaskId', contest_task_id),
+        ('endTime', from_timestamp),
+    )
 
-        response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
-                                headers=__get_headers(csrf_token),
-                                params=params, cookies=__get_cookies(csrf_token))
-        json_data = json.loads(response.text)
-        publicuser.extend(json_data['state'].get('publicuser', []))
-        evaljob.extend(json_data['state'].get('evaljob', []))
+    response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
+                            headers=__get_headers(csrf_token),
+                            params=params, cookies=__get_cookies(csrf_token))
+    json_data = json.loads(response.text)
+    publicuser = json_data['state'].get('publicuser', [])
+    evaljob = json_data['state'].get('evaljob', [])
     return publicuser, evaljob
 
 
@@ -80,8 +79,9 @@ def get_csrf_token():
     return csrf_token
 
 
-def parse_submissions(csrf_token, task_name, task_id, from_date):
-    publicuser, evaljob = get_eval_jobs(csrf_token, task_id, from_date)
+def parse_submissions(csrf_token, task_name, contest_id, task_id, from_date):
+    publicuser, evaljob = get_eval_jobs(
+        csrf_token, contest_id, task_id, from_date)
 
     # Make user id to username map. We use usernames. :)
     user_id_to_username = {}
@@ -96,13 +96,15 @@ def parse_submissions(csrf_token, task_name, task_id, from_date):
     for eval_job in sorted(evaljob, key=lambda ej: ej['id'], reverse=True):
         submission_id = str(eval_job['id'])
         if not eval_job['isDone']:
-            log.info(f'Skipping submission {submission_id}: Not finished evaluating.')
+            log.info(
+                f'Skipping submission {submission_id}: Not finished evaluating.')
 
         # Parse easy data.
         submission = dict(
             judge_id=CSACADEMY_JUDGE_ID,
             submission_id=submission_id,
-            submitted_on=datetime.datetime.utcfromtimestamp(eval_job['timeSubmitted']),
+            submitted_on=datetime.datetime.utcfromtimestamp(
+                eval_job['timeSubmitted']),
             task_id=task_name.lower(),
             author_id=user_id_to_username[eval_job['userId']],
             source_size=len(eval_job['sourceText']),
@@ -147,24 +149,39 @@ def parse_submissions(csrf_token, task_name, task_id, from_date):
         yield submission
 
 
-def scrape_submissions_for_task(csrf_token, task_name, task_id):
+def scrape_submissions_for_task(csrf_token, task_name, task_name_dict=None):
+    task_name_dict = task_name_dict or get_task_name_dict(csrf_token)
     from_date = datetime.datetime.now() + datetime.timedelta(days=2)
 
-    found = True
-    while found:
-        found = False
+    contests_and_tasks = [
+        (contest_id, task_id)
+        for name, contest_id, task_id in task_name_dict
+        if name == task_name]
 
-        submissions = parse_submissions(
-            csrf_token, task_name,
-            task_id,
-            from_date=from_date
-        )
-        for submission in submissions:
-            found = True
-            from_date = submission['submitted_on']
-            yield submission
+    if not contests_and_tasks:
+        log.error(f"Task '{task_name}' not found.")
 
-        from_date = from_date - datetime.timedelta(microseconds=1)
+    def scrape(task_name, contest_id, task_id, from_date):
+        found = True
+        while found:
+            found = False
+
+            submissions = parse_submissions(
+                csrf_token, task_name,
+                contest_id, task_id,
+                from_date=from_date
+            )
+            for submission in submissions:
+                found = True
+                from_date = submission['submitted_on']
+                yield submission
+
+            from_date = from_date - datetime.timedelta(microseconds=1)
+
+    return heapq.merge(
+        *[scrape(task_name, contest_id, task_id, from_date)
+          for contest_id, task_id in contests_and_tasks],
+        key=lambda x: x['submitted_on'], reverse=True)
 
 
 def scrape_submissions_for_tasks(tasks):
@@ -173,11 +190,9 @@ def scrape_submissions_for_tasks(tasks):
 
     submissions = []
     for task_name in tasks:
-        if task_name in task_name_dict:
-            submissions.append(scrape_submissions_for_task(
-                csrf_token, task_name, task_name_dict[task_name]['id']))
-        else:
-            log.error(f"Task '{task_name}' not found.")
+
+        submissions.append(scrape_submissions_for_task(
+            csrf_token, task_name, task_name_dict))
 
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
