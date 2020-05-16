@@ -156,7 +156,7 @@ def scrape_submissions_for_task(csrf_token, task_name, task_name_dict=None):
     contests_and_tasks = [
         (contest_id, task_id)
         for name, contest_id, task_id in task_name_dict
-        if name == task_name]
+        if name.lower() == task_name.lower()]
 
     if not contests_and_tasks:
         log.error(f"Task '{task_name}' not found.")
