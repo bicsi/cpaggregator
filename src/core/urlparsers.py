@@ -42,6 +42,7 @@ TASK_PARSERS = [
 
 
 def parse_task_url(url: str) -> Optional[ParseTaskResult]:
+    url = url.split('?')[0]
     result = re.search(r"https://competitive\.herokuapp\.com/"
                        r"task/(?P<judge_id>[^/]+)/(?P<task_id>[^/]+)", url)
     if result:
@@ -62,4 +63,3 @@ def parse_task_url(url: str) -> Optional[ParseTaskResult]:
 
     log.warning(f'Could not parse URL: {url}.')
     return None
-
