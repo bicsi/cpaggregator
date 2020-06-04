@@ -1,0 +1,44 @@
+{% with member_count=members|length %}
+<div class="card mb-5">
+    <h6 class="card-header">
+        Results
+    </h6>
+    <div class="table-container table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">User</th>
+              <th scope="col" class="text-uppercase text-center">=</th>
+              {% for assignment in assignments %}
+              <th scope="col" class="text-center text-truncate" style="min-width: 7em">
+                  <span>
+                  {{ assignment.assignment.sheet }}
+                  </span>
+              </th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for data_row in results %}
+            {% with user=data_row.user %}
+            <tr>
+              <th scope="row" class="text-truncate">
+                  <a class="no-underline" href="{% url 'profile' username=user.username %}">
+                  {% include "accounts/thumbnail_profile.html" with user=user.user %}
+                  </a>
+              </th>
+              <td class="text-center"><strong>{{ data_row.total_score }}</strong></td>
+              {% for score in data_row.scores %}
+              <td class="text-center" style="min-width: 7em">
+                  {{ score }}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+</div>
+{% endwith %}

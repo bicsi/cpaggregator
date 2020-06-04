@@ -11,7 +11,11 @@
 
 <div class="container">
     {% include "info/group/group_main.html" %}
-    {% include "info/group/group_members.html" %}
+    {% if view_results %}
+        {% include "info/group/group_results.html" %}
+    {% else %}
+        {% include "info/group/group_members.html" %}
+    {% endif %}
     {% include "info/group/group_assignments.html" %}
 
     {% if is_owner %}

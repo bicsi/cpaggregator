@@ -18,7 +18,7 @@ from info import forms
 from info.models import TaskSheetTask, TaskSheet, Assignment
 from info.tables import ResultsTable
 from info.views.generic import SubmissionDownloadCSVView
-
+from info import utils
 
 class DownloadResultsView(SubmissionDownloadCSVView):
     def __init__(self, **kwargs):
@@ -82,28 +82,7 @@ class ResultsDetailView(generic.DetailView):
                      .filter(sheet=self.object.sheet).all()]
 
         # Send results data.
-        results_data = []
-
-        for user in self.object.group.members.all():
-            user_submissions = []
-            has_one_submission = False
-            total_score = 0
-            for task in tasks:
-                submission = submissions_for_user_and_task.get((user, task['task']), None)
-                if submission:
-                    user_submissions.append(submission)
-                    has_one_submission = True
-                    if submission.verdict == 'AC':
-                        total_score += task['score']
-                else:
-                    user_submissions.append(None)
-            if has_one_submission:
-                results_data.append({
-                    'user': user,
-                    'results': user_submissions,
-                    'total_score': total_score,
-                })
-        results_data.sort(key=lambda x: x['total_score'], reverse=True)
+        results_data = utils.compute_assignment_results(self.object, submissions=self.submissions)
 
         context['tasks'] = tasks
         context['is_owner'] = self.object.sheet.is_owned_by(request_user)

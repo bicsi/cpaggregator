@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from data.models import UserGroup, Submission, GroupMember
 from info import forms, queries
 from info.models import Assignment
-from info.utils import build_group_card_context
+from info.utils import build_group_card_context, compute_assignment_results
 from loguru import logger as log
 
 class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
@@ -161,6 +161,7 @@ class GroupDetailView(generic.DetailView):
     slug_url_kwarg = 'group_id'
     slug_field = 'group_id'
     context_object_name = 'group'
+    view_results = False
 
     def get_context_data(self, **kwargs):
         group = self.object
@@ -190,6 +191,30 @@ class GroupDetailView(generic.DetailView):
             'member': member.profile,
             'role': member.role,
         } for member in members]
+
+        kwargs['view_results'] = self.view_results
+        if self.view_results:
+            user_scores = {user: [] for user in group.members.all()}
+            for assignment in assignments.all():
+                results = compute_assignment_results(assignment)
+                results = {r["user"]: r["total_score"] for r in results}
+                for user in user_scores:
+                    score = results.get(user, 0)
+                    user_scores[user].append(score)
+
+            results_data = []
+            for user, scores in user_scores.items():
+                total_score = sum(scores)
+                results_data.append({
+                    "user": user,
+                    "scores": scores,
+                    "total_score": total_score,
+                })
+            results_data.sort(key=lambda x: x["total_score"], reverse=True)
+            kwargs['results'] = results_data
+
+
+
 
         # if group.group_id == 'asd-seminar' and 0:
         #     scores = compute_asd_scores(group)

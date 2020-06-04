@@ -9,6 +9,7 @@
           <thead>
             <tr>
               <th scope="col">User</th>
+              <th scope="col" class="text-uppercase text-center">=</th>
               {% for task_verdict in tasks %}
               <th scope="col" class="text-center text-truncate" style="min-width: 7em">
                   <span>
@@ -17,7 +18,6 @@
                   </span>
               </th>
               {% endfor %}
-              <th scope="col" class="text-uppercase text-center">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -30,6 +30,7 @@
                   {% include "accounts/thumbnail_profile.html" with user=user.user %}
                   </a>
               </th>
+              <td class="text-center"><strong>{{ data_row.total_score }}</strong></td>
               {% for submission in data_row.results %}
               <td class="text-center" style="min-width: 7em">
                   {% if submission %}
@@ -46,7 +47,6 @@
                   {% endif %}
               </td>
               {% endfor %}
-              <td class="text-center"><strong>{{ data_row.total_score }}</strong></td>
             </tr>
             {% endwith %}
             {% endfor %}

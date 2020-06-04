@@ -45,6 +45,7 @@ urlpatterns = [
         path('delete-member/', views.group.GroupMemberDeleteView.as_view(), name='group-member-delete'),
         path('add-member/', views.group.GroupMemberAddView.as_view(), name='group-member-add'),
         path('create-assignment/', views.group.AssignmentCreateView.as_view(), name='assignment-create'),
+        path('results/', views.group.GroupDetailView.as_view(view_results=True), name='group-results'),
         path('sheet/<sheet_id>/', include([
                 path('', views.sheet.ResultsDetailView.as_view(
                     show_results=True,

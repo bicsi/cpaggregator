@@ -107,3 +107,37 @@ def compute_asd_scores(group):
                     'bonus': False,
                 })
     return scores
+
+
+def compute_assignment_results(assignment, submissions=None):
+    if submissions is None:
+        submissions = assignment.get_best_submissions()
+
+    results_data = []
+
+    submissions_for_user_and_task = {
+        (submission.author.user, submission.task): submission
+        for submission in submissions}
+
+    users = assignment.group.members.all()
+    tasks = TaskSheetTask.objects.filter(sheet=assignment.sheet).all()
+
+    for user in users:
+        user_submissions = []
+        has_one_submission = False
+        total_score = 0
+        for task in tasks:
+            submission = submissions_for_user_and_task.get((user, task.task))
+            if submission:
+                has_one_submission = True
+                if submission.verdict == 'AC':
+                    total_score += task.score
+            user_submissions.append(submission)
+        if has_one_submission:
+            results_data.append({
+                'user': user,
+                'results': user_submissions,
+                'total_score': total_score,
+            })
+    results_data.sort(key=lambda x: x['total_score'], reverse=True)
+    return results_data
