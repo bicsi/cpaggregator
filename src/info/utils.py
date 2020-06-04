@@ -112,6 +112,7 @@ def compute_asd_scores(group):
 def compute_assignment_results(assignment, submissions=None):
     if submissions is None:
         submissions = assignment.get_best_submissions()
+    submissions = submissions.select_related('author', 'author__user', 'task')
 
     results_data = []
 
