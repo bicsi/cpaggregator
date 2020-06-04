@@ -10,10 +10,10 @@
               <th scope="col">User</th>
               <th scope="col" class="text-uppercase text-center">=</th>
               {% for assignment in assignments %}
-              <th scope="col" class="text-center text-truncate small" style="min-width: 2em">
-                  <span>
+              <th scope="col" class="text-center text-truncate small" style="max-width: 12em">
+                  <strong>
                   {{ assignment.assignment.sheet }}
-                  </span>
+                  </strong>
               </th>
               {% endfor %}
             </tr>
@@ -30,7 +30,7 @@
               </th>
               <td class="text-center"><strong>{{ data_row.total_score }}</strong></td>
               {% for score in data_row.scores %}
-              <td class="text-center" style="min-width: 2em">
+              <td class="text-center" style="max-width: 12em">
                   {{ score }}
               </td>
               {% endfor %}
