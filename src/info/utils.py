@@ -120,7 +120,7 @@ def compute_assignment_results(assignment, submissions=None):
         for submission in submissions}
 
     users = assignment.group.members.all()
-    tasks = TaskSheetTask.objects.filter(sheet=assignment.sheet).all()
+    tasks = TaskSheetTask.objects.select_related('task').filter(sheet=assignment.sheet).all()
 
     for user in users:
         user_submissions = []

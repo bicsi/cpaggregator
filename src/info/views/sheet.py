@@ -64,10 +64,11 @@ class ResultsDetailView(generic.DetailView):
         kwargs['table'] = self.table
         kwargs['media'] = forms.AssignmentUpdateForm().media
         context = super(ResultsDetailView, self).get_context_data(**kwargs)
+        submissions = self.submissions.select_related('author__user', 'task', 'task__judge')
 
         submissions_for_user_and_task = {
             (submission.author.user, submission.task): submission
-            for submission in self.submissions.select_related('author__user', 'task', 'task__judge')}
+            for submission in submissions}
 
         # Map task to verdict of current user.
         verdict_for_user_dict = {
@@ -82,7 +83,7 @@ class ResultsDetailView(generic.DetailView):
                      .filter(sheet=self.object.sheet).all()]
 
         # Send results data.
-        results_data = utils.compute_assignment_results(self.object, submissions=self.submissions)
+        results_data = utils.compute_assignment_results(self.object, submissions=submissions)
 
         context['tasks'] = tasks
         context['is_owner'] = self.object.sheet.is_owned_by(request_user)
