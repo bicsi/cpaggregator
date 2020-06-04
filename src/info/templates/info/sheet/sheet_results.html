@@ -11,11 +11,14 @@
               <th scope="col">User</th>
               <th scope="col" class="text-uppercase text-center">=</th>
               {% for task_verdict in tasks %}
-              <th scope="col" class="text-center text-truncate" style="min-width: 7em">
-                  <span>
-                  {% include 'accounts/judge_label.html' with judge=task_verdict.task.judge %}
-                  {{ task_verdict.task.name_or_id }}
-                  </span>
+              <th scope="col" class="text-center text-truncate small" style="min-width: 1em">
+                  <strong>
+                      {% if tasks|length > 7 %}
+                        {{ task_verdict.task.name_or_id|slice:":3" }}
+                      {% else %}
+                        {{ task_verdict.task.name_or_id }}
+                      {% endif %}
+                  </strong>
               </th>
               {% endfor %}
             </tr>
@@ -32,7 +35,7 @@
               </th>
               <td class="text-center"><strong>{{ data_row.total_score }}</strong></td>
               {% for submission in data_row.results %}
-              <td class="text-center" style="min-width: 7em">
+              <td class="text-center" style="min-width: 1em">
                   {% if submission %}
                   <a href="#!" tabindex="0" data-toggle="popover"
                      data-trigger="focus" data-html="true" data-placement="top"
