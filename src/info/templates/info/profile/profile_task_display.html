@@ -1,12 +1,17 @@
 
 <ul class="list-unstyled list-inline">
-    {% for task in tasks %}
+    {% for task_data in tasks %}
+    {% with submission=task_data.submission task=task_data.task %}
     <li class="list-inline-item">
-        <a class="badge badge-primary"
-           href="{% url 'task-detail' task_path=task.get_path %}">
+        <a class="badge badge-primary" href="#!"
+           tabindex="0" data-toggle="popover"
+           data-trigger="focus" data-html="true" data-placement="top"
+           title="Submission <a href='{{ submission.get_url }}'>#{{ submission.submission_id }}</a>"
+           data-content="Submitted on: {{ submission.submitted_on|date:'M d, Y H:m'}} <br/> Verdict: {{ submission.get_verdict_display }}">
             {{ task.name_or_id }}
         </a>
     </li>
+    {% endwith %}
     {% endfor %}
 </ul>
 <span class="small text-muted">

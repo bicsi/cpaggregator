@@ -85,20 +85,6 @@ class UserProfile(models.Model):
             return "%s %s" % (self.first_name, self.last_name)
         return self.username
 
-    def get_solved_tasks(self):
-        tasks = Submission.objects.best().filter(author__user=self) \
-            .filter(verdict='AC').values_list('task', flat=True)
-        return Task.objects.filter(id__in=tasks.all())
-
-    def get_submitted_tasks(self):
-        tasks = Submission.objects.best().filter(author__user=self).values_list('task', flat=True)
-        return Task.objects.filter(id__in=tasks.all())
-
-    def get_unsolved_tasks(self):
-        tasks = Submission.objects.best().filter(author__user=self) \
-            .exclude(verdict='AC').values_list('task', flat=True)
-        return Task.objects.filter(id__in=tasks.all())
-
     def __str__(self):
         return self.get_display_name()
 

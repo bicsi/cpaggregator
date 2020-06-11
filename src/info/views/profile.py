@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 
-from data.models import UserProfile, UserHandle
+from data.models import UserProfile, UserHandle, Submission
 from django_ajax.mixin import AJAXMixin
 
 from info.forms import UserUpdateForm, HandleCreateForm
@@ -69,6 +69,17 @@ class UserSubmissionsDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         kwargs['is_owner'] = self.object.user == self.request.user
+        kwargs['solved_tasks'], kwargs['unsolved_tasks'] = [], []
+        best_submissions = Submission.objects.best().filter(author__user=self.object).select_related('task')
+        for submission in best_submissions.all():
+            task_data = {
+                'submission': submission,
+                'task': submission.task,
+            }
+            if submission.verdict == 'AC':
+                kwargs['solved_tasks'].append(task_data)
+            else:
+                kwargs['unsolved_tasks'].append(task_data)
         try:
             statistics = self.object.statistics
             if statistics.activity:

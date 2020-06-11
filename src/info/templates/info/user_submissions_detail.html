@@ -37,13 +37,13 @@
             <div class="card mt-3">
                 <h6 class="card-header">Tasks solved</h6>
                 <div class="card-body">
-                    {% include 'info/profile/profile_task_display.html' with tasks=profile.get_solved_tasks %}
+                    {% include 'info/profile/profile_task_display.html' with tasks=solved_tasks %}
                 </div>
             </div>
             <div class="card mt-3">
                 <h6 class="card-header">Tasks tried</h6>
                 <div class="card-body">
-                    {% include 'info/profile/profile_task_display.html' with tasks=profile.get_unsolved_tasks %}
+                    {% include 'info/profile/profile_task_display.html' with tasks=unsolved_tasks %}
                 </div>
             </div>
         </div>
