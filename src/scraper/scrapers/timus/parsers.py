@@ -1,12 +1,15 @@
 import datetime
 import re
 from typing import List
+import time
+import pytz
 
 
 def parse_date(date_contents: List):
     date_text = f"{date_contents[0].text} {date_contents[2].text}"
-    ret = datetime.datetime.strptime(date_text, "%H:%M:%S %d %b %Y")
-    return ret
+    dt = datetime.datetime.strptime(date_text, "%H:%M:%S %d %b %Y")
+    ts = time.mktime(pytz.timezone("Asia/Yekaterinburg").localize(dt).utctimetuple())
+    return datetime.datetime.utcfromtimestamp(ts)
 
 
 def parse_memory_used(memory_used_text: str):

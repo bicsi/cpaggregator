@@ -53,8 +53,3 @@ def scrape_task_info(task_id, space=1):
     }
 
 
-for idx, s in enumerate(scrape_submissions()):
-    if idx >= 50000:
-        break
-    print(s)
-
