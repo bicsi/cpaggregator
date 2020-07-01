@@ -29,20 +29,22 @@ TASK_PARSERS = [
            regex=re.compile(r'codeforces\.com/(gym|contest)/'
                             r'(?P<contest_id>\d+)/problem/(?P<task_id>[A-Za-z](\d)?)')),
     Parser(judge_id='ia', type=ParserType.SIMPLE,
-           regex=re.compile(r'infoarena\.ro/problema/(?P<task_id>[^/]+)')),
+           regex=re.compile(r'infoarena\.ro/problema/(?P<task_id>[^/?&]+)')),
     Parser(judge_id='ac', type=ParserType.COMPOSED,
-           regex=re.compile(r'atcoder\.jp/contests/(?P<contest_id>[^/]+)/tasks/(?P<task_id>[^/]+)')),
+           regex=re.compile(r'atcoder\.jp/contests/(?P<contest_id>[^/?&]+)/tasks/(?P<task_id>[^/?&]+)')),
     Parser(judge_id='csa', type=ParserType.SIMPLE,
-           regex=re.compile(r'csacademy\.com/contest/(?P<contest_id>[^/]+)/task/(?P<task_id>[^/]+)')),
+           regex=re.compile(r'csacademy\.com/contest/(?P<contest_id>[^/?&]+)/task/(?P<task_id>[^/?&]+)')),
     Parser(judge_id='ojuz', type=ParserType.SIMPLE,
-           regex=re.compile(r'oj\.uz/problem/(?P<action>[^/]+)/(?P<task_id>[^/]+)')),
+           regex=re.compile(r'oj\.uz/problem/(?P<action>[^/?&]+)/(?P<task_id>[^/?&]+)')),
     Parser(judge_id='cf', type=ParserType.COMPOSED,
-           regex=re.compile(r'codeforces\.com/problemset/problem/(?P<contest_id>\d+)/(?P<task_id>[A-Za-z](\d)?)'))
+           regex=re.compile(r'codeforces\.com/problemset/problem/(?P<contest_id>\d+)/(?P<task_id>[A-Za-z](\d)?)')),
+    Parser(judge_id='timus', type=ParserType.SIMPLE,
+           regex=re.compile(r'acm\.timus\.ru/problem\.aspx(.*)num=(?P<task_id>\d+)')),
 ]
 
 
 def parse_task_url(url: str) -> Optional[ParseTaskResult]:
-    url = url.split('?')[0]
+    # url = url.split('?')[0]
     result = re.search(r"https://competitive\.herokuapp\.com/"
                        r"task/(?P<judge_id>[^/]+)/(?P<task_id>[^/]+)", url)
     if result:

@@ -22,7 +22,7 @@ class SubmissionQuerySet(models.QuerySet):
 class JudgeManager(models.Manager):
     def get_queryset(self):
         return super(JudgeManager, self).get_queryset() \
-            .filter(judge_id__in=['csa', 'cf', 'ia', 'ojuz', 'ac'])
+            .filter(judge_id__in=['csa', 'cf', 'ia', 'ojuz', 'ac', 'timus'])
 
 
 class PublicGroupManager(models.Manager):

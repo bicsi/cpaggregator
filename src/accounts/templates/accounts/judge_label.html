@@ -6,11 +6,10 @@
 <img class="p-1"
      style="width: 1.8rem; height: 1.8rem; opacity: 0.2"
      src="{% static judge.get_logo_url %}"
-     data-toggle="tooltip" data-placement="top" title="No account"
+     data-toggle="tooltip" data-placement="top" title="{{ judge }}: No account linked"
      alt="{{ judge.judge_id }}">
 {% else %}
 <img class="p-1"
-     style="width: 1.8rem; height: 1.8rem"
-     src="{% static judge.get_logo_url %}"
-     alt="{{ judge.judge_id }}">
+     style="width: 1.7rem; height: 1.7rem;"
+     src="{% static judge.get_logo_url %}">
 {% endif %}

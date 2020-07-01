@@ -31,6 +31,7 @@ def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
 
     # Get submissions as list of generators.
     submissions = []
+
     for task_id in task_ids:
         try:
             submissions = scraper.scrape_submissions_for_task(task_id)

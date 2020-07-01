@@ -32,19 +32,20 @@
                 <span v-cloak v-show="editMode" class="pl-3 task-move">
                     <i class="fas fa-arrows-alt text-muted"></i>
                 </span>
-                <div class="px-3 py-1">
+                <div class="pl-3 py-1">
                     {% include 'accounts/judge_label.html' with judge=task.judge %}
-                    <span class="text-uppercase text-center text-monospace small text-center
-                            font-weight-bold d-none d-sm-inline-block" style="width: 2.8em">
-                        {{ task.judge.judge_id }}
-                    </span>
                 </div>
-                <span class="d-none d-sm-inline mr-3 text-light">|</span>
-                <span class="text-primary flex-grow-1">
+<!--                <span class="text-uppercase text-right text-monospace small-->
+<!--                        font-weight-bold d-none d-sm-inline-block text-muted pt-1" style="width: 4.3em">-->
+<!--                    [{{ task.judge.judge_id }}]-->
+<!--                </span>-->
+<!--                <span class="d-none d-sm-inline mr-3 text-light">|</span>-->
+                <span class="text-primary ml-3">
                     {{ task.name_or_id }}
-                    <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2"
-                       @click="goExternal('{{ task.get_url }}')"></i>
                 </span>
+                <i v-show="hoverIndex === {{ idx }}" class="fas fa-xs fa-external-link-alt mx-2 text-primary"
+                   @click="goExternal('{{ task.get_url }}')"></i>
+                <span class="flex-grow-1"></span>
                 <div class="mr-3">
                     <div v-cloak>
                         <div v-if="!editMode" class="d-inline">

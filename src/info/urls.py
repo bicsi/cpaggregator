@@ -21,7 +21,7 @@ from info import views
 
 class TaskPathConverter:
     regex = "((cf|ac)/([^/]+)/([^/]+))|" \
-            "((ia|ojuz|csa)/([^/]+))"
+            "((ia|ojuz|csa|timus)/([^/]+))"
 
     def to_python(self, value):
         return str(value)

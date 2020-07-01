@@ -13,6 +13,8 @@ def get_handle_url(judge_id: str, handle: str):
         return f"https://codeforces.com/profile/{handle}"
     if judge_id == 'ac':
         return f"https://atcoder.jp/users/{handle}"
+    if judge_id == 'timus':
+        return f"https://acm.timus.ru/author.aspx?id={handle}"
 
 
 def get_submission_url(judge_id: str, task_id: str, submission_id: str):
@@ -40,6 +42,8 @@ def get_task_url(judge_id, task_id):
         return 'https://csacademy.com/contest/archive/task/%s' % task_id
     if judge_id == 'ia':
         return 'https://www.infoarena.ro/problema/%s' % task_id
+    if judge_id == 'timus':
+        return f"https://acm.timus.ru/problem.aspx?space=1&num={task_id}"
     if judge_id == 'cf':
         contest_id, task_letter = task_id.split('/')
         if int(contest_id) >= 100000:
