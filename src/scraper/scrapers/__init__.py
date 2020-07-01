@@ -5,6 +5,7 @@ from .codeforces.scraper import CodeforcesScraper
 from .csacademy.scraper import CSAcademyScraper
 from .atcoder.scraper import AtCoderScraper
 from .ojuz.scraper import OjuzScraper
+from .timus.scraper import TimusScraper
 
 __SUBMISSION_SCRAPERS__ = [
     InfoarenaScraper,
@@ -12,6 +13,7 @@ __SUBMISSION_SCRAPERS__ = [
     CSAcademyScraper,
     AtCoderScraper,
     OjuzScraper,
+    TimusScraper,
 ]
 
 
