@@ -11,8 +11,12 @@ from data.models import Submission
 class SubmissionIdColumn(tables.Column):
 
     def render(self, record):
-        return format_html('<a href="{url}" class="text-secondary small">{name}</a>',
-                           url=record.get_url(), name=record.submission_id)
+        if record.get_url():
+            return format_html('<a href="{url}" class="text-secondary small">{name}</a>',
+                               url=record.get_url(), name=record.submission_id)
+        else:
+            return format_html('<span class="text-secondary small">{name}</a>',
+                               name=record.submission_id)
 
 
 class AuthorColumn(tables.Column):

@@ -39,7 +39,11 @@
                   {% if submission %}
                   <a href="#!" tabindex="0" data-toggle="popover"
                      data-trigger="focus" data-html="true" data-placement="top"
+                     {% if submission.get_url %}
                      title="Submission <a href='{{ submission.get_url }}'>#{{ submission.submission_id }}</a>"
+                     {% else %}
+                     title="Submission #{{ submission.submission_id }}"
+                     {% endif %}
                      data-content="Submitted on: {{ submission.submitted_on|date:'M d, Y H:m'}} <br/> Verdict: {{ submission.get_verdict_display }}">
                     {% if submission.verdict == 'AC' %}
                     <i class="fas fa-check text-success"></i>
