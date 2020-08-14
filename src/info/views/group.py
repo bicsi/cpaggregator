@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 
 from data.models import UserGroup, Submission, GroupMember
 from info import forms, queries
-from info.models import Assignment
+from info.models import Assignment, TaskSheetTask
 from info.utils import build_group_card_context, compute_assignment_results
 from loguru import logger as log
 
@@ -163,27 +163,57 @@ class GroupDetailView(generic.DetailView):
     context_object_name = 'group'
     view_results = False
 
+    def populate_assignments_data(self, ctx, is_owner):
+        group = self.object
+        assignments_queryset = Assignment.objects.visible().filter(group=group)
+        if is_owner:
+            assignments_queryset = Assignment.objects.filter(group=group)
+
+        assignments = list(assignments_queryset.select_related('sheet').all())
+        all_tasks = list(TaskSheetTask.objects
+                         .filter(sheet__in=[a.sheet for a in assignments])
+                         .select_related('task', 'sheet'))
+
+        best_submissions = {}
+        if self.request.user.is_authenticated:
+            best_submissions = {
+                s.task: s
+                for s in Submission.objects.best().filter(
+                    author__in=self.request.user.profile.handles.all(),
+                    task__in=[t.task for t in all_tasks]).all()
+            }
+
+        assignments_data = []
+        for assignment in assignments:
+            # Get tasks for this assignment.
+            tasks = [t.task for t in all_tasks if t.sheet == assignment.sheet]
+            tasks_data = [{
+                'task': task,
+                'submission': best_submissions.get(task)
+            } for task in tasks]
+
+            assignments_data.append({
+                'assignment': assignment,
+                'tasks': tasks_data,
+                'solved_count': len([t for t in tasks_data
+                                     if t['submission'] and t['submission'].verdict == 'AC']),
+                'task_count': len(tasks_data),
+            })
+        ctx['assignments'] = assignments_data
+
     def get_context_data(self, **kwargs):
         group = self.object
 
-        assignments = Assignment.objects.visible().filter(group=group)
+        is_owner = False
         if self.request.user.is_authenticated:
             is_owner = group.is_owned_by(self.request.user)
-            if is_owner:
-                assignments = Assignment.objects.filter(group=group)
 
+        if self.request.user.is_authenticated:
             kwargs['is_owner'] = is_owner
             kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=group.id).exists()
             kwargs['judges'] = queries.get_all_judges(group)
-            kwargs['assignments'] = [{
-                'assignment': assignment,
-                'solved_count': Submission.objects.best().filter(
-                    author__in=self.request.user.profile.handles.all(),
-                    task__in=assignment.sheet.tasks.all(),
-                    verdict='AC').count()
-            } for assignment in assignments.all()]
-        else:
-            kwargs['assignments'] = [{'assignment': assignment} for assignment in assignments.all()]
+
+        self.populate_assignments_data(kwargs, is_owner)
 
         members = GroupMember.objects.filter(group=group).select_related('profile').all()
 
@@ -195,7 +225,8 @@ class GroupDetailView(generic.DetailView):
         kwargs['view_results'] = self.view_results
         if self.view_results:
             user_scores = {user: [] for user in group.members.all()}
-            for assignment in assignments.all():
+            for assignment_data in kwargs['assignments']:
+                assignment = assignment_data['assignment']
                 results = compute_assignment_results(assignment)
                 results = {r["user"]: r["total_score"] for r in results}
                 for user in user_scores:

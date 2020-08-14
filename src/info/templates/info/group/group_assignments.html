@@ -16,39 +16,48 @@
     <div class="list-group list-group-flush" id="assignmentList">
         {% for assignment_data in assignments %}
         {% with assignment=assignment_data.assignment solved_count=assignment_data.solved_count %}
-        {% with task_count=assignment.sheet.tasks.count %}
+        {% with task_count=assignment_data.task_count tasks=assignment_data.tasks %}
         {% with idx=forloop.counter0 %}
         <a class="list-group-item list-group-item-action" data-id="{{ idx }}"
            href="{% url 'group-sheet-detail' group_id=group.group_id sheet_id=assignment.sheet.sheet_id %}">
-            <div class="d-flex align-items-center">
-                <span v-cloak v-show="editMode" class="mr-2 move-assignment">
-                    <i class="fas fa-arrows-alt text-secondary" ></i>
-                </span>
-                <div class="flex-grow-1">
-                    <strong class="d-inline-block">{{ assignment.sheet.title }}</strong>
-                </div>
-                {% if is_user_member %}
-                    <span class="badge badge-pill
-                        {% if solved_count == task_count %}
-                        badge-success
-                        {% else %}
-                        badge_secondary
-                        {% endif %}">
-                        {{ solved_count }}/{{ task_count }} solved
+            <div class="my-0">
+                <div class="d-flex align-items-center">
+                    <span v-cloak v-show="editMode" class="mr-2 move-assignment">
+                        <i class="fas fa-arrows-alt text-secondary" ></i>
                     </span>
+                    <div class="flex-grow-1">
+                        <strong class="d-inline-block">{{ assignment.sheet.title }}</strong>
+                        {% if assignment.is_future %}
+                        <span class="badge badge-info ml-1">Future</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-muted small">
+                        {{ assignment.assigned_on|naturaltime }}
+                    </div>
+                </div>
+                {% if not is_user_member %}
+                <div class="mt-2 badge badge-info">
+                    {{ task_count }} task{{ task_count|pluralize }}
+                </div>
+                {% else %}
+                <div class="mt-1">
+                {% for task in tasks %}
+                    {% if task.submission.verdict == 'AC' %}
+                    <span class="badge badge-success"><i class="fas fa-fw fa-check"></i></span>
+                    {% elif task.submission %}
+                    <span class="badge badge-danger"><i class="fas fa-fw fa-times"></i></span>
+                    {% else %}
+                    <span class="badge badge-secondary badge-outline" style="opacity: 20%">
+                        <i class="fas fa-fw fa-question"></i>
+                    </span>
+                    {% endif %}
+                {% endfor %}
+                </div>
+                <span class="text-muted badge">
+                    {{ solved_count }}/{{ task_count }} solved
+                </span>
                 {% endif %}
             </div>
-            <div class="text-muted small">
-                {{ assignment.assigned_on|naturaltime }}
-                {% if assignment.is_future %}
-                <span class="badge badge-info ml-1">Future</span>
-                {% endif %}
-            </div>
-            {% if not is_user_member %}
-            <div class="mt-2 badge badge-info">
-                {{ task_count }} task{{ task_count|pluralize }}
-            </div>
-            {% endif %}
         </a>
         {% endwith %}
         {% endwith %}
