@@ -11,9 +11,8 @@ class Command(BaseCommand):
         parser.add_argument('--handles', nargs='+')
 
     def handle(self, *args, **options):
-        db = database.get_db()
         handles = options['handles']
         print("HANDLES", handles)
 
         for handle in handles:
-            services.scrape_handle_info(db, handle)
+            services.scrape_handle_info(handle)

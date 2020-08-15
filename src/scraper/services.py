@@ -6,7 +6,7 @@ from celery import shared_task
 
 from core.logging import log
 from data.models import Task, UserHandle
-from scraper import utils, database, scrapers
+from scraper import scrapers, queries
 
 
 def __expand_task(judge_id, task_id):
@@ -22,50 +22,11 @@ def __expand_handle(judge_id, handle):
     if handle == '*':
         handles = [handle.handle for handle in
                    UserHandle.objects.filter(judge__judge_id=judge_id)]
-    log.info(f'Handles: {handles}')
     return handles
-
-
-def __scrape_submissions_for_tasks(db, judge_id, task_ids, from_date, to_date):
-    scraper = scrapers.create_scraper(judge_id)
-
-    # Get submissions as list of generators.
-    submissions = []
-
-    for task_id in task_ids:
-        try:
-            submissions = scraper.scrape_submissions_for_task(task_id)
-            submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
-            utils.write_submissions(db, submissions, chunk_size=1000)
-
-        except NotImplementedError:
-            log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
-            return
-        except Exception as ex:
-            log.exception(ex)
-
-
-def __scrape_submissions_for_users(db, judge_id, handles, from_date, to_date):
-    scraper = scrapers.create_scraper(judge_id)
-
-    # Get submissions as list of generators.
-    for handle in handles:
-        try:
-            submissions = scraper.scrape_submissions_for_user(handle)
-            submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
-            utils.write_submissions(db, submissions, chunk_size=1000)
-
-        except NotImplementedError:
-            log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
-            return
-        except Exception as ex:
-            log.exception(ex)
 
 
 @shared_task
 def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
-    db = database.get_db()
-
     log.info(f"Scraping submissions for tasks {tasks}...")
 
     from_date = datetime.now() - timedelta(days=from_days)
@@ -80,15 +41,25 @@ def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
         task_dict[judge_id] = task_dict.get(judge_id, []) + task_ids
 
     for judge_id, task_ids in task_dict.items():
+        task_ids = list(set(task_ids))
         log.info(f"Scraping task submissions from judge '{judge_id}':")
         log.info(f'Task ids: {task_ids}')
-        __scrape_submissions_for_tasks(db, judge_id, list(set(task_ids)), from_date, to_date)
+
+        scraper = scrapers.create_scraper(judge_id)
+        for task_id in task_ids:
+            try:
+                submissions = scraper.scrape_submissions_for_task(task_id)
+                submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+                queries.write_submissions(submissions)
+            except NotImplementedError:
+                log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
+                break
+            except Exception as ex:
+                log.exception(ex)
 
 
 @shared_task
 def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
-    db = database.get_db()
-
     log.info(f"Scraping submissions for users {user_ids}...")
 
     from_date = datetime.now() - timedelta(days=from_days)
@@ -103,12 +74,28 @@ def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
         handle_dict[judge_id] = handle_dict.get(judge_id, []) + handles
 
     for judge_id, handles in handle_dict.items():
+        handles = list(set(handles))
         log.info(f"Scraping user submissions from judge '{judge_id}':")
         log.info(f'Handles: {handles}')
-        __scrape_submissions_for_users(db, judge_id, list(set(handles)), from_date, to_date)
+
+        scraper = scrapers.create_scraper(judge_id)
+
+        # Get submissions as list of generators.
+        for handle in handles:
+            try:
+                submissions = scraper.scrape_submissions_for_user(handle)
+                submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+                queries.write_submissions(submissions)
+
+            except NotImplementedError:
+                log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
+                return
+            except Exception as ex:
+                log.exception(ex)
 
 
-def scrape_task_info(db, task):
+@shared_task
+def scrape_task_info(task):
     log.info(f"Scraping task info for task '{task}'...")
     judge_id, task_id = task.split('/', 1)
     task_ids = __expand_task(judge_id, task_id)
@@ -142,10 +129,11 @@ def scrape_task_info(db, task):
         except Exception as ex:
             log.exception(ex)
 
-    utils.write_tasks(db, task_infos)
+    queries.write_tasks(task_infos)
 
 
-def scrape_handle_info(db, handle):
+@shared_task
+def scrape_handle_info(handle):
     log.info(f"Scraping info for handle '{handle}'...")
     judge_id, handle_id = handle.split('/', 1)
     handles = __expand_handle(judge_id, handle_id)
@@ -166,24 +154,22 @@ def scrape_handle_info(db, handle):
         except Exception as ex:
             log.exception(ex)
 
-    utils.write_handles(db, user_infos)
+    queries.write_handles(user_infos)
 
 
 @shared_task
 def scrape_tasks_info():
-    db = database.get_db()
     for task in Task.objects.all():
         try:
-            scrape_task_info(db, task.get_path())
+            scrape_task_info(task.get_path())
         except Exception as e:
             log.exception(f"Could not parse task '{task}': {e}")
 
 
 @shared_task
 def scrape_handles_info():
-    db = database.get_db()
     for handle in UserHandle.objects.all():
         try:
-            scrape_handle_info(db, '/'.join([handle.judge.judge_id, handle.handle]))
+            scrape_handle_info('/'.join([handle.judge.judge_id, handle.handle]))
         except Exception as e:
             log.exception(f"Could not parse handle '{handle}': {e}")

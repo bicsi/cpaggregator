@@ -61,6 +61,12 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
         try:
             verdict_text = row[6].find("span").text
             submission_id = row[0].find("a", href=True)['href'].split('/')[-1]
+            if not row[4].find("a"):
+                log.debug(f"Skipped submission #{submission_id}: private.")
+                continue
+            if verdict_text.startswith("Eroare"):
+                log.debug(f"Skipped submission #{submission_id}: system error.")
+                continue
             submission = dict(
                 judge_id=INFOARENA_JUDGE_ID,
                 submission_id=submission_id,
@@ -74,7 +80,7 @@ def scrape_submissions(from_page=1, to_page=SCRAPER_LIMIT, results_per_page=200,
             yield submission
         except (TypeError, AttributeError) as e:
             # Probably task name was hidden.
-            log.warning(f"Skipped submission with id {submission_id}: {e}")
+            log.warning(f"Error scraping submission #{submission_id}: {e}")
 
 
 def get_submission_count(**query_dict):

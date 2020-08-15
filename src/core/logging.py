@@ -25,5 +25,5 @@ class InterceptHandler(logging.Handler):
 
 
 logging.basicConfig(handlers=[InterceptHandler()], level=0)
-
+logging.getLogger("urllib3").setLevel("WARNING")
 

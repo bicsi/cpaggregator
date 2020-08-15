@@ -167,7 +167,7 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 # Celery settings.
 CELERY_BROKER_URL = 'redis://localhost'
-USE_CELERY = True
+USE_CELERY = False
 
 BOOTSTRAP4 = {
     'include_jquery': True,

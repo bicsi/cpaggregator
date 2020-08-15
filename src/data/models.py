@@ -196,7 +196,7 @@ class Task(models.Model):
         unique_together = (('judge', 'task_id'),)
 
     def __str__(self):
-        return f"{self.judge.judge_id}:{self.task_id} [{self.name}]"
+        return f"{self.judge.judge_id}/{self.task_id} <{self.name or 'UNKNOWN TITLE'}>"
 
 
 class TaskStatement(models.Model):

@@ -61,6 +61,7 @@ def write_submissions(db, submissions, chunk_size=100):
     total_inserted = 0
     for chunk in split_into_chunks(submissions, chunk_size):
         log.info(f"Writing chunk of size {len(chunk)} to database...")
+        
         num_inserted = database.insert_submissions(db, chunk)
         log.info(f"{num_inserted} submissions written to database.")
         total_inserted += num_inserted
