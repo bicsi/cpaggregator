@@ -184,21 +184,8 @@ def scrape_submissions_for_task(csrf_token, task_name, task_name_dict=None):
         key=lambda x: x['submitted_on'], reverse=True)
 
 
-def scrape_submissions_for_tasks(tasks):
-    csrf_token = get_csrf_token()
-    task_name_dict = get_task_name_dict(csrf_token)
-
-    submissions = []
-    for task_name in tasks:
-
-        submissions.append(scrape_submissions_for_task(
-            csrf_token, task_name, task_name_dict))
-
-    return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
-
-
 def scrape_all_task_info(csrf_token):
-    for task_data in get_task_info(csrf_token):
+    for _contest_id, task_data in get_task_info(csrf_token):
         task_name = task_data['name']
         yield {
             'judge_id': CSACADEMY_JUDGE_ID,
