@@ -5,7 +5,6 @@ from data.models import UserHandle, Submission, Task, TaskStatement, MethodTag, 
 import math
 from core.logging import log
 from django.utils.text import slugify
-from bulk_sync import bulk_sync
 
 
 def write_submissions(submissions):
@@ -13,13 +12,15 @@ def write_submissions(submissions):
     # Get all handles.
     handles = {(handle.judge.judge_id, handle.handle): handle
                for handle in UserHandle.objects.filter(
-                    handle__in={sub['author_id'] for sub in submissions})}
+                    handle__in={sub['author_id'] for sub in submissions})
+                   .select_related('judge')}
     # Get all required tasks.
     tasks = {(task.judge.judge_id, task.task_id): task
              for task in Task.objects.filter(
-                task_id__in={sub['task_id'] for sub in submissions})}
+                task_id__in={sub['task_id'] for sub in submissions})
+                 .select_related('judge')}
 
-    log.info("Writing submissions to database...")
+    log.info(f"Writing {len(submissions)} submissions to database...")
     log.debug(f"TASKS: {tasks}")
     log.debug(f"HANDLES: {handles}")
 
@@ -48,11 +49,11 @@ def write_submissions(submissions):
         submission_models.append(Submission(**fields))
 
     if submission_models:
-        result = bulk_sync(submission_models,
-                           key_fields=('submission_id', 'author'),
-                           filters=None, skip_deletes=True)
+        result = Submission.objects.bulk_create(submission_models, ignore_conflicts=True)
+        to_update = [x for x in result if x.pk is None]
+        log.warning("TODO: Implement update!")
         log.success(f"Successfully upserted {len(submission_models)} submissions! "
-                    f"({result['stats']['created']} created)")
+                    f"({len(result) - len(to_update)} created, 0 updated)")
     else:
         log.info("No submissions to upsert.")
 

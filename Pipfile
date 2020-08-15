@@ -51,7 +51,6 @@ django-markdownify = "*"
 scikit-learn = "*"
 html2text = "*"
 django-mathjax = "*"
-django-bulk-sync = "*"
 
 [requires]
 python_version = "3.7"
