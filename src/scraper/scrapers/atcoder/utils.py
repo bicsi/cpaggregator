@@ -1,5 +1,7 @@
 import heapq
+import time
 
+import pytz
 from bs4 import BeautifulSoup
 import datetime
 import re
@@ -34,7 +36,7 @@ def __scrape_table_rows(node, table_css_selector):
         yield row.find_all("td")
 
 
-def scrape_submissions_for_contest(contest_id, from_page=1, to_page=PAGE_LIMIT, **query_dict):
+def scrape_submissions_for_contest(contest_id, query_dict, from_page=1, to_page=PAGE_LIMIT):
     """
     Scrapes all the submissions for a given contest.
     :param contest_id: the id of the contest (e.g. 'agc003')
@@ -46,24 +48,28 @@ def scrape_submissions_for_contest(contest_id, from_page=1, to_page=PAGE_LIMIT, 
     base_url = __get_contest_url(contest_id)
 
     for page_id in range(from_page, to_page + 1):
-        page_url = f"{base_url}submissions/all/{page_id}"
-        page = get_page(page_url, **query_dict)
+        page_url = f"{base_url}submissions"
+        page = get_page(page_url, page=page_id, **query_dict)
         soup = BeautifulSoup(page.content, 'html.parser')
-        rows = __scrape_table_rows(soup.select_one("#outer-inner"),
+        rows = __scrape_table_rows(soup.select_one(".panel-submission"),
                                    table_css_selector="table")
         submission_found = False
 
         for row in rows:
+            submitted_on = datetime.datetime.strptime(
+                    row[0].find('time').text, "%Y-%m-%d %H:%M:%S%z")
+            ts = time.mktime(submitted_on.utctimetuple())
+            submitted_on = datetime.datetime.utcfromtimestamp(ts)
+
             submission = {
                 'judge_id': ATCODER_JUDGE_ID,
                 'submission_id': row[-1].find('a', href=True)['href'].split('/')[-1],
-                'submitted_on': datetime.datetime.strptime(
-                    row[0].find('time').text, "%Y/%m/%d %H:%M:%S +0000"),
+                'submitted_on': submitted_on,
                 'task_id': "/".join([contest_id, row[1].find('a', href=True)['href'].split('/')[-1]]).lower(),
                 'author_id': row[2].find('a', href=True)['href'].split('/')[-1].lower(),
                 'language': row[3].text,
                 'source_size': int(row[5].text.split()[0]),
-                'verdict': row[6].select_one('span.label.tooltip-label').text.split()[-1],
+                'verdict': row[6].select_one('span.label').text.split()[-1],
             }
 
             if row[4].text != '-':
@@ -117,7 +123,7 @@ def scrape_submissions_for_user(user_id, contest_ids):
     """
     for contest_id in contest_ids:
         submissions = scrape_submissions_for_contest(
-            contest_id, user_screen_name=user_id)
+            contest_id, {"f.User": user_id})
         for submission in submissions:
             yield submission
 
@@ -130,12 +136,7 @@ def scrape_submissions_for_task(task_id):
     """
     contest_id, task_id = task_id.split('/')
     return scrape_submissions_for_contest(
-        contest_id, task_screen_name=task_id)
-
-
-def scrape_submissions_for_tasks(task_ids):
-    submissions = [scrape_submissions_for_task(task_id) for task_id in task_ids]
-    return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
+        contest_id, {"f.Task": task_id})
 
 
 def scrape_task_info(task_id: str):
