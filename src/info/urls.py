@@ -69,7 +69,7 @@ urlpatterns = [
         path('delete/', views.group.GroupDeleteView.as_view(), name='group-delete'),
     ])),
     path('create-group/', views.group.GroupCreateView.as_view(), name='group-create'),
-    path('create-sheet/', views.sheet.SheetCreateView.as_view(), name='sheet-create'),
+    # path('create-sheet/', views.sheet.SheetCreateView.as_view(), name='sheet-create'),
     path('sheet/<sheet_id>/', include([
         path('', views.sheet.SheetDetailView.as_view(), name='sheet-detail'),
         path('task/add/', views.sheet.SheetTaskAddView.as_view(), name='sheet-task-add'),

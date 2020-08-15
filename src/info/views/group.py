@@ -18,14 +18,16 @@ from info.models import Assignment, TaskSheetTask
 from info.utils import build_group_card_context, compute_assignment_results
 from loguru import logger as log
 
+
 class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
-    form_class = forms.AssignmentSheetCreateMultiForm
+    form_class = forms.AssignmentCreateForm
     template_name = 'info/modal/assignment_create.html'
     group = None
 
     def get_form_kwargs(self):
         kwargs = super(AssignmentCreateView, self).get_form_kwargs()
         kwargs['user'] = self.request.user
+        kwargs['group'] = self.group
         return kwargs
 
     def dispatch(self, request, *args, **kwargs):
@@ -40,16 +42,7 @@ class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
         return context
 
     def form_valid(self, form):
-        sheet = form['sheet'].save(commit=False)
-        sheet.author = self.request.user.profile
-        sheet.save()
-
-        assignment = form['assignment'].save(commit=False)
-        assignment.sheet = sheet
-        assignment.group = self.group
-
-        assignment.save()
-
+        assignment = form.save()
         return redirect('group-sheet-detail',
                         group_id=assignment.group.group_id,
                         sheet_id=assignment.sheet.sheet_id)

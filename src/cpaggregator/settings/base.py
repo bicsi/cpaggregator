@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django_ajax',
     'mathfilters',
     'markdownx',
-    'betterforms',
     'bootstrap_pagination',
     'django_tables2',
     'widget_tweaks',

@@ -148,23 +148,23 @@ class SheetTaskDeleteView(LoginRequiredMixin, generic.View):
         return redirect(self.request.META.get('HTTP_REFERER', reverse_lazy('home')))
 
 
-class SheetCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
-    model = TaskSheet
-    form_class = forms.SheetCreateForm
-    template_name = 'info/modal/sheet_create.html'
-    sheet = None
-
-    def get_form_kwargs(self):
-        kwargs = super(SheetCreateView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        self.sheet = form.save()
-        return redirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse_lazy('sheet-detail', kwargs=dict(sheet_id=self.sheet.sheet_id))
+# class SheetCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
+#     model = TaskSheet
+#     form_class = forms.SheetCreateForm
+#     template_name = 'info/modal/sheet_create.html'
+#     sheet = None
+#
+#     def get_form_kwargs(self):
+#         kwargs = super(SheetCreateView, self).get_form_kwargs()
+#         kwargs['user'] = self.request.user
+#         return kwargs
+#
+#     def form_valid(self, form):
+#         self.sheet = form.save()
+#         return redirect(self.get_success_url())
+#
+#     def get_success_url(self):
+#         return reverse_lazy('sheet-detail', kwargs=dict(sheet_id=self.sheet.sheet_id))
 
 
 class SheetTaskAddView(LoginRequiredMixin, SingleObjectMixin,

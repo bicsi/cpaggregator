@@ -1,7 +1,7 @@
 import re
 
 from django.contrib.auth.models import User
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from django.db import models
 from django.utils import timezone
 from markdownx.models import MarkdownxField

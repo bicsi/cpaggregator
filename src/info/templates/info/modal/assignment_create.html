@@ -3,7 +3,6 @@
 {% block modal_title %}Create assignment{% endblock %}
 {% block action_text %}Create{% endblock %}
 {% block modal_body %}
-    {% bootstrap_form form.sheet %}
-    {% bootstrap_form form.assignment %}
+    {% bootstrap_form form %}
 {% endblock %}
 {% block submit_url %}{% url 'assignment-create' group_id=object.group_id %}{% endblock %}

@@ -1,6 +1,5 @@
 import datetime
 
-from betterforms import multiform
 from bootstrap_datepicker_plus import DateTimePickerInput
 from django import forms
 from django.contrib.auth.models import User
@@ -97,28 +96,6 @@ class GroupCreateForm(forms.ModelForm):
         return group
 
 
-class SheetCreateForm(forms.ModelForm):
-    class Meta:
-        model = TaskSheet
-        fields = ['title']
-        help_texts = {
-            'title': "Example: \"Dynamic Programming super-tasks\"."
-        }
-
-    def __init__(self, **kwargs):
-        print(kwargs)
-        self.user = kwargs.pop('user')
-        super(SheetCreateForm, self).__init__(**kwargs)
-
-    def save(self, commit=True):
-        sheet = super(SheetCreateForm, self).save(commit=False)
-        sheet.sheet_id = slugify_unique(TaskSheet, sheet.title, 'sheet_id')
-        sheet.author = self.user.profile
-        if commit:
-            sheet.save()
-        return sheet
-
-
 FORMAT = '%d.%m.%Y %H:%M'
 
 
@@ -132,6 +109,9 @@ def get_date_time_picker_widget(required=True):
 
 
 class AssignmentCreateForm(forms.ModelForm):
+    sheet_title = forms.CharField(max_length=64, required=True,
+                                  help_text="Example: \"Dynamic Programming super-tasks\".")
+
     assigned_on = forms.DateTimeField(
         input_formats=[FORMAT],
         widget=get_date_time_picker_widget(),
@@ -144,12 +124,28 @@ class AssignmentCreateForm(forms.ModelForm):
         required=False,
         help_text='Optional. When the assignment will end. Time is in UTC+0.')
 
+    field_order = ['sheet_title', 'assigned_on', 'end_on', 'use_best_recent']
+
     class Meta:
         model = Assignment
         fields = ['assigned_on', 'use_best_recent', 'end_on']
 
+    def save(self, commit=True):
+        assignment = super(AssignmentCreateForm, self).save(commit=False)
+        sheet_title = self.cleaned_data.get('sheet_title')
+        sheet = TaskSheet(title=sheet_title,
+                          sheet_id=slugify_unique(TaskSheet, sheet_title, 'sheet_id'))
+        sheet.author = self.user.profile
+        assignment.sheet = sheet
+        assignment.group = self.group
+        if commit:
+            sheet.save()
+            assignment.save()
+        return assignment
+
     def __init__(self, **kwargs):
-        kwargs.pop('user')
+        self.user = kwargs.pop('user')
+        self.group = kwargs.pop('group')
         super(AssignmentCreateForm, self).__init__(**kwargs)
 
 
@@ -171,13 +167,6 @@ class AssignmentUpdateForm(forms.ModelForm):
         fields = ['assigned_on', 'end_on',
                   'use_best_recent',
                   'hide_submissions_before_assigned']
-
-
-class AssignmentSheetCreateMultiForm(multiform.MultiModelForm):
-    form_classes = {
-        'sheet': SheetCreateForm,
-        'assignment': AssignmentCreateForm,
-    }
 
 
 class GroupUpdateForm(forms.ModelForm):

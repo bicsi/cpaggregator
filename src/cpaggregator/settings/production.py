@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'django_ajax',
     'mathfilters',
-    'betterforms',
     'bootstrap_pagination',
     'bootstrap4',
     'markdownx',
