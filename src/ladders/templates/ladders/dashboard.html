@@ -18,10 +18,10 @@
     </div>
 </div>
 <div class="navbar navbar-dark d-block position-fixed w-100
-            text-white px-3 py-2 text-center"
+            text-white px-3 py-3 text-center"
      style="bottom: 0; z-index: 10">
 
-  <h1>Welcome, {{user}}!</h1>
+  <h1>Welcome, {{user.profile.get_display_name}}!</h1>
   <div>
     <span class="font-weight-bold">Current level: {{current_level}}</span>
     <span class="mx-2">|</span>
