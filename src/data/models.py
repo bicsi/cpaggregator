@@ -58,6 +58,7 @@ class UserProfile(models.Model):
     last_name = models.CharField(max_length=256, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     avatar = models.ImageField(upload_to=user_directory_path, blank=True)
+    avatar_url = models.CharField(max_length=1024, null=True, blank=True)
 
     objects = UserProfileManager()
 
@@ -68,16 +69,8 @@ class UserProfile(models.Model):
         return str(self.id)
 
     def avatar_url_or_default(self):
-        if self.avatar:
-            return self.avatar.url
-
-        handle_dict = {handle.judge.judge_id: handle
-                       for handle in self.handles.select_related('judge').all()}
-        judge_order = ['cf', 'ia', 'csa']
-        for judge_id in judge_order:
-            if judge_id in handle_dict and handle_dict[judge_id].photo_url:
-                return handle_dict[judge_id].photo_url
-
+        if self.avatar_url:
+            return self.avatar_url
         return static("img/user-avatar.svg")
 
     def get_display_name(self):

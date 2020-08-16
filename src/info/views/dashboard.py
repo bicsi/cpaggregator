@@ -12,7 +12,7 @@ class RankListView(generic.ListView):
     template_name = 'info/rank_list.html'
     paginate_by = 10
     context_object_name = 'profile_list'
-    queryset = UserProfile.objects.order_by('statistics__rank')
+    queryset = UserProfile.objects.order_by('statistics__rank').select_related('statistics')
 
     def get_context_data(self, **kwargs):
         kwargs['user_count'] = UserProfile.objects.count()

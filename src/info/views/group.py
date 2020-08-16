@@ -171,9 +171,10 @@ class GroupDetailView(generic.DetailView):
         if self.request.user.is_authenticated:
             best_submissions = {
                 s.task: s
-                for s in Submission.objects.best().filter(
-                    author__in=self.request.user.profile.handles.all(),
-                    task__in=[t.task for t in all_tasks]).all()
+                for s in Submission.objects.best()
+                    .filter(author__in=self.request.user.profile.handles.all(),
+                            task__in=[t.task for t in all_tasks])
+                    .select_related('task').all()
             }
 
         assignments_data = []

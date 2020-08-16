@@ -16,10 +16,10 @@ else:
 # Other Celery settings
 CELERY_BEAT_SCHEDULE = {
     # Data services cronjobs.
-    # 'update-all-users': {
-    #     'task': 'data.services.update_all_users',
-    #     'schedule': 15 * 60,
-    # },
+    'update-all-users': {
+        'task': 'data.services.update_all_users',
+        'schedule': 2 * 60,
+    },
     # 'update-all-tasks-info': {
     #     'task': 'data.services.update_all_tasks_info',
     #     'schedule': 30 * 60,
