@@ -209,12 +209,11 @@ class GroupDetailView(generic.DetailView):
 
         self.populate_assignments_data(kwargs, is_owner)
 
-        members = GroupMember.objects.filter(group=group).select_related('profile').all()
-
         kwargs['members'] = [{
             'member': member.profile,
             'role': member.role,
-        } for member in members]
+        } for member in GroupMember.objects.filter(group=group)
+            .select_related('profile', 'profile__user')]
 
         kwargs['view_results'] = self.view_results
         if self.view_results:
