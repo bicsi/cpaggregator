@@ -71,7 +71,7 @@
     </form>
     {% elif task.status == 'COM' %}
     <span class="text-success">
-      <i class="fas fa-check mr-1"></i> Completed
+      <i class="fas fa-check mr-1"></i> Completed in {{completed_in|smooth_timedelta:"short"}}
     </span>
     {% elif task.status == 'EXP' %}
     <div class="text-danger">

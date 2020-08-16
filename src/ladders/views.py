@@ -111,11 +111,21 @@ class LadderTaskDetail(LoginRequiredMixin, AJAXMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super(LadderTaskDetail, self).get_context_data(**kwargs)
-        tasks = LadderTask.objects.filter(ladder=self.object.ladder)
+
         task = self.object
+        tasks = LadderTask.objects.filter(ladder=task.ladder)
         if task.started_on:
             tasks = tasks.filter(started_on__lte=task.started_on)
         ctx['level'] = tasks.count()
+
+        if task.status == LadderTask.Status.COMPLETED:
+            ac_submission = (
+                Submission.objects
+                    .filter(task=task.task, author__user=task.ladder.profile, verdict='AC')
+                    .order_by('submitted_on')[:1])
+            if ac_submission and ac_submission[0].submitted_on > task.started_on:
+                ctx['completed_in'] = ac_submission[0].submitted_on - task.started_on
+
         return ctx
 
 
