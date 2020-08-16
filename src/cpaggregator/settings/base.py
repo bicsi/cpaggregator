@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'stats',
     'contact',
     'search',
+    'ladders',
     'rest_framework',
     'silk',
     'bootstrap_datepicker_plus',

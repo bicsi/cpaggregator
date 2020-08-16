@@ -1,0 +1,82 @@
+{% load ladder_extras %}
+{% load static %}
+
+<div class="modal-content px-3">
+  <div class="modal-body">
+    <!-- Header -->
+    <div class="d-flex mb-2">
+      <h4 class="modal-title flex-grow-1">
+        {% if task.status == 'NEW' %}
+        Ladder Task #{{level}}
+        {% else %}
+        {{task.task.name_or_id}}
+        {% endif %}
+      </h4>
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <!-- Body -->
+    {% with task=task.task %}
+      <div style="height: 40px" class="py-1">
+          <a href="{{ task.judge.homepage }}">
+              <img class="img-fluid" style="max-height: 100%"
+               src="{% static task.judge.get_banner_url %}"
+               alt="{{ task.judge.judge_id }}">
+          </a>
+      </div>
+      {% if task.status != 'NEW' %}
+      <div>
+        {% if task.statistics %}
+        <span class="badge badge-pill badge-info"><i class="far fa-dot-circle mr-1"></i>{{ task.statistics.difficulty_score }} points</span>
+        <span class="text-light mx-2">|</span>
+        {% endif %}
+        {% if best_submission_for_user %}
+          <span class="small text-muted">Verdict:</span>
+          {% if best_submission_for_user.verdict == 'AC' %}
+          <span class="badge badge-success ml-1">
+              <i class="fa fa-check mr-1"></i>{{ best_submission_for_user.get_verdict_display }}
+          </span>
+          {% else %}
+          <span class="badge badge-danger ml-1">
+              <i class="fa fa-times mr-1"></i>
+              {{ best_submission_for_user.get_verdict_display }}
+          </span>
+          {% endif %}
+        <span class="small">
+          (<a href="{{ best_submission_for_user.get_url }}">#{{ best_submission_for_user.submission_id }}</a>)
+        </span>
+        {% else %}
+          <span class="small text-muted">Not tried yet</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    <div class="text-dark mt-2">
+      <i class="fas fa-clock mx-1"></i>{{task.duration|smooth_timedelta}}
+    </div>
+  </div>
+  <div class="modal-footer">
+    {% if task.status == 'RUN' %}
+    <a href="{{ task.task.get_url }}" class="btn btn-primary mr-2" target="_blank">
+        <i class="fas fa-external-link-alt mr-1"></i> Go to task
+    </a>
+    <a href="{% url 'task-detail' task_path=task.task.get_path %}" class="btn btn-secondary mr-2">
+        See details
+    </a>
+    {% elif task.status == 'NEW' %}
+    <form method="post" action="{% url 'ladders:ladder-task-start' task=task.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Start task!</button>
+    </form>
+    {% elif task.status == 'COM' %}
+    <span class="text-success">
+      <i class="fas fa-check mr-1"></i> Completed
+    </span>
+    {% elif task.status == 'EXP' %}
+    <div class="text-danger">
+      <i class="fas fa-times mr-1"></i> Expired
+    </div>
+    {% endif %}
+  </div>
+</div>

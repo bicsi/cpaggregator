@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include('info.urls')),
     path('', views.HomeView.as_view(), name='home'),
     path('', include('contact.urls')),
+    path('ladders/', include(('ladders.urls', 'ladders'), namespace='ladders')),
     path('accounts/', include('accounts.urls')),
     path('markdownx/', include('markdownx.urls')),
     url(r'^favicon.ico$',

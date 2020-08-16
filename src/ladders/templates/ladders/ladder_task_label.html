@@ -1,0 +1,24 @@
+{% load ladder_extras %}
+{% with width='80px' %}
+<div class="col-3 col-sm-2 col-xl-1 mb-4 text-center d-flex align-items-center justify-content-center p-0"
+      style="opacity: 0">
+    <div class="bg-{{task.status|pipe_color}} pipe-right"
+         style="width: 120px; height: 2em; position: absolute; left: 50%; z-index: -1">
+    </div>
+    <div class="bg-{{task.status|pipe_color}} pipe-down"
+         style="width: 2em; height: 7em; position: absolute; top: 50%; z-index: -1">
+    </div>
+    <div class="bg-light rounded p-1 ladder-cell" style="width: {{width}}; height: {{width}}">
+      <a class="btn btn-{{task.status|ladder_color}} p-1 border-light w-100 h-100
+        {% if task.status == 'LOC'%}text-muted disabled{% endif %}"
+         {% if task.status != 'LOC' %}
+         data-toggle="modal" href="#modal"
+         onclick="loadModalForm('{% url 'ladders:ladder-task-detail' task=task.id %}');"
+         {% endif %}
+      >
+          <h4 class="fas {{task.status|ladder_icon}} mt-3 mb-1" style="font-size: 20px"></h4>
+          <div class="small font-weight-bold" style="font-size: 13px">{{level}}</div>
+      </a>
+    </div>
+</div>
+{% endwith %}

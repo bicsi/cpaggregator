@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% load render_table from django_tables2 %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block title_tag %}Ladders{% endblock %}
+
+{% block body_content %}
+{% with request.user as user %}
+<div class="container pb-3">
+    <div class="row" id="ladder-grid" style="overflow: hidden">
+        {% for task in ladder_tasks %}
+        {% with forloop.counter as level %}
+        {% include "ladders/ladder_task_label.html" with task=task level=level %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+</div>
+<div class="navbar navbar-dark d-block position-fixed w-100
+            text-white px-3 py-2 text-center"
+     style="bottom: 0; z-index: 10">
+
+  <h1>Welcome, {{user}}!</h1>
+  <div>
+    <span class="font-weight-bold">Current level: {{current_level}}</span>
+    <span class="mx-2">|</span>
+    <span class="font-weight-bold">Points earned: 0</span>
+  </div>
+</div>
+
+{% endwith %}
+{% endblock %}
+
+{% block js_scripts %}
+<script>
+    const gridElements = [];
+    let currentNumCells = -1;
+
+    const refreshOrder = () => {
+      const grid = document.getElementById("ladder-grid");
+      const numCells = (function () {
+        var minl = 1. / 0, rows = 0;
+        for (var i = 0; i < 12; ++i) {
+          const nowl = grid.children[i].getBoundingClientRect().left;
+          if (nowl < minl - 1e-9) minl = nowl;
+          if (nowl < minl + 1e-9) rows += 1;
+        }
+        return 12 / rows;
+      }());
+      if (currentNumCells === numCells) return;
+      currentNumCells = numCells;
+
+      for (let i = 0; i < grid.children.length; ++i) {
+        const rowId = Math.floor(i / numCells);
+        const colId = (rowId % 2 == 1
+          ? (numCells - 1 - i % numCells)
+          : i % numCells);
+        const gridCell = grid.children[i];
+        const downPipe = gridCell.getElementsByClassName("pipe-down")[0];
+        const rightPipe = gridCell.getElementsByClassName("pipe-right")[0];
+        gridCell.style.order = rowId * numCells + colId + 1;
+
+        rightPipe.style.opacity = colId < numCells - 1 ? 1.0 : 0.0;
+        downPipe.style.opacity = (colId == 0 && rowId % 2 == 1
+          || colId == numCells - 1 && rowId % 2 == 0) ? 1.0 : 0.0;
+        gridCell.style.opacity = 1;
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", refreshOrder);
+    window.addEventListener("resize", refreshOrder);
+</script>
+{% endblock %}
