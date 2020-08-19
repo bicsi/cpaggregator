@@ -10,7 +10,6 @@ from django.utils.text import slugify
 
 def write_submissions(submissions):
     submissions = list(submissions)
-    log.error({sub['author_id'].lower() for sub in submissions})
     # Get all handles.
     handles = {(handle.judge.judge_id, handle.handle.lower()): handle
                for handle in UserHandle.objects.annotate(handle_lower=Lower('handle')).filter(

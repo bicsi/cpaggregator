@@ -165,6 +165,12 @@ class LadderTaskDetail(LoginRequiredMixin, AJAXMixin, generic.DetailView):
             tasks = tasks.filter(started_on__lte=task.started_on)
         ctx['level'] = tasks.count()
 
+        try:
+            ctx['best_submission_for_user'] = (Submission.objects.best()
+                .get(author__user=self.request.user.profile, task=task.task))
+        except ObjectDoesNotExist:
+            ctx['best_submission_for_user'] = None
+
         if task.status == LadderTask.Status.COMPLETED:
             ac_submission = (
                 Submission.objects
