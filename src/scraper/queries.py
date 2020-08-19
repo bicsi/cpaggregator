@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.functions import Lower
 from django.utils import timezone
 
 from data.models import UserHandle, Submission, Task, TaskStatement, MethodTag, TaskSource, JudgeTaskStatistic, Judge
@@ -9,10 +10,11 @@ from django.utils.text import slugify
 
 def write_submissions(submissions):
     submissions = list(submissions)
+    log.error({sub['author_id'].lower() for sub in submissions})
     # Get all handles.
-    handles = {(handle.judge.judge_id, handle.handle): handle
-               for handle in UserHandle.objects.filter(
-                    handle__in={sub['author_id'] for sub in submissions})
+    handles = {(handle.judge.judge_id, handle.handle.lower()): handle
+               for handle in UserHandle.objects.annotate(handle_lower=Lower('handle')).filter(
+                    handle_lower__in={sub['author_id'].lower() for sub in submissions})
                    .select_related('judge')}
     # Get all required tasks.
     tasks = {(task.judge.judge_id, task.task_id): task
