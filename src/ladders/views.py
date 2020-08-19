@@ -3,6 +3,7 @@ import random
 from random import randint
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils import timezone
@@ -14,27 +15,59 @@ from data.models import UserProfile, UserHandle, Task, Submission
 from .models import LadderTask, Ladder
 from core.logging import log
 
+
 # Create your views here.
 
 
 def generate_new_task(ladder, commit=True):
     profile = ladder.profile
+    log.info(f"Generating new task for {profile}...")
+
     handles = list(UserHandle.objects.filter(user=profile).select_related('judge'))
-    previous_tasks = set(ladder.tasks.values_list('task', flat=True))
     judges = {handle.judge for handle in handles}
 
     tried_tasks = set(Submission.objects
-                       .filter(author__in=handles)
-                       .values_list('task', flat=True)
-                       .distinct())
+                      .filter(author__in=handles)
+                      .values_list('task', flat=True)
+                      .distinct())
+    previous_tasks = set(ladder.tasks.values_list('task', flat=True))
     forbidden_tasks = tried_tasks | previous_tasks
-    available_tasks = [task for task in Task.objects.filter(judge__in=judges)
-                       if task.pk not in forbidden_tasks]
+
+    available_tasks = [
+        task for task in Task.objects
+            .filter(judge__in=judges, statistics__isnull=False)
+            .select_related('statistics')
+        if task.pk not in forbidden_tasks]
 
     if not available_tasks:
+        log.warning("Could not generate: no tasks to choose from.")
         return None
 
-    chosen_task = random.choice(available_tasks)
+    solved_tasks_scores = [
+        score for _, score in Submission.objects
+            .filter(author__in=handles, verdict='AC')
+            .values_list('task', 'task__statistics__difficulty_score')
+            .distinct()
+        if score is not None]
+
+    bounds = 60, 100
+    if len(solved_tasks_scores) >= 10:
+        solved_tasks_scores.sort()
+        solved_tasks_scores = solved_tasks_scores[-20:]
+        mid_score = random.choice(solved_tasks_scores)
+        bounds = mid_score * 0.9, mid_score * 1.1
+
+    sought_score = random.randint(int(bounds[0]), int(bounds[1]))
+    log.info(f"Sought score: {sought_score} (bounds: {bounds})")
+
+    random.shuffle(available_tasks)
+    best_error, chosen_task = None, None
+    for task in available_tasks:
+        curr_error = abs(task.statistics.difficulty_score - sought_score)
+        if not chosen_task or best_error > curr_error:
+            best_error, chosen_task = curr_error, task
+
+    log.info(f"Chosen task: {chosen_task} (score: {chosen_task.statistics.difficulty_score})")
     duration = datetime.timedelta(minutes=120)
     ladder_task = LadderTask(
         ladder=ladder,
@@ -55,12 +88,22 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
         profile = self.request.user.profile
 
         ladder, _ = Ladder.objects.get_or_create(profile=profile)
-        ladder_tasks = list(LadderTask.objects.filter(ladder=ladder))
+        ladder_tasks = list(LadderTask.objects.filter(ladder=ladder).select_related('task', 'task__statistics'))
 
         next_level = 1 + len(ladder_tasks)
         current_level = (next_level
                          if not ladder_tasks or ladder_tasks[-1].is_finished
                          else next_level - 1)
+
+        points_earned = 0
+        for task in ladder_tasks:
+            if not task.status == LadderTask.Status.COMPLETED:
+                continue
+            try:
+                points_earned += task.task.statistics.difficulty_score
+            except ObjectDoesNotExist as ex:
+                log.error(f"Exception calculating points earned of task {task}: {ex}")
+                pass
 
         if current_level != next_level:
             current_task = ladder_tasks[-1]
@@ -99,6 +142,7 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
         ctx.update({
             'ladder_tasks': ladder_tasks,
             'current_level': current_level,
+            'points_earned': points_earned,
         })
         return ctx
 
