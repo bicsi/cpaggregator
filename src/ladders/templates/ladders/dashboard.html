@@ -9,7 +9,12 @@
 
 {% block body_content %}
 {% with request.user as user %}
-<div class="container pb-3">
+<div class="container pb-3 text-center">
+    <div class="bg-light d-inline-block rounded px-3 py-1 mb-3">
+      {% for judge in all_judges %}
+      {% include "accounts/judge_label.html" with dim_if_no_account=True %}
+      {% endfor %}
+    </div>
     <div class="row" id="ladder-grid" style="overflow: hidden">
         {% for task in ladder_tasks %}
         {% with forloop.counter as level %}

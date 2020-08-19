@@ -11,7 +11,7 @@ from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
 from django_ajax.mixin import AJAXMixin
 
-from data.models import UserProfile, UserHandle, Task, Submission
+from data.models import UserProfile, UserHandle, Task, Submission, Judge
 from .models import LadderTask, Ladder
 from core.logging import log
 
@@ -105,6 +105,7 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
                 log.error(f"Exception calculating points earned of task {task}: {ex}")
                 pass
 
+        current_task = None
         if current_level != next_level:
             current_task = ladder_tasks[-1]
 
@@ -128,7 +129,7 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
                 current_level += 1
 
         if current_level == next_level:
-            current_task = generate_new_task(ladder, next_level)
+            current_task = generate_new_task(ladder)
             if current_task:
                 ladder_tasks.append(current_task)
                 next_level += 1
@@ -144,6 +145,7 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
             'current_level': current_level,
             'current_task': current_task,
             'points_earned': points_earned,
+            'all_judges': Judge.objects.all(),
         })
         return ctx
 
