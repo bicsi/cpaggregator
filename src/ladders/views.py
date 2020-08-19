@@ -53,7 +53,7 @@ def generate_new_task(ladder, commit=True):
     bounds = 60, 100
     if len(solved_tasks_scores) >= 10:
         solved_tasks_scores.sort()
-        solved_tasks_scores = solved_tasks_scores[-20:]
+        solved_tasks_scores = solved_tasks_scores[-50:]
         mid_score = random.choice(solved_tasks_scores)
         bounds = mid_score * 0.9, mid_score * 1.1
 
