@@ -47,7 +47,7 @@ def generate_new_task(ladder, commit=True):
     return ladder_task
 
 
-class LaddersDashboard(generic.TemplateView, LoginRequiredMixin):
+class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
     template_name = 'ladders/dashboard.html'
 
     def get_context_data(self, **kwargs):
