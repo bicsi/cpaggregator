@@ -70,7 +70,7 @@ def smooth_timedelta(timedeltaobj, fmt="long"):
         timetot += f"{int(mins)} {M} "
         secs = secs - mins*60
 
-    if secs > 0:
-        timetot += f"{int(secs)} {S} "
+    # if secs > 0:
+    #     timetot += f"{int(secs)} {S} "
 
     return timetot[:-1]

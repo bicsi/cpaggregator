@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 from django.db.models import F
+from django.utils import timezone
 
 from data.models import UserProfile, Task, Judge
 from django.utils.translation import gettext_lazy as _
@@ -27,6 +28,12 @@ class LadderTask(models.Model):
     status = models.CharField(choices=Status.choices, max_length=3)
     started_on = models.DateTimeField(null=True)
     duration = models.DurationField()
+
+    @property
+    def remaining_time(self):
+        if self.status != LadderTask.Status.RUNNING:
+            return None
+        return self.started_on + self.duration - timezone.now()
 
     @property
     def is_finished(self):

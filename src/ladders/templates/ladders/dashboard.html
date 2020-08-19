@@ -3,6 +3,7 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap4 %}
 {% load static %}
+{% load ladder_extras %}
 
 {% block title_tag %}Ladders{% endblock %}
 
@@ -21,7 +22,16 @@
             text-white px-3 py-3 text-center"
      style="bottom: 0; z-index: 10">
 
-  <h1>Welcome, {{user.profile.get_display_name}}!</h1>
+  <h2>Welcome, {{user.profile.get_display_name}}!</h2>
+  <h5 class="">
+  {% if current_task_status == "NEW" %}
+    <strong>You have a new task!</strong> Start it when you feel ready.
+  {% elif current_task_status == "RUN" %}
+    <strong>You have started a task!</strong> Remaining time: {{remaining_time|smooth_timedelta:"short"}}
+  {% else %}
+    You have no more tasks to solve. Add a new judge to your profile.
+  {% endif %}
+  </h5>
   <div>
     <span class="font-weight-bold">Current level: {{current_level}}</span>
     <span class="mx-2">|</span>

@@ -133,6 +133,9 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
                 ladder_tasks.append(current_task)
                 next_level += 1
 
+        current_task_status = ladder_tasks[-1].status
+        remaining_time = current_task.remaining_time
+
         required_len = max(len(ladder_tasks) + 12, 100)
         required_len += (12 - required_len % 12) % 12
 
@@ -142,6 +145,8 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
         ctx.update({
             'ladder_tasks': ladder_tasks,
             'current_level': current_level,
+            'current_task_status': current_task_status,
+            'remaining_time': remaining_time,
             'points_earned': points_earned,
         })
         return ctx
