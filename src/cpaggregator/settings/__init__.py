@@ -68,4 +68,8 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 10 * 60,
         'task': 'stats.services.compute_task_statistics',
     },
+    'compute-ladder-statistics': {
+        'schedule': 10 * 60,
+        'task': 'stats.services.compute_ladder_statistics',
+    },
 }

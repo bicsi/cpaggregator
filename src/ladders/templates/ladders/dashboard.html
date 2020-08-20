@@ -30,8 +30,12 @@
   <h2 class="mb-0">Welcome, {{user.profile.get_display_name}}!</h2>
   <div class="mb-2">
     <span class="font-weight-bold">Current level: {{current_level}}</span>
-    <span class="mx-2">|</span>
-    <span class="font-weight-bold">Points earned: {{points_earned}}</span>
+    <span class="mx-2">&#183;</span>
+    <span class="font-weight-bold">Points earned: {{ladder.statistics.total_points|default:"0"}}</span>
+    <span class="mx-2">&#183;</span>
+    <span class="font-weight-bold">
+      Rank: <a href="{% url 'ladders:rank' %}" class="bg-primary rounded text-white px-2 py-1">{{ladder.statistics.rank|default:"--"}}</a>
+    </span>
   </div>
   <p class="mb-0">
   {% if current_task.status == "NEW" %}

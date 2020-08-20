@@ -12,6 +12,7 @@ from django.views.generic.detail import SingleObjectMixin
 from django_ajax.mixin import AJAXMixin
 
 from data.models import UserProfile, UserHandle, Task, Submission, Judge
+from stats.services import compute_ladder_statistics
 from .models import LadderTask, Ladder
 from core.logging import log
 
@@ -80,6 +81,48 @@ def generate_new_task(ladder, commit=True):
     return ladder_task
 
 
+def update_ladder(ladder):
+    profile = ladder.profile
+    ladder_tasks = list(LadderTask.objects.filter(ladder=ladder).select_related('task', 'task__statistics'))
+
+    next_level = 1 + len(ladder_tasks)
+    current_level = (next_level
+                     if not ladder_tasks or ladder_tasks[-1].is_finished
+                     else next_level - 1)
+
+    current_task = None
+    if current_level != next_level:
+        current_task = ladder_tasks[-1]
+
+        # Check if it was expired or solved
+        ac_submissions = list(
+            Submission.objects
+                .filter(task=current_task.task,
+                        author__user=profile,
+                        verdict='AC')
+                .order_by('submitted_on')[:1])
+        if ac_submissions and (not current_task.started_on or
+                               current_task.started_on + current_task.duration >
+                               ac_submissions[0].submitted_on):
+            current_task.status = LadderTask.Status.COMPLETED
+            current_task.save()
+            current_level += 1
+        elif (current_task.started_on and current_task.started_on +
+              current_task.duration < timezone.now()):
+            current_task.status = LadderTask.Status.EXPIRED
+            current_task.save()
+            current_level += 1
+
+    if current_level == next_level:
+        current_task = generate_new_task(ladder)
+        if current_task:
+            ladder_tasks.append(current_task)
+            next_level += 1
+        compute_ladder_statistics()
+
+    return ladder_tasks, current_task
+
+
 class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
     template_name = 'ladders/dashboard.html'
 
@@ -88,51 +131,8 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
         profile = self.request.user.profile
 
         ladder, _ = Ladder.objects.get_or_create(profile=profile)
-        ladder_tasks = list(LadderTask.objects.filter(ladder=ladder).select_related('task', 'task__statistics'))
-
-        next_level = 1 + len(ladder_tasks)
-        current_level = (next_level
-                         if not ladder_tasks or ladder_tasks[-1].is_finished
-                         else next_level - 1)
-
-        points_earned = 0
-        for task in ladder_tasks:
-            if not task.status == LadderTask.Status.COMPLETED:
-                continue
-            try:
-                points_earned += task.task.statistics.difficulty_score
-            except ObjectDoesNotExist as ex:
-                log.error(f"Exception calculating points earned of task {task}: {ex}")
-                pass
-
-        current_task = None
-        if current_level != next_level:
-            current_task = ladder_tasks[-1]
-
-            # Check if it was expired or solved
-            ac_submissions = list(
-                Submission.objects
-                    .filter(task=current_task.task,
-                            author__user=profile,
-                            verdict='AC')
-                    .order_by('submitted_on')[:1])
-            if ac_submissions and (not current_task.started_on or
-                                   current_task.started_on + current_task.duration >
-                                   ac_submissions[0].submitted_on):
-                current_task.status = LadderTask.Status.COMPLETED
-                current_task.save()
-                current_level += 1
-            elif (current_task.started_on and current_task.started_on +
-                  current_task.duration < timezone.now()):
-                current_task.status = LadderTask.Status.EXPIRED
-                current_task.save()
-                current_level += 1
-
-        if current_level == next_level:
-            current_task = generate_new_task(ladder)
-            if current_task:
-                ladder_tasks.append(current_task)
-                next_level += 1
+        ladder_tasks, current_task = update_ladder(ladder)
+        current_level = len(ladder_tasks)
 
         required_len = max(len(ladder_tasks) + 12, 100)
         required_len += (12 - required_len % 12) % 12
@@ -144,7 +144,7 @@ class LaddersDashboard(LoginRequiredMixin, generic.TemplateView):
             'ladder_tasks': ladder_tasks,
             'current_level': current_level,
             'current_task': current_task,
-            'points_earned': points_earned,
+            'ladder': ladder,
             'all_judges': Judge.objects.all(),
         })
         return ctx
@@ -194,3 +194,14 @@ class LadderTaskStart(LoginRequiredMixin, SingleObjectMixin, generic.RedirectVie
         task.status = LadderTask.Status.RUNNING
         task.save()
         return redirect('ladders:dashboard')
+
+
+class LadderRankListView(generic.ListView):
+    template_name = 'ladders/rank_list.html'
+    paginate_by = 10
+    context_object_name = 'ladder_list'
+    queryset = Ladder.objects.order_by('statistics__rank').select_related('profile', 'statistics')
+
+    def get_context_data(self, **kwargs):
+        kwargs['user_count'] = Ladder.objects.count()
+        return super(LadderRankListView, self).get_context_data(**kwargs)

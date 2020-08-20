@@ -3,6 +3,8 @@ import math
 from data.models import Task, UserProfile, Submission
 from django.contrib.postgres.fields import JSONField
 
+from ladders.models import Ladder
+
 
 class TaskStatistics(models.Model):
     task = models.OneToOneField(Task, on_delete=models.CASCADE, related_name='statistics')
@@ -33,6 +35,12 @@ class UserStatistics(models.Model):
     rank = models.IntegerField(null=True)
     tag_stats = JSONField(null=True)
     activity = JSONField(null=True)
+
+
+class LadderStatistics(models.Model):
+    ladder = models.OneToOneField(Ladder, on_delete=models.CASCADE, related_name='statistics')
+    total_points = models.IntegerField(default=0)
+    rank = models.IntegerField(null=True)
 
 
 class BestSubmission(models.Model):

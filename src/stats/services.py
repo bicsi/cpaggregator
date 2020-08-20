@@ -1,9 +1,12 @@
 import json
 
+from django.core.exceptions import ObjectDoesNotExist
+
 from core.logging import log
 from data.models import Submission, UserProfile, Task, Judge
+from ladders.models import Ladder, LadderTask
 from stats import utils, multipliers
-from .models import TaskStatistics, UserStatistics, BestSubmission
+from .models import TaskStatistics, UserStatistics, BestSubmission, LadderStatistics
 
 from celery import shared_task
 
@@ -66,14 +69,54 @@ def compute_task_statistics():
         statistics.save()
 
 
+def compute_ranks(elems, key, reverse=False):
+    elems = list(elems)
+    old_best = None
+    current_rank = 1
+    next_rank = 1
+    ranks = [None] * len(elems)
+    for idx in sorted(range(len(elems)), key=lambda x: key(elems[x]), reverse=reverse):
+        elem_key = key(elems[idx])
+        if old_best is None or elem_key != old_best:
+            current_rank = next_rank
+        old_best = elem_key
+        ranks[idx] = current_rank
+        next_rank += 1
+    return ranks
+
+
 @shared_task
-def compute_best_submissions():
-    print('[TASK] Computing best submissions...')
-    for submission in Submission.objects.best().all():
-        BestSubmission.objects.update_or_create(
-            task=submission.task,
-            profile=submission.author.user,
-            defaults={'submission': submission})
+def compute_ladder_statistics():
+    log.info('Computing ladder statistics...')
+
+    scores = {}
+    for task in (LadderTask.objects
+            .filter(status=LadderTask.Status.COMPLETED)
+            .select_related('task', 'task__statistics', 'ladder')):
+        ladder = task.ladder
+        score = scores.get(ladder, 0)
+        try:
+            score += task.task.statistics.difficulty_score
+        except ObjectDoesNotExist:
+            pass
+        scores[ladder] = score
+
+    stats = []
+    for ladder in Ladder.objects.all():
+        stat, _ = LadderStatistics.objects.update_or_create(
+            ladder=ladder,
+            defaults=dict(
+                total_points=scores.get(ladder, 0)
+            ))
+        stats.append(stat)
+
+    ranks = compute_ranks(stats, key=lambda x: x.total_points, reverse=True)
+    for stat, rank in zip(stats, ranks):
+        print(stat.ladder, stat.total_points, rank)
+        stat.rank = rank
+
+    for stat in stats:
+        stat.save(force_update=True)
 
 
 @shared_task
@@ -92,7 +135,10 @@ def compute_user_statistics():
 
         total_points = 0
         for submission in submissions.filter(verdict='AC').all():
-            total_points += submission.task.statistics.difficulty_score
+            try:
+                total_points += submission.task.statistics.difficulty_score
+            except ObjectDoesNotExist:
+                pass
 
         statistic, _ = UserStatistics.objects.update_or_create(
             user=user,
@@ -109,16 +155,11 @@ def compute_user_statistics():
     user_statistics = [make_user_stat(user) for user in UserProfile.objects.all()]
 
     # Compute ranks.
-    old_best = -1
-    current_rank = 1
-    next_rank = 1
-    for statistic in sorted(user_statistics, key=lambda stat: stat.total_points, reverse=True):
-        if statistic.total_points < old_best:
-            current_rank = next_rank
-        old_best = statistic.total_points
-        statistic.rank = current_rank
-        next_rank += 1
-
+    ranks = compute_ranks(user_statistics, key=lambda stat: stat.total_points, reverse=True)
     # Save.
-    for statistic in user_statistics:
-        statistic.save(force_update=True)
+    for stat, rank in zip(user_statistics, ranks):
+        stat.rank = rank
+
+    for stat in user_statistics:
+        stat.save(force_update=True)
+
