@@ -21,8 +21,9 @@ VERDICT_CHOICES = [
 ]
 
 VISIBILITY_CHOICES = [
-    ("PUBLIC", "Public"),
-    ("PRIVATE", "Private"),
+    ("PUBLIC", "Public", "Everybody can see and join this group."),
+    ("UNLISTED", "Unlisted", "Everybody with the link can see and join this group."),
+    ("PRIVATE", "Private", "People have to be manually added by the owner to see this group."),
 ]
 
 
@@ -88,7 +89,7 @@ class UserGroup(models.Model):
     members = models.ManyToManyField(UserProfile, related_name='assigned_groups', through='GroupMember')
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(UserProfile, related_name='owned_groups', null=True, on_delete=models.SET_NULL)
-    visibility = models.CharField(max_length=256, choices=VISIBILITY_CHOICES, default='PRIVATE')
+    visibility = models.CharField(max_length=256, choices=[c[:2] for c in VISIBILITY_CHOICES], default='PRIVATE')
     description = MarkdownxField(blank=True, null=True)
 
     # Model managers.
@@ -112,6 +113,12 @@ class UserGroup(models.Model):
             return True
         if GroupMember.objects.filter(profile=user.profile, group=self, role='owner').exists():
             return True
+
+    def get_visibility_description(self):
+        for name, _, desc in VISIBILITY_CHOICES:
+            if name == self.visibility:
+                return desc
+        raise ValueError(self.visibility)
 
     def __str__(self):
         return self.name

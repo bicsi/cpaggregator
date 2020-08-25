@@ -17,6 +17,7 @@ from info import forms, queries
 from info.models import Assignment, TaskSheetTask
 from info.utils import build_group_card_context, compute_assignment_results
 from loguru import logger as log
+from django.http import Http404
 
 
 class AssignmentCreateView(LoginRequiredMixin, AJAXMixin, generic.FormView):
@@ -206,6 +207,9 @@ class GroupDetailView(generic.DetailView):
             kwargs['is_owner'] = is_owner
             kwargs['is_user_member'] = self.request.user.profile.assigned_groups.filter(id=group.id).exists()
             kwargs['judges'] = queries.get_all_judges(group)
+
+        if group.visibility == "PRIVATE" and not kwargs.get('is_user_member') and not is_owner:
+            raise Http404()
 
         self.populate_assignments_data(kwargs, is_owner)
 

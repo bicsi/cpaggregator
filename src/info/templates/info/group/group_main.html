@@ -9,12 +9,8 @@
         </a>
         <span class="text-light mx-3">|</span>
         <a data-toggle="tooltip" data-placement="right"
-           title="
-           {% if group.visibility == 'PRIVATE' %}
-                Everybody can see the group. Members have to be manually added by the owner.
-           {% elif group.visibility == 'PUBLIC' %}
-                Everybody can see and join this group.
-           {% endif %}" href="#!"
+           href="#"
+           title="{{group.get_visibility_description}}"
            class="badge badge-info">
             <i class="fas fa-xs fa-globe-americas"></i> {{ group.get_visibility_display }}
         </a>
