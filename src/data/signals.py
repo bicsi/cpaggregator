@@ -54,7 +54,8 @@ def create_task(sender, instance, created, **kwargs):
 def create_handle(sender, instance, created, **kwargs):
     if created and settings.USE_CELERY:
         log.info('Created new handle: updating info...')
-        services.scraper_services.scrape_handle_info \
-            .si('/'.join([instance.judge.judge_id, instance.handle])).apply_async()
+        handle = '/'.join([instance.judge.judge_id, instance.handle])
+        services.scraper_services.scrape_handle_info.si(handle).apply_async()
+        services.scraper_services.scrape_submissions_for_users.si(handle).apply_async()
 
 
