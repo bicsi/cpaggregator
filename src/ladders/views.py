@@ -38,7 +38,8 @@ def generate_new_task(ladder, commit=True):
         task for task in Task.objects
             .filter(judge__in=judges, statistics__isnull=False)
             .select_related('statistics')
-        if task.pk not in forbidden_tasks]
+        if task.pk not in forbidden_tasks
+           and task.statistics.users_solved_count >= 2]
 
     if not available_tasks:
         log.warning("Could not generate: no tasks to choose from.")
