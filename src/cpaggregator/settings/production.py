@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'silk',
     'bootstrap_datepicker_plus',
     'markdownify',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -67,9 +68,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'silk.middleware.SilkyMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'cpaggregator.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {
