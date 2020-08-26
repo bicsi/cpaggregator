@@ -50,6 +50,7 @@ django-markdownify = "*"
 scikit-learn = "*"
 html2text = "*"
 django-mathjax = "*"
+django-cors-headers = "*"
 
 [requires]
 python_version = "3.7"

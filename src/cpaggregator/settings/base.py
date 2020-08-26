@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'markdownify',
     'django_mathjax',
+    'corsheaders',
 ]
 
 DATABASES = {
@@ -80,7 +81,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'silk.middleware.SilkyMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'cpaggregator.urls'
 
@@ -189,3 +193,9 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
