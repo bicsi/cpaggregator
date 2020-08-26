@@ -5,7 +5,7 @@ from random import randint
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
@@ -52,10 +52,10 @@ def generate_new_task(ladder, commit=True):
             .distinct()
         if score is not None]
 
-    bounds = 60, 100
-    if len(solved_tasks_scores) >= 10:
+    bounds = 25, 60
+    if len(solved_tasks_scores) >= 25:
         solved_tasks_scores.sort()
-        solved_tasks_scores = solved_tasks_scores[-50:]
+        solved_tasks_scores = solved_tasks_scores[-50:-5]
         mid_score = random.choice(solved_tasks_scores)
         bounds = mid_score * 0.9, mid_score * 1.1
 
