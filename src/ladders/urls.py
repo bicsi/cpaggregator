@@ -10,7 +10,8 @@ urlpatterns = [
         path('start/', views.LadderTaskStart.as_view(), name='ladder-task-start'),
     ])),
     path('api/', include([
-        path('<user>/', api_views.ShowLadder.as_view(), name='api-show-ladder'),
-        path('<user>/<int:level>/', api_views.ShowLadderTask.as_view(), name='api-show-task'),
+        path('get/<user>/', api_views.ShowLadder.as_view(), name='api-show-ladder'),
+        path('get/<user>/<int:level>/', api_views.ShowLadderTask.as_view(), name='api-show-task'),
+        path('rank/', api_views.ListLadderRank.as_view(), name='api-list-rank'),
     ]))
 ]

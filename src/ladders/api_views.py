@@ -1,11 +1,13 @@
 from django.http import Http404
 from rest_framework import authentication, permissions
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from data.models import Submission, UserProfile
 from .models import LadderTask, Ladder
 from django.shortcuts import get_object_or_404
+from . import serializers
 
 
 class ShowLadderTask(APIView):
@@ -91,4 +93,9 @@ class ShowLadder(APIView):
             }
         }
         return Response(ladder_serialized)
+
+
+class ListLadderRank(ListAPIView):
+    queryset = Ladder.objects.order_by('statistics__rank').select_related('profile', 'statistics')
+    serializer_class = serializers.LadderSerializer
 
