@@ -46,22 +46,23 @@ def get_task_info(csrf_token):
 
 
 def get_task_name_dict(csrf_token):
-    task_name_to_id = []
+    task_name_to_id = {}
     for contest_id, task in get_task_info(csrf_token):
-        task_name_to_id.append((task['name'], contest_id, task['id']))
+        task_name_to_id[task['evalTaskId']] = task['name']
     return task_name_to_id
 
 
-def get_eval_jobs(csrf_token, contest_id, contest_task_id, from_date, num_jobs=1000):
+def get_eval_jobs(csrf_token, user_id, task_id, from_date, num_jobs=1000):
     from_timestamp = from_date.timestamp()
 
-    params = (
+    params = [
         ('numJobs', num_jobs),
         ('requestCount', 'false'),
-        ('contestId', contest_id),
-        ('contestTaskId', contest_task_id),
+        ('evalTaskId', task_id),
+        ('userId', user_id),
         ('endTime', from_timestamp),
-    )
+    ]
+    params = [p for p in params if p[1] is not None]
 
     response = requests.get('https://csacademy.com/eval/get_eval_jobs/',
                             headers=__get_headers(csrf_token),
@@ -79,9 +80,9 @@ def get_csrf_token():
     return csrf_token
 
 
-def parse_submissions(csrf_token, task_name, contest_id, task_id, from_date):
-    publicuser, evaljob = get_eval_jobs(
-        csrf_token, contest_id, task_id, from_date)
+def parse_submissions(csrf_token, task_name_dict, user_id, task_id, from_date):
+    publicuser, evaljobs = get_eval_jobs(
+        csrf_token, user_id, task_id, from_date)
 
     # Make user id to username map. We use usernames. :)
     user_id_to_username = {}
@@ -93,19 +94,21 @@ def parse_submissions(csrf_token, task_name, contest_id, task_id, from_date):
         user_id_to_username[user_id] = username
 
     # Parse submissions.
-    for eval_job in sorted(evaljob, key=lambda ej: ej['id'], reverse=True):
+    for eval_job in sorted(evaljobs, key=lambda ej: ej['id'], reverse=True):
         submission_id = str(eval_job['id'])
         if not eval_job['isDone']:
             log.info(
                 f'Skipping submission {submission_id}: Not finished evaluating.')
+            continue
 
+        task_name = task_name_dict[eval_job['evalTaskId']]
         # Parse easy data.
         submission = dict(
             judge_id=CSACADEMY_JUDGE_ID,
             submission_id=submission_id,
             submitted_on=datetime.datetime.utcfromtimestamp(
                 eval_job['timeSubmitted']),
-            task_id=task_name.lower(),
+            task_id=task_name,
             author_id=user_id_to_username[eval_job['userId']],
             source_size=len(eval_job['sourceText']),
             verdict='CE',
@@ -149,39 +152,44 @@ def parse_submissions(csrf_token, task_name, contest_id, task_id, from_date):
         yield submission
 
 
-def scrape_submissions_for_task(csrf_token, task_name, task_name_dict=None):
-    task_name_dict = task_name_dict or get_task_name_dict(csrf_token)
+def scrape_paginated_submissions(csrf_token, task_name_dict, user_id, task_id, from_date):
+    found = True
+    while found:
+        found = False
+
+        submissions = parse_submissions(
+            csrf_token, task_name_dict,
+            user_id,
+            task_id,
+            from_date,
+        )
+        for submission in submissions:
+            found = True
+            from_date = submission['submitted_on']
+            yield submission
+
+        from_date = from_date - datetime.timedelta(microseconds=1)
+
+
+def scrape_submissions(csrf_token, task_name_dict, task_name=None, username=None):
     from_date = datetime.datetime.now() + datetime.timedelta(days=2)
 
-    contests_and_tasks = [
-        (contest_id, task_id)
-        for name, contest_id, task_id in task_name_dict
-        if name.lower() == task_name.lower()]
+    task_id = None
+    if task_name:
+        if task_name not in task_name_dict.values():
+            log.error(f"Task '{task_name}' not found.")
+            return
+        [task_id] = [t_id for t_id, t_name in task_name_dict.items() if t_name == task_name]
 
-    if not contests_and_tasks:
-        log.error(f"Task '{task_name}' not found.")
+    user_id = None
+    if username:
+        response = requests.get(f'https://csacademy.com/user/{username}/',
+                                headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
+        json_data = json.loads(response.text)
+        [user_data] = json_data['state']['publicuser']
+        user_id = user_data['id']
 
-    def scrape(task_name, contest_id, task_id, from_date):
-        found = True
-        while found:
-            found = False
-
-            submissions = parse_submissions(
-                csrf_token, task_name,
-                contest_id, task_id,
-                from_date=from_date
-            )
-            for submission in submissions:
-                found = True
-                from_date = submission['submitted_on']
-                yield submission
-
-            from_date = from_date - datetime.timedelta(microseconds=1)
-
-    return heapq.merge(
-        *[scrape(task_name, contest_id, task_id, from_date)
-          for contest_id, task_id in contests_and_tasks],
-        key=lambda x: x['submitted_on'], reverse=True)
+    return scrape_paginated_submissions(csrf_token, task_name_dict, user_id, task_id, from_date)
 
 
 def scrape_all_task_info(csrf_token):
@@ -191,5 +199,6 @@ def scrape_all_task_info(csrf_token):
             'judge_id': CSACADEMY_JUDGE_ID,
             'task_id': task_name.lower(),
             'title': task_data['longName'],
+            'contest_id': task_data['contestId'],
             'tags': [],
         }

@@ -32,24 +32,24 @@ CELERY_BEAT_SCHEDULE = {
     'scrape-submissions-tasks-last-day': {
         'schedule': 5 * 60,
         'task': 'scraper.services.scrape_submissions_for_tasks',
-        'args': ('ac/*', 'ojuz/*', 'csa/*'),
+        'args': ('ac/*', 'ojuz/*'),
         'kwargs': {'to_days': 1},
     },
     'scrape-submissions-tasks-all-time': {
         'schedule': 10 * 60 * 60,
         'task': 'scraper.services.scrape_submissions_for_tasks',
-        'args': ('ac/*', 'ojuz/*', 'csa/*'),
+        'args': ('ac/*', 'ojuz/*'),
     },
     'scrape-submissions-users-last-day': {
         'schedule': 5 * 60,
         'task': 'scraper.services.scrape_submissions_for_users',
-        'args': ('cf/*', 'ia/*', 'timus/*'),
+        'args': ('cf/*', 'ia/*', 'timus/*', 'csa/*'),
         'kwargs': {'to_days': 1},
     },
     'scrape-submissions-users-all-time': {
         'schedule': 10 * 60 * 60,
         'task': 'scraper.services.scrape_submissions_for_users',
-        'args': ('cf/*', 'ia/*', 'timus/*'),
+        'args': ('cf/*', 'ia/*', 'timus/*', 'csa/*'),
     },
     #'scrape-tasks-info': {
     #    'schedule': 60 * 60,

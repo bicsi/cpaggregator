@@ -14,8 +14,14 @@ class CSAcademyScraper(Scraper):
     def scrape_submissions_for_task(self, task_id):
         # CSAcademy has their own task ids that are numerical and are kept inside
         # a global map. We keep `task_id` as a parameter for consistency.
-        return utils.scrape_submissions_for_task(
-            self.csrf_token, task_id, self.task_name_dict)
+        return utils.scrape_submissions(self.csrf_token, self.task_name_dict,
+                                        task_name=task_id)
+
+    def scrape_submissions_for_user(self, user_id):
+        # CSAcademy has their own user ids that are numerical and are kept inside
+        # a global map. We keep `user_id` as a parameter for consistency.
+        return utils.scrape_submissions(self.csrf_token, self.task_name_dict,
+                                        username=user_id)
 
     def scrape_task_info(self, task_id):
         # Compute if not added to cache.
