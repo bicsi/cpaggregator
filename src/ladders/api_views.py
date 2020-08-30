@@ -32,20 +32,20 @@ class ShowLadderTask(APIView):
         task_serialized = {
             "level": level,
             "status": task.status,
-            "task": {
-                "id": task.task.get_path(),
-                "title": task.task.name_or_id(),
-            },
-            "startedOn": task.started_on,
+            "task": serializers.TaskSerializer(task.task).data,
+            "started_on": task.started_on,
+            "judge_id": task.task.judge.judge_id,
+            "duration": task.duration,
         }
         if best_submissions:
             [best_submission] = best_submissions
-            task_serialized['task'].update({
-                "bestSubmission": {
-                    "id": best_submission.submission_id,
-                    "submittedOn": best_submission.submitted_on,
-                }
-            })
+            task_serialized['task']['best_submission'] = {
+                "submission_id": best_submission.submission_id,
+                "submitted_on": best_submission.submitted_on,
+                "verdict": best_submission.verdict,
+            }
+        else:
+            task_serialized['task']['best_submission'] = None
         if task.status == LadderTask.Status.NEW:
             del task_serialized['task']
 
@@ -70,8 +70,9 @@ class ShowLadder(APIView):
                 "status": task.status,
                 "task": {
                     "id": task.task.get_path(),
-                    "title": task.task.name_or_id(),
-                }
+                    "title": task.task.name,
+                },
+                "judge_id": task.task.judge.judge_id,
             }
             if task.status == LadderTask.Status.NEW:
                 del task_serialized['task']
@@ -83,13 +84,13 @@ class ShowLadder(APIView):
 
         ladder_serialized = {
             "tasks": tasks_serialized,
-            "totalPoints": ladder.statistics.total_points,
+            "total_points": ladder.statistics.total_points,
             "rank": ladder.statistics.rank,
-            "currentLevel": current_level,
+            "current_level": current_level,
             "profile": {
-                "firstName": ladder.profile.first_name,
-                "lastName": ladder.profile.last_name,
-                "userName": ladder.profile.username,
+                "first_name": ladder.profile.first_name,
+                "last_name": ladder.profile.last_name,
+                "username": ladder.profile.username,
             }
         }
         return Response(ladder_serialized)
