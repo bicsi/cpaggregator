@@ -52,10 +52,13 @@ class ShowLadderTask(APIView):
         return Response(task_serialized)
 
 
-class ListBestSubmissions(APIView):
+class ListBestSubmissions(ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get_queryset(self):
         tasks = (LadderTask.objects.filter(ladder__profile__user__username=self.kwargs['user'])
                  .values_list('task', flat=True))
+        print(tasks)
         return (Submission.objects.best()
                 .filter(author__user__user__username=self.kwargs['user'], task__in=tasks)
                 .select_related('task', 'author'))
