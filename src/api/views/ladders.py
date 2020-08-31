@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from data.models import Submission, UserProfile
-from .models import LadderTask, Ladder
+from ladders.models import LadderTask, Ladder
 from django.shortcuts import get_object_or_404
-from . import serializers
+from api import serializers
 
 
 class ShowLadderTask(APIView):
@@ -68,11 +68,10 @@ class ShowLadder(APIView):
             task_serialized = {
                 "level": idx + 1,
                 "status": task.status,
-                "task": {
-                    "id": task.task.get_path(),
-                    "title": task.task.name,
-                },
+                "task": serializers.TaskSerializer(task.task).data,
                 "judge_id": task.task.judge.judge_id,
+                "duration": task.duration,
+                "started_on": task.started_on,
             }
             if task.status == LadderTask.Status.NEW:
                 del task_serialized['task']
