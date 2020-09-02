@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from data.models import Task, Submission, UserProfile
+from data.models import Task, Submission, UserProfile, UserHandle
 from stats.models import TaskStatistics, LadderStatistics, Ladder
 
 
@@ -25,9 +25,18 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    handles = serializers.SerializerMethodField('get_handles')
+
+    def get_handles(self, profile):
+        handles = UserHandle.objects.filter(user=profile).select_related('judge')
+        return [{
+            "judge_id": handle.judge.judge_id,
+            "handle": handle.handle,
+        } for handle in handles]
+
     class Meta:
         model = UserProfile
-        fields = ['first_name', 'last_name', 'username', 'avatar_url']
+        fields = ['first_name', 'last_name', 'username', 'avatar_url', 'handles']
 
 
 class LadderStatisticsSerializer(serializers.ModelSerializer):

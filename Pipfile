@@ -51,6 +51,7 @@ scikit-learn = "*"
 html2text = "*"
 django-mathjax = "*"
 django-cors-headers = "*"
+djangorestframework-simplejwt = "*"
 
 [requires]
 python_version = "3.7"

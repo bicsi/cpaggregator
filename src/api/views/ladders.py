@@ -1,5 +1,6 @@
 from django.http import Http404
 from rest_framework import authentication, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -113,3 +114,26 @@ class ListLadderRank(ListAPIView):
     queryset = Ladder.objects.order_by('statistics__rank').select_related('profile', 'statistics')
     serializer_class = serializers.LadderSerializer
 
+
+class StartTask(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, **kwargs):
+        if request.user.username != kwargs['user'] and not request.user.is_superuser:
+            raise PermissionDenied({"message": "You don't have permission.",
+                                    "user": kwargs['user']})
+        ladder = Ladder.objects.get(profile__user__username=kwargs['user'])
+        task = LadderTask.objects.get(
+            ladder=ladder,
+            status=LadderTask.Status.NEW)
+        task.start()
+        task_level = LadderTask.objects.filter(ladder=ladder).count()
+        task_serialized = {
+            "level": task_level,
+            "status": task.status,
+            "task": serializers.TaskSerializer(task.task).data,
+            "judge_id": task.task.judge.judge_id,
+            "duration": task.duration,
+            "started_on": task.started_on,
+        }
+        return Response(task_serialized)

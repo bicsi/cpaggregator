@@ -42,6 +42,13 @@ class LadderTask(models.Model):
             LadderTask.Status.COMPLETED,
         ]
 
+    def start(self):
+        if self.status != LadderTask.Status.NEW:
+            raise ValueError("Status is not new.")
+        self.started_on = timezone.now()
+        self.status = LadderTask.Status.RUNNING
+        self.save()
+
     class Meta:
         ordering = [F('started_on').asc(nulls_last=True)]
 

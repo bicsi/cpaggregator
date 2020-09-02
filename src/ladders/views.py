@@ -191,9 +191,7 @@ class LadderTaskStart(LoginRequiredMixin, SingleObjectMixin, generic.RedirectVie
         task = self.get_object()
         if task.ladder.profile != request.user.profile or task.status != LadderTask.Status.NEW:
             raise Http404()
-        task.started_on = timezone.now()
-        task.status = LadderTask.Status.RUNNING
-        task.save()
+        task.start()
         return redirect('ladders:dashboard')
 
 
