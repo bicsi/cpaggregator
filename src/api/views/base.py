@@ -17,7 +17,7 @@ class RetrieveUser(RetrieveAPIView):
     serializer_class = ProfileSerializer
     lookup_field = "user__username"
     lookup_url_kwarg = "user"
-    queryset = UserProfile.objects.select_related('user')
+    queryset = UserProfile.objects.select_related('user', 'statistics')
 
 
 class ListJudges(APIView):
