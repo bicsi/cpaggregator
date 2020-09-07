@@ -2,8 +2,8 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from data.models import UserProfile, UserHandle, Judge
-from api.serializers import ProfileSerializer
+from data.models import UserProfile, UserHandle, Judge, Submission
+from api.serializers import ProfileSerializer, SubmissionSerializer
 
 
 class RetrieveCurrentUser(RetrieveAPIView):
@@ -18,6 +18,15 @@ class RetrieveUser(RetrieveAPIView):
     lookup_field = "user__username"
     lookup_url_kwarg = "user"
     queryset = UserProfile.objects.select_related('user', 'statistics')
+
+
+class ListUserBestSubmissions(ListAPIView):
+    def get_queryset(self):
+        return (Submission.objects.best()
+                .filter(author__user__user__username=self.kwargs['user'])
+                .select_related('task', 'author'))
+
+    serializer_class = SubmissionSerializer
 
 
 class ListJudges(APIView):
