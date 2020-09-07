@@ -21,12 +21,20 @@ class RetrieveUser(RetrieveAPIView):
 
 
 class ListUserBestSubmissions(ListAPIView):
+    filter_ac = False
+    exclude_ac = False
+    serializer_class = SubmissionSerializer
+
     def get_queryset(self):
-        return (Submission.objects.best()
+        queryset = (
+            Submission.objects.best()
                 .filter(author__user__user__username=self.kwargs['user'])
                 .select_related('task', 'author', 'task__judge', 'task__statistics'))
-
-    serializer_class = SubmissionSerializer
+        if self.filter_ac:
+            queryset = queryset.filter(verdict='AC')
+        if self.exclude_ac:
+            queryset = queryset.exclude(verdict='AC')
+        return queryset
 
 
 class ListJudges(APIView):
