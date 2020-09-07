@@ -12,8 +12,8 @@ urlpatterns = [
     path('judges/', views.base.ListJudges.as_view(), name='api-judges'),
     path('user/<user>/', include([
         path('', views.base.RetrieveUser.as_view(), name='api-user'),
-        path('subs/best/', include([
-            path('', views.base.ListUserBestSubmissions.as_view(), name='api-list-subs-ladder'),
+        path('subs/', include([
+            path('best/', views.base.ListUserBestSubmissions.as_view(), name='api-list-subs-ladder'),
             path('solved/', views.base.ListUserBestSubmissions.as_view(filter_ac=True), name='api-list-subs-ladder-ac'),
             path('unsolved/', views.base.ListUserBestSubmissions.as_view(exclude_ac=True),
                  name='api-list-subs-ladder-nac'),
