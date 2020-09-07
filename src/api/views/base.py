@@ -24,7 +24,7 @@ class ListUserBestSubmissions(ListAPIView):
     def get_queryset(self):
         return (Submission.objects.best()
                 .filter(author__user__user__username=self.kwargs['user'])
-                .select_related('task', 'author'))
+                .select_related('task', 'author', 'task__judge', 'task__statistics'))
 
     serializer_class = SubmissionSerializer
 
