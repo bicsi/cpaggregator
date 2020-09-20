@@ -9,6 +9,7 @@ from data.models import Submission, UserProfile
 from ladders.models import LadderTask, Ladder
 from django.shortcuts import get_object_or_404
 from api import serializers
+from ladders.services import update_ladder
 
 
 class ShowLadderTask(APIView):
@@ -74,6 +75,7 @@ class ShowLadder(APIView):
         ladder = get_object_or_404(queryset, profile__user__username=self.kwargs['user'])
         if ladder.profile != self.request.user.profile and not self.request.user.is_superuser:
             self.permission_denied(request, message="Cannot view other people's ladder.")
+        update_ladder(ladder)
 
         tasks = list(LadderTask.objects.filter(ladder=ladder).select_related('task'))
 
