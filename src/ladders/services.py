@@ -49,8 +49,7 @@ def generate_new_task(ladder, commit=True):
         bounds = mid_score * 0.9, mid_score * 1.1
 
     if profile.user.username == "adrian.budau":
-        bounds[0] *= 1.5
-        bounds[1] *= 1.5
+        bounds = (bounds[0] * 1.5, bounds[1] * 1.5)
 
     sought_score = random.randint(int(bounds[0]), int(bounds[1]))
     log.info(f"Sought score: {sought_score} (bounds: {bounds})")
