@@ -88,6 +88,7 @@ class ShowLadder(APIView):
                 "judge_id": task.task.judge.judge_id,
                 "duration": task.duration,
                 "started_on": task.started_on,
+                "score": task.task.statistics.difficulty_score,
             }
             if task.status == LadderTask.Status.NEW:
                 del task_serialized['task']
