@@ -6,20 +6,6 @@ from data.models import UserProfile, UserHandle, Judge, Submission
 from api.serializers import ProfileSerializer, SubmissionSerializer
 
 
-class RetrieveCurrentUser(RetrieveAPIView):
-    serializer_class = ProfileSerializer
-
-    def get_object(self):
-        return UserProfile.objects.select_related('user', 'statistics').get(user=self.request.user)
-
-
-class RetrieveUser(RetrieveAPIView):
-    serializer_class = ProfileSerializer
-    lookup_field = "user__username"
-    lookup_url_kwarg = "user"
-    queryset = UserProfile.objects.select_related('user', 'statistics')
-
-
 class ListUserBestSubmissions(ListAPIView):
     filter_ac = False
     exclude_ac = False

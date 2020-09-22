@@ -8,10 +8,11 @@ urlpatterns = [
     path('ladders/', include([
         path('rank/', views.ladders.ListLadderRank.as_view(), name='api-list-rank'),
     ])),
-    path('me/', views.base.RetrieveCurrentUser.as_view(), name='api-me'),
+    path('me/', views.profile.RetrieveCurrentUser.as_view(), name='api-me'),
     path('judges/', views.base.ListJudges.as_view(), name='api-judges'),
+    path('users/rank/', views.profile.ListUserRank.as_view(), name='api-user-rank'),
     path('user/<user>/', include([
-        path('', views.base.RetrieveUser.as_view(), name='api-user'),
+        path('', views.profile.RetrieveUser.as_view(), name='api-user'),
         path('subs/', include([
             path('best/', views.base.ListUserBestSubmissions.as_view(), name='api-list-subs-ladder'),
             path('solved/', views.base.ListUserBestSubmissions.as_view(filter_ac=True), name='api-list-subs-ladder-ac'),
