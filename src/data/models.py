@@ -107,12 +107,15 @@ class UserGroup(models.Model):
         return self.description
 
     def is_owned_by(self, user):
+        if not user.is_authenticated:
+            return False
         if user.is_superuser:
             return True
         if user.profile == self.author:
             return True
         if GroupMember.objects.filter(profile=user.profile, group=self, role='owner').exists():
             return True
+        return False
 
     def get_visibility_description(self):
         for name, _, desc in VISIBILITY_CHOICES:

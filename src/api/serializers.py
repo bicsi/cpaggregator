@@ -2,7 +2,8 @@ import json
 
 from rest_framework import serializers
 
-from data.models import Task, Submission, UserProfile, UserHandle
+from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember
+from info.models import Assignment, TaskSheet, TaskSheetTask
 from stats.models import TaskStatistics, LadderStatistics, Ladder, UserStatistics
 
 
@@ -59,6 +60,12 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'username', 'avatar_url', 'handles', 'created_at', 'statistics']
 
 
+class ProfileSerializerTiny(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'username', 'avatar_url', 'created_at']
+
+
 class LadderStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LadderStatistics
@@ -66,7 +73,7 @@ class LadderStatisticsSerializer(serializers.ModelSerializer):
 
 
 class LadderSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer()
+    profile = ProfileSerializerTiny()
     statistics = LadderStatisticsSerializer()
 
     class Meta:
@@ -84,3 +91,57 @@ class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
         fields = ['submission_id', 'submitted_on', 'author', 'verdict', 'task']
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    author = ProfileSerializerTiny()
+
+    class Meta:
+        model = UserGroup
+        fields = ['group_id', 'name', 'description', 'author', 'visibility']
+
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializerTiny()
+
+    class Meta:
+        model = GroupMember
+        fields = ['profile', 'role']
+
+
+class AssignmentSerializer(serializers.ModelSerializer):
+    tasks_dict = None
+
+    def __init__(self, list, **kwargs):
+        self.list = list
+        super(AssignmentSerializer, self).__init__(list, **kwargs)
+
+    def get_tasks(self, sheet):
+        if self.tasks_dict is None:
+            tasks = list(TaskSheetTask.objects
+                         .filter(sheet__in=[a.sheet for a in self.list])
+                         .select_related('sheet', 'task', 'task__statistics', 'task__judge'))
+            tasks_dict = {}
+            for task in tasks:
+                task_list = tasks_dict.get(task.sheet, [])
+                task_list.append({
+                    "task": TaskSerializer(task.task).data,
+                    "score": task.score,
+                })
+                tasks_dict[task.sheet] = task_list
+            self.tasks_dict = tasks_dict
+        return self.tasks_dict.get(sheet, [])
+
+    def to_representation(self, assignment):
+        data = super(AssignmentSerializer, self).to_representation(assignment)
+        sheet: TaskSheet = assignment.sheet
+        data['sheet'] = {
+            'tasks': self.get_tasks(sheet),
+            'title': sheet.title,
+            'description': sheet.description,
+        }
+        return data
+
+    class Meta:
+        model = Assignment
+        fields = ["assigned_on", "end_on"]
