@@ -23,7 +23,7 @@ class RetrieveGroup(RetrieveAPIView):
     serializer_class = GroupSerializer
 
     def get_object(self):
-        return get_group_or_404(self.request.kwargs['group'], self.request.user)
+        return get_group_or_404(self.kwargs['group'], self.request.user)
 
 
 class ListGroupMembers(ListAPIView):
