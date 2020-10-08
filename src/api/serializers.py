@@ -136,6 +136,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
         data = super(AssignmentSerializer, self).to_representation(assignment)
         sheet: TaskSheet = assignment.sheet
         data['sheet'] = {
+            'sheet_id': sheet.sheet_id,
             'tasks': self.get_tasks(sheet),
             'title': sheet.title,
             'description': sheet.description,
