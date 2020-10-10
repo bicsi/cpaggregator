@@ -54,4 +54,10 @@ class ListAssignments(ListAPIView):
         return Assignment.objects.filter(group=group).select_related('sheet')
 
 
+class ListGroups(ListAPIView):
+    serializer_class = GroupSerializer
+
+    def get_queryset(self):
+        return UserGroup.public.all()
+
 
