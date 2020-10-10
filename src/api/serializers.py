@@ -60,12 +60,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'username', 'avatar_url', 'handles', 'created_at', 'statistics']
 
 
-class ProfileSerializerTiny(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = ['first_name', 'last_name', 'username', 'avatar_url', 'created_at']
-
-
 class LadderStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LadderStatistics
@@ -73,7 +67,7 @@ class LadderStatisticsSerializer(serializers.ModelSerializer):
 
 
 class LadderSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializerTiny()
+    profile = ProfileSerializer()
     statistics = LadderStatisticsSerializer()
 
     class Meta:
@@ -94,7 +88,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    author = ProfileSerializerTiny()
+    author = ProfileSerializer()
 
     class Meta:
         model = UserGroup
@@ -102,7 +96,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class GroupMemberSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializerTiny()
+    profile = ProfileSerializer()
 
     class Meta:
         model = GroupMember
