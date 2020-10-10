@@ -38,7 +38,7 @@ class ListSubmissions(ListAPIView):
 
             queryset = queryset.filter(author__user__in=members, task__in=tasks)
 
-        return queryset.select_related('task', 'author')
+        return queryset.select_related('task', 'author', 'task__judge')
 
     serializer_class = serializers.SubmissionSerializer
 
