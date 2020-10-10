@@ -112,7 +112,6 @@ def compute_ladder_statistics():
 
     ranks = compute_ranks(stats, key=lambda x: x.total_points, reverse=True)
     for stat, rank in zip(stats, ranks):
-        print(stat.ladder, stat.total_points, rank)
         stat.rank = rank
 
     for stat in stats:
