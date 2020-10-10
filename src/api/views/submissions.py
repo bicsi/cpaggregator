@@ -12,8 +12,6 @@ class ListSubmissions(ListAPIView):
 
     def get_queryset(self):
         queryset = Submission.objects
-        if self.only_best:
-            queryset = queryset.best()
 
         group_id = self.request.query_params.get('group')
         author_username = self.request.query_params.get('author')
@@ -38,6 +36,8 @@ class ListSubmissions(ListAPIView):
 
             queryset = queryset.filter(author__user__in=members, task__in=tasks)
 
+        if self.only_best:
+            queryset = queryset.best()
         return queryset.select_related('task', 'author', 'task__judge')
 
     serializer_class = serializers.SubmissionSerializer
