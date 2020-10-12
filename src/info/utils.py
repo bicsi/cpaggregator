@@ -38,7 +38,7 @@ def build_group_card_context(request, groups):
                         .filter(members=profile, id__in=groups)
                         .values_list('id', flat=True))
     groups = groups.prefetch_related(Prefetch(
-        'assignment_set',
+        'assignments',
         Assignment.objects.visible(),
         to_attr='visible_assignments'))
 
@@ -49,29 +49,30 @@ def build_group_card_context(request, groups):
         .annotate(task_count=Count('sheet__tasks'))
 
     tasks = TaskSheetTask.objects.filter(sheet__in=assignments.values('sheet'))
-    ac_submissions = Submission.objects.best().filter(author__user=profile, verdict='AC')
+    ac_submissions = Submission.objects.best().filter(
+        author__user=profile, verdict='AC')
     solved_tasks = tasks.filter(task__in=ac_submissions.values('task'))
 
     solved_count = {
         sheet['sheet']: sheet['solved_count']
         for sheet in solved_tasks.values('sheet')
-                      .order_by('sheet')
-                      .annotate(solved_count=Count('sheet'))}
+        .order_by('sheet')
+        .annotate(solved_count=Count('sheet'))}
 
     assignment_ctx = {
         assignment: {
-                "assignment": assignment,
-                "solved_count": solved_count.get(assignment.sheet.id, 0),
-                "task_count": assignment.task_count}
+            "assignment": assignment,
+            "solved_count": solved_count.get(assignment.sheet.id, 0),
+            "task_count": assignment.task_count}
         for assignment in assignments}
 
     ret = [{
-            "group": group,
-            "is_user_member": (group.id in member_groups),
-            "assignments": [assignment_ctx[assignment]
-                            for assignment in group.visible_assignments[:3]],
-            "assignment_count": len(group.visible_assignments)
-        } for group in groups]
+        "group": group,
+        "is_user_member": (group.id in member_groups),
+        "assignments": [assignment_ctx[assignment]
+                        for assignment in group.visible_assignments[:3]],
+        "assignment_count": len(group.visible_assignments)
+    } for group in groups]
 
     return ret
 
@@ -82,7 +83,7 @@ def compute_asd_scores(group):
     bonuses = {member.id: 0 for member in members}
     non_bonuses = {member.id: 0 for member in members}
 
-    for assignment in group.assignment_set.all():
+    for assignment in group.assignments.all():
         submissions = Submission.objects.best().filter(
             author__user__in=members,
             task__in=assignment.sheet.tasks.all(),
@@ -121,7 +122,8 @@ def compute_assignment_results(assignment, submissions=None):
         for submission in submissions}
 
     users = assignment.group.members.all()
-    tasks = TaskSheetTask.objects.select_related('task').filter(sheet=assignment.sheet).all()
+    tasks = TaskSheetTask.objects.select_related(
+        'task').filter(sheet=assignment.sheet).all()
 
     for user in users:
         user_submissions = []
