@@ -48,7 +48,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     statistics = UserStatisticsSerializer()
 
     def get_handles(self, profile):
-        handles = UserHandle.objects.filter(user=profile).select_related('judge')
+        handles = UserHandle.objects.filter(
+            user=profile).select_related('judge')
 
         return [{
             "judge_id": handle.judge.judge_id,
@@ -57,7 +58,8 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ['first_name', 'last_name', 'username', 'avatar_url', 'handles', 'created_at', 'statistics']
+        fields = ['first_name', 'last_name', 'username',
+                  'avatar_url', 'handles', 'created_at', 'statistics']
 
 
 class LadderStatisticsSerializer(serializers.ModelSerializer):
@@ -89,10 +91,13 @@ class SubmissionSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.ModelSerializer):
     author = ProfileSerializer()
+    members_count = serializers.IntegerField()
+    assignments_count = serializers.IntegerField()
 
     class Meta:
         model = UserGroup
-        fields = ['group_id', 'name', 'description', 'author', 'visibility']
+        fields = ['group_id', 'name', 'description',
+                  'author', 'visibility', 'members_count', 'assignments_count']
 
 
 class GroupMemberSerializer(serializers.ModelSerializer):

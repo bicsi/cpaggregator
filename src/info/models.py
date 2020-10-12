@@ -14,7 +14,8 @@ class TaskSheet(models.Model):
     description = MarkdownxField(blank=True, null=True)
     tasks = models.ManyToManyField(Task, through='TaskSheetTask')
     is_public = models.BooleanField(default=False)
-    author = models.ForeignKey(UserProfile, null=True, blank=True, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        UserProfile, null=True, blank=True, on_delete=models.CASCADE)
 
     @property
     def formatted_description(self):
@@ -50,7 +51,8 @@ class TaskSheetTask(models.Model):
 
 
 class Assignment(models.Model):
-    group = models.ForeignKey(UserGroup, on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        UserGroup, on_delete=models.CASCADE, related_name="assignments")
     sheet = models.OneToOneField(TaskSheet, on_delete=models.CASCADE)
     assigned_on = models.DateTimeField()
     end_on = models.DateTimeField(blank=True, null=True)
@@ -95,8 +97,10 @@ class Assignment(models.Model):
 
 
 class FavoriteTask(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='favorite_users')
-    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='favorite_tasks')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name='favorite_users')
+    profile = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, related_name='favorite_tasks')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -104,8 +108,10 @@ class FavoriteTask(models.Model):
 
 
 class CustomTaskTag(models.Model):
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='custom_tags')
-    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='custom_tags')
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, related_name='custom_tags')
+    profile = models.ForeignKey(
+        UserProfile, on_delete=models.CASCADE, related_name='custom_tags')
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=32)
 
@@ -114,5 +120,3 @@ class CustomTaskTag(models.Model):
 
     def __str__(self):
         return f"#{self.name} for {self.task} from {self.profile}"
-
-
