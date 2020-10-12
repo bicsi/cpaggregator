@@ -13,9 +13,10 @@ from core.logging import log
 
 def get_group_or_404(group_id: str, user: User):
     group: UserGroup = get_object_or_404(
-        UserGroup.objects.select_related('author').annotate(
-            members_count=Count('members'),
-            assignments_count=Count('assignments')),
+        UserGroup.objects
+        .select_related('author')
+        .annotate(members_count=Count('members'))
+        .annotate(assignments_count=Count('assignments')),
         group_id=group_id)
     if group.visibility == "PRIVATE" and not group.is_owned_by(user) and \
             not GroupMember.objects.filter(profile__user=user, group=group).exists():
@@ -63,6 +64,7 @@ class ListGroups(ListAPIView):
     serializer_class = GroupSerializer
 
     def get_queryset(self):
-        return UserGroup.public.annotate(
-            members_count=Count('members'),
-            assignments_count=Count('assignments')).order_by('-members_count').all()
+        return (UserGroup.public
+                .annotate(members_count=Count('members'))
+                .annotate(assignments_count=Count('assignments'))
+                .order_by('-members_count').all())
