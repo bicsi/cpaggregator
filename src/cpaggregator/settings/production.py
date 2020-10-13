@@ -1,3 +1,4 @@
+from django.contrib.messages import constants as messages
 import django
 import django_heroku
 
@@ -56,6 +57,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'markdownify',
     'corsheaders',
+    'rest_registration',
 ]
 
 MIDDLEWARE = [
@@ -167,7 +169,6 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -184,4 +185,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'cpaggregator.pagination.ResultsPagination',
+}
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_ENABLED': False,
+    'REGISTER_EMAIL_VERIFICATION_ENABLED': False,
+    'RESET_PASSWORD_VERIFICATION_ENABLED': False,
 }

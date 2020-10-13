@@ -1,3 +1,4 @@
+from django.contrib.messages import constants as messages
 import os
 
 import django
@@ -16,8 +17,8 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(
-            os.path.dirname(
-                os.path.abspath(__file__)))
+    os.path.dirname(
+        os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '9n03926ncnffiw(6np41+zv9pv@q=vda4o_sgit&**(u*9ckr1'
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     'markdownify',
     'django_mathjax',
     'corsheaders',
+    'rest_registration',
 ]
 
 DATABASES = {
@@ -183,7 +185,6 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-from django.contrib.messages import constants as messages
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',
@@ -200,4 +201,10 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'cpaggregator.pagination.ResultsPagination',
+}
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_ENABLED': False,
+    'REGISTER_EMAIL_VERIFICATION_ENABLED': False,
+    'RESET_PASSWORD_VERIFICATION_ENABLED': False,
 }

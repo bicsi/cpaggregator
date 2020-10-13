@@ -53,6 +53,8 @@ html2text = "*"
 django-mathjax = "*"
 django-cors-headers = "*"
 djangorestframework-simplejwt = "*"
+django-rest-registration = "*"
+virtualenv = "*"
 
 [requires]
 python_version = "3.7"
