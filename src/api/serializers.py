@@ -2,9 +2,10 @@ import json
 
 from rest_framework import serializers
 
-from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember
+from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember, Judge
 from info.models import Assignment, TaskSheet, TaskSheetTask
 from stats.models import TaskStatistics, LadderStatistics, Ladder, UserStatistics
+from core.logging import log
 
 
 class TaskStatisticsSerializer(serializers.ModelSerializer):
@@ -43,18 +44,30 @@ class UserStatisticsSerializer(serializers.ModelSerializer):
                   'tag_stats', 'activity']
 
 
+class UserHandleSerializer(serializers.ModelSerializer):
+    judge_id = serializers.CharField()
+
+    def to_internal_value(self, data):
+        user = self.context['user']
+        value = super(UserHandleSerializer, self).to_internal_value(data)
+        judge_id = Judge.objects.get(judge_id=value['judge_id']).pk
+        value['judge_id'] = judge_id
+        value['user'] = user
+        return value
+
+    def to_representation(self, handle):
+        data = super(UserHandleSerializer, self).to_representation(handle)
+        data['judge_id'] = handle.judge.judge_id
+        return data
+
+    class Meta:
+        model = UserHandle
+        fields = ['judge_id', 'handle']
+
+
 class ProfileSerializer(serializers.ModelSerializer):
-    handles = serializers.SerializerMethodField('get_handles')
+    handles = UserHandleSerializer(many=True)
     statistics = UserStatisticsSerializer()
-
-    def get_handles(self, profile):
-        handles = UserHandle.objects.filter(
-            user=profile).select_related('judge')
-
-        return [{
-            "judge_id": handle.judge.judge_id,
-            "handle": handle.handle,
-        } for handle in handles]
 
     class Meta:
         model = UserProfile
