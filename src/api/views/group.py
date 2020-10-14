@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.http import Http404
 from requests import Response
 from rest_framework.generics import RetrieveAPIView, ListAPIView, get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, When, Value, Case
 
 from api.serializers import ProfileSerializer, GroupSerializer, GroupMemberSerializer, TaskSerializer, \
     AssignmentSerializer
@@ -39,7 +39,9 @@ class ListGroupMembers(ListAPIView):
 
     def get_queryset(self):
         group = get_group_or_404(self.kwargs['group'], self.request.user)
-        return GroupMember.objects.filter(group=group)
+        return GroupMember.objects.filter(group=group).order_by(
+            Case(When(role='owner', then=Value(0)), default=Value(1)),
+            'profile')
 
 
 class RetrieveUser(RetrieveAPIView):
