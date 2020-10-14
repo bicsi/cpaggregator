@@ -14,7 +14,9 @@ urlpatterns = [
         path('', views.group.ListGroups.as_view()),
         path('<group>/', include([
             path('', views.group.RetrieveGroup.as_view()),
-            path('members/', views.group.ListGroupMembers.as_view()),
+            path('member/<username>/',
+                 views.group.RetrieveDestroyGroupMember.as_view()),
+            path('member/', views.group.ListCreateGroupMember.as_view()),
             path('assignments/', views.group.ListAssignments.as_view()),
         ])),
     ])),
