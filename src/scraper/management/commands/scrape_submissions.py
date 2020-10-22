@@ -14,10 +14,11 @@ class Command(BaseCommand):
         parser.add_argument('--to_days', type=int, default=1)
         parser.add_argument('--tasks', nargs='*')
         parser.add_argument('--users', nargs='*')
+        parser.add_argument('--judges', nargs='*')
 
     def handle(self, *args, **options):
-        if not options['tasks'] and not options['users']:
-            print('Please provide tasks or users.')
+        if not options['tasks'] and not options['users'] and not options['judges']:
+            print('Please provide tasks, users or judges.')
             return
 
         if options.get('tasks'):
@@ -26,10 +27,13 @@ class Command(BaseCommand):
                 from_days=options['from_days'],
                 to_days=options['to_days'],
             )
-
-        if options.get('users'):
+        elif options.get('users'):
             services.scrape_submissions_for_users(
                 *options['users'],
                 from_days=options['from_days'],
                 to_days=options['to_days'],
             )
+        elif options.get('judges'):
+            services.scrape_recent_submissions(
+                *options['judges'],
+                to_days=options['to_days'])

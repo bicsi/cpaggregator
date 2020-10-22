@@ -32,8 +32,18 @@ def _api_get(api_method: str, kwargs) -> Any:
     return json_data['result']
 
 
+def scrape_recent_submissions(count=1000):
+    response = _api_get('problemset.recentStatus', kwargs={
+        'count': count,
+    })
+    for submission_data in response:
+        for submission in parse_submission(submission_data):
+            yield submission
+
+
 def scrape_submissions_for_tasks(task_ids, count=200):
-    submissions = [scrape_submissions_for_task(task_id, count=count) for task_id in task_ids]
+    submissions = [scrape_submissions_for_task(
+        task_id, count=count) for task_id in task_ids]
     return heapq.merge(*submissions, key=lambda x: x['submitted_on'], reverse=True)
 
 
@@ -99,7 +109,8 @@ def scrape_task_info(task_id: str):
 
     found = False
     for task_data in response['problems']:
-        curr_task_id = '/'.join([str(task_data['contestId']), task_data['index']]).lower()
+        curr_task_id = '/'.join([str(task_data['contestId']),
+                                 task_data['index']]).lower()
         if task_id != curr_task_id:
             continue
 
@@ -155,7 +166,8 @@ def scrape_user_info(handles):
 def scrape_task_statement(task_id: str):
     contest_id, task_letter = task_id.split('/')
     contest_or_gym = "gym" if int(contest_id) >= 100000 else "contest"
-    response = get_page(f"https://codeforces.com/{contest_or_gym}/{contest_id}/problem/{task_letter}")
+    response = get_page(
+        f"https://codeforces.com/{contest_or_gym}/{contest_id}/problem/{task_letter}")
     soup = BeautifulSoup(response.text, 'html.parser')
     statement = soup.select_one(".problem-statement")
     result = ""
@@ -231,7 +243,8 @@ def scrape_task_statement(task_id: str):
     if len(inputs) == len(outputs):
         examples = [{"input": i, "output": o} for i, o in zip(inputs, outputs)]
     else:
-        log.critical(f"Could not parse examples for {task_id}: unequal number of inputs and outputs")
+        log.critical(
+            f"Could not parse examples for {task_id}: unequal number of inputs and outputs")
 
     task_info.update({
         "statement": md,

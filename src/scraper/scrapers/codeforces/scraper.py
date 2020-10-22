@@ -5,6 +5,9 @@ from . import utils
 class CodeforcesScraper(Scraper):
     JUDGE_ID = utils.CODEFORCES_JUDGE_ID
 
+    def scrape_recent_submissions(self):
+        return utils.scrape_recent_submissions()
+
     def scrape_submissions_for_task(self, task_id):
         return utils.scrape_submissions_for_task(task_id)
 

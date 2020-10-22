@@ -26,6 +26,22 @@ def __expand_handle(judge_id, handle):
 
 
 @shared_task
+def scrape_recent_submissions(*judge_ids, to_days=1):
+    to_date = datetime.now() - timedelta(days=to_days)
+    for judge_id in judge_ids:
+        try:
+            scraper = scrapers.create_scraper(judge_id)
+            submissions = scraper.scrape_recent_submissions()
+            submissions = itertools.takewhile(
+                lambda x: x['submitted_on'] >= to_date, submissions)
+            queries.write_submissions(submissions)
+        except Exception as ex:
+            log.error(
+                f"Exception while fetching recent submissions for {judge_id}")
+            log.exception(ex)
+
+
+@shared_task
 def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
     log.info(f"Scraping submissions for tasks {tasks}...")
 
@@ -49,10 +65,12 @@ def scrape_submissions_for_tasks(*tasks, from_days=0, to_days=100000):
         for task_id in task_ids:
             try:
                 submissions = scraper.scrape_submissions_for_task(task_id)
-                submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+                submissions = itertools.takewhile(
+                    lambda x: x['submitted_on'] >= to_date, submissions)
                 queries.write_submissions(submissions)
             except NotImplementedError:
-                log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
+                log.warning(
+                    f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
                 break
             except Exception as ex:
                 log.exception(ex)
@@ -84,11 +102,13 @@ def scrape_submissions_for_users(*user_ids, from_days=0, to_days=100000):
         for handle in handles:
             try:
                 submissions = scraper.scrape_submissions_for_user(handle)
-                submissions = itertools.takewhile(lambda x: x['submitted_on'] >= to_date, submissions)
+                submissions = itertools.takewhile(
+                    lambda x: x['submitted_on'] >= to_date, submissions)
                 queries.write_submissions(submissions)
 
             except NotImplementedError:
-                log.warning(f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
+                log.warning(
+                    f'Scraping submissions not implemented for {scraper.__class__.__name__}.')
                 return
             except Exception as ex:
                 log.exception(ex)
@@ -108,23 +128,27 @@ def scrape_task_info(task):
         try:
             task_info = scraper.scrape_task_info(task_id)
             if task_info is None:
-                log.warning(f"Did not find task info for '{task_id}'. Skipping...")
+                log.warning(
+                    f"Did not find task info for '{task_id}'. Skipping...")
                 continue
 
             log.debug(task_info)
-            log.info(f"Successfully scraped '{task_id}' [{task_info['title']}]...")
+            log.info(
+                f"Successfully scraped '{task_id}' [{task_info['title']}]...")
 
             try:
                 statement_info = scraper.scrape_task_statement(task_id)
                 task_info.update(statement_info)
             except NotImplementedError:
-                log.warning(f"Could not get statement of task {task_id}: not implemented.")
+                log.warning(
+                    f"Could not get statement of task {task_id}: not implemented.")
             except Exception as ex:
                 log.warning(f"Could not get statement of task {task_id}: {ex}")
 
             task_infos.append(task_info)
         except NotImplementedError:
-            log.warning(f'Scraping tasks not implemented for {scraper.__class__.__name__}.')
+            log.warning(
+                f'Scraping tasks not implemented for {scraper.__class__.__name__}.')
             return
         except Exception as ex:
             log.exception(ex)
@@ -149,7 +173,8 @@ def scrape_handle_info(handle):
             log.debug(user_info)
             user_infos.append(user_info)
         except NotImplementedError:
-            log.warning(f'Scraping handles not implemented for {scraper.__class__.__name__}.')
+            log.warning(
+                f'Scraping handles not implemented for {scraper.__class__.__name__}.')
             return
         except Exception as ex:
             log.exception(ex)
@@ -170,6 +195,7 @@ def scrape_tasks_info():
 def scrape_handles_info():
     for handle in UserHandle.objects.all():
         try:
-            scrape_handle_info('/'.join([handle.judge.judge_id, handle.handle]))
+            scrape_handle_info(
+                '/'.join([handle.judge.judge_id, handle.handle]))
         except Exception as e:
             log.exception(f"Could not parse handle '{handle}': {e}")
