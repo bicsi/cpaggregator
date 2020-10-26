@@ -2,7 +2,8 @@ import json
 
 from rest_framework import serializers
 
-from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember, Judge
+from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember, Judge, TaskStatement, \
+    TaskSource
 from info.models import Assignment, TaskSheet, TaskSheetTask
 from stats.models import TaskStatistics, LadderStatistics, Ladder, UserStatistics
 from core.logging import log
@@ -26,6 +27,37 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["name", "task_id", "statistics", "judge_id"]
+
+
+class TaskSourceSerializer(serializers.ModelSerializer):
+    judge_id = serializers.SerializerMethodField('get_judge_id')
+
+    def get_judge_id(self, src):
+        return src.judge.judge_id
+
+    class Meta:
+        model = TaskSource
+        exclude = ["id", "judge"]
+
+
+class TaskStatementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskStatement
+        exclude = ["task", "id"]
+
+
+class TaskSerializerFull(serializers.ModelSerializer):
+    statistics = TaskStatisticsSerializer()
+    judge_id = serializers.SerializerMethodField('get_judge_id')
+    statement = TaskStatementSerializer()
+    source = TaskSourceSerializer()
+
+    def get_judge_id(self, task):
+        return task.judge.judge_id
+
+    class Meta:
+        model = Task
+        fields = ["name", "task_id", "statistics", "judge_id", "statement", "source"]
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):

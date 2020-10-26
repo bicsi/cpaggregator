@@ -20,6 +20,11 @@ urlpatterns = [
             path('assignments/', views.group.ListAssignments.as_view()),
         ])),
     ])),
+    path('task/', include([
+        path('<task-path:task_path>/', include([
+            path('', views.task.RetrieveTask.as_view()),
+        ])),
+    ])),
     path('me/', views.profile.RetrieveCurrentUser.as_view(), name='api-me'),
     path('handle/', views.profile.CreateHandle.as_view()),
     path('handle/<judge_id>/<handle>/',
