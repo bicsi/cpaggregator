@@ -5,8 +5,6 @@ import time
 
 from google.cloud import translate_v3 as translate
 from google.oauth2 import service_account
-from html2text import html2text
-from markdownx.utils import markdownify
 
 from core import markdown
 from core.logging import log
@@ -14,7 +12,7 @@ from core.logging import log
 __client = None
 
 PROJECT_ID = "competitive-257117"
-
+PARENT = f"projects/{PROJECT_ID}/locations/us-central1"
 
 def __get_client():
     global __client
@@ -33,21 +31,30 @@ def __get_client():
 def translate_ro_en(text: str, use_glossary=False):
 
     client = __get_client()
-    parent = client.location_path(PROJECT_ID, 'us-central1')
+    parent = PARENT
 
-    html_text = markdownify(text)
+    html_text = markdown.text2html(text)
     html_text = re.sub(r"(<h.>)[^<>]*[Cc]erin[^<>]*(</h.>)", r"\g<1><task/>\g<2>", html_text)
     html_text = re.sub(r"(<h.>)[^<>]*ntrare[^<>]*(</h.>)", r"\g<1><input/>\g<2>", html_text)
     html_text = re.sub(r"(<h.>)[^<>]*e.ire[^<>]*(</h.>)", r"\g<1><output/>\g<2>", html_text)
     html_text = re.sub(r"(<h.>)[^<>]*estric[^<>]*(</h.>)", r"\g<1><constraints/>\g<2>", html_text)
     html_text = re.sub(r"(<h.>)[^<>]*reciz.r[^<>]*(</h.>)", r"\g<1><notes/>\g<2>", html_text)
 
+
+
     replace = {}
-    for idx, code in enumerate(set(re.findall(r"<code>(.*?)<\/code>", html_text))):
-        placeholder = f"<span id=\"{idx}\">0</span>"
+    for latex, _ in set(re.findall(r"(<latex>(.*?)<\/latex>)", html_text)):
+        placeholder = f"<code id=\"{len(replace)}\">0</code>"
+        replace[latex] = placeholder
+        html_text = html_text.replace(latex, placeholder)
+
+    for code, _ in set(re.findall(r"(<code>(.*?)<\/code>)", html_text)):
+        placeholder = f"<code id=\"{len(replace)}\">0</code>"
         replace[code] = placeholder
         html_text = html_text.replace(code, placeholder)
 
+    
+      
     # Ro glossary
 
     html_text = re.sub(r"Sa( se)? ", "Trebuie sa ", html_text)
@@ -104,14 +111,14 @@ def translate_ro_en(text: str, use_glossary=False):
         .replace('<notes/>', 'Notes')\
 
     for pref, header_text, suff in set(re.findall(r"(<h.>)([^<>]*)(</h.>)", translated)):
-        print(pref, header_text, suff)
         translated = translated.replace(pref + header_text + suff,
                                         pref + header_text.strip().capitalize() + suff)
 
 
     # translated = re.sub(r"<code>[^<>]*\.in<\/code>([^\n]{1,25}<code>[^<>]*\.in<\/code>)", r"\g<1>", translated)
     # translated = re.sub(r"<code>[^<>]*\.out<\/code>([^\n]{1,25}<code>[^<>]*\.out<\/code>)", r"\g<1>", translated)
-    translated = html2text(translated, bodywidth=0)
+    translated = markdown.html2text(translated)
+
     return markdown.prettify(translated)
 
 
@@ -131,7 +138,7 @@ def sample_list_glossaries():
 
     client = translate.TranslationServiceClient()
 
-    parent = client.location_path(PROJECT_ID, "us-central1")
+    parent = PARENT
 
     # Iterate over all results
     for glossary in client.list_glossaries(parent):
@@ -170,7 +177,7 @@ def sample_create_glossary(input_file, glossary_id):
         language_codes_set=language_codes_set,
         input_config=input_config)
 
-    parent = client.location_path(PROJECT_ID, location)
+    parent = PARENT
 
     operation = client.create_glossary(parent=parent, glossary=glossary)
 

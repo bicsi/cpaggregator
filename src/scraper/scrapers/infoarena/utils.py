@@ -360,8 +360,15 @@ def scrape_task_statement(task_id: str):
 
     md = html2text(html, bodywidth=0)
 
+    md = re.sub(r'\$`\s*`\$', ' ', md)
+    md = re.sub(r'`\$(.*?)\$`', '%%%\g<1>%%%', md)
+    md = re.sub(r'(?<!`)\$', '\\$', md)
+    md = md.replace('%%%', '$')
+    md = markdown.prettify(md)
+    print(md)
+
     return {
-        "statement": markdown.prettify(md),
+        "statement": md,
         "examples": examples,
     }
 

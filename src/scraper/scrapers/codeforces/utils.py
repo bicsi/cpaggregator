@@ -4,9 +4,8 @@ import re
 from typing import Dict, Any
 
 from bs4 import BeautifulSoup
-from html2text import html2text
-from markdownx.utils import markdownify
 
+from core import markdown 
 from core.logging import log
 from scraper.scrapers.codeforces.parsers import \
     parse_tag, parse_submission, CODEFORCES_JUDGE_ID, \
@@ -172,8 +171,8 @@ def scrape_task_statement(task_id: str):
     statement = soup.select_one(".problem-statement")
     result = ""
 
-    print(statement.select_one('.time-limit'))
-    print(statement.select_one('.time-limit').string)
+    # print(statement.select_one('.time-limit'))
+    # print(statement.select_one('.time-limit').string)
 
     task_info = {
         "time_limit": parse_time_limit(
@@ -210,7 +209,6 @@ def scrape_task_statement(task_id: str):
         node.wrap(soup.new_tag("h3"))
 
     for node in soup.select(".tex-span"):
-        code = soup.new_tag("code")
 
         inner_text = str(node)
         inner_text = inner_text.replace("&lt;", "<")
@@ -224,20 +222,27 @@ def scrape_task_statement(task_id: str):
         inner_text = re.sub(r"<sup[^>]*>(.*?)<\/sup>", r"^{\g<1>}", inner_text)
         inner_text = re.sub(r"<i[^>]*>(.*?)<\/i>", r"\g<1>", inner_text)
 
-        inner_text = "$" + inner_text + "$"
+        code = soup.new_tag("latex")
         code.string = inner_text
         node.replace_with(code)
 
     for node in soup.select(".tex-font-style-tt"):
-        code = soup.new_tag("code")
+        code = soup.new_tag("latex")
         code.string = node.text
         node.replace_with(code)
 
     result = str(soup)
-    result = re.sub(r'\$\$\$(.*?)\$\$\$', r"<code>$\g<1>$</code>", result)
+    latex_codes = []
+    result = re.sub(r'\$\$\$(.*?)\$\$\$', '<latex>\g<1></latex>', result)
 
-    md = html2text(result)
-    md = re.sub(r"###\s+", "###", md)
+    # result = re.sub(r'\$\$\$(.*?)\$\$\$', "<code>$<1>$</code>", result)
+
+
+    md = markdown.html2text(result)
+
+    for match, repl in zip(reversed(list(re.finditer(r'`\[\[\[LATEX\]\]\]`', md))), latex_codes):
+        [b, e] = match.span()
+        md = md[:b] + '$' + repl + '$' + md[e:]
 
     examples = None
     if len(inputs) == len(outputs):
@@ -245,6 +250,8 @@ def scrape_task_statement(task_id: str):
     else:
         log.critical(
             f"Could not parse examples for {task_id}: unequal number of inputs and outputs")
+
+    print(md)
 
     task_info.update({
         "statement": md,
