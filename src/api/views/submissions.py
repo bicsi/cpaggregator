@@ -48,7 +48,7 @@ class ListSubmissions(ListAPIView):
             queryset = queryset.filter(verdict='AC')
         if self.kind == 'unsolved':
             queryset = queryset.exclude(verdict='AC')
-        return queryset.select_related('task', 'author', 'task__judge')
+        return queryset.select_related('task', 'author', 'task__judge', 'author__user', 'author__user__user')
 
     serializer_class = serializers.SubmissionSerializer
 

@@ -114,6 +114,12 @@ class ProfileSerializer(serializers.ModelSerializer):
                   'avatar_url', 'handles', 'created_at', 'statistics']
 
 
+class ProfileSerializerTiny(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['first_name', 'last_name', 'username',
+                  'avatar_url']
+
 class LadderStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LadderStatistics
@@ -134,7 +140,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
     author = serializers.SerializerMethodField('get_author')
 
     def get_author(self, sub):
-        return sub.author.handle
+        return {
+            "handle": sub.author.handle,
+            "profile": ProfileSerializerTiny(sub.author.user).data,
+        }
 
     class Meta:
         model = Submission
