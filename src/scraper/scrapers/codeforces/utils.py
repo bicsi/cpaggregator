@@ -234,7 +234,7 @@ def scrape_task_statement(task_id: str):
     result = str(soup)
     latex_codes = []
     result = re.sub(r'\$\$\$(.*?)\$\$\$', '<latex>\g<1></latex>', result)
-
+    
     # result = re.sub(r'\$\$\$(.*?)\$\$\$', "<code>$<1>$</code>", result)
 
 

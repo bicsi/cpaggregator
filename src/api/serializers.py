@@ -3,7 +3,7 @@ import json
 from rest_framework import serializers
 
 from data.models import Task, Submission, UserProfile, UserHandle, UserGroup, GroupMember, Judge, TaskStatement, \
-    TaskSource
+    TaskSource, JudgeTaskStatistic
 from info.models import Assignment, TaskSheet, TaskSheetTask
 from stats.models import TaskStatistics, LadderStatistics, Ladder, UserStatistics
 from core.logging import log
@@ -45,19 +45,26 @@ class TaskStatementSerializer(serializers.ModelSerializer):
         model = TaskStatement
         exclude = ["task", "id"]
 
+class JudgeTaskStatisticSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JudgeTaskStatistic
+        exclude = ["task", "id"]
+
 
 class TaskSerializerFull(serializers.ModelSerializer):
     statistics = TaskStatisticsSerializer()
     judge_id = serializers.SerializerMethodField('get_judge_id')
     statement = TaskStatementSerializer()
     source = TaskSourceSerializer()
+    judge_statistics = JudgeTaskStatisticSerializer(source='judge_statistic')
 
     def get_judge_id(self, task):
         return task.judge.judge_id
 
     class Meta:
         model = Task
-        fields = ["name", "task_id", "statistics", "judge_id", "statement", "source"]
+        fields = ["name", "task_id", "statistics", "judge_id", "statement", 
+            "source", "judge_statistics"]
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):
