@@ -8,7 +8,7 @@ from info.models import TaskSheetTask, Assignment
 
 
 class ListSubmissions(ListAPIView):
-    only_best = True
+    kind = 'best'
 
     def get_queryset(self):
         queryset = Submission.objects
@@ -42,8 +42,12 @@ class ListSubmissions(ListAPIView):
 
             queryset = queryset.filter(author__user__in=members, task__in=tasks)
 
-        if self.only_best:
+        if self.kind in ['best', 'solved', 'unsolved']:
             queryset = queryset.best()
+        if self.kind == 'solved':
+            queryset = queryset.filter(verdict='AC')
+        if self.kind == 'unsolved':
+            queryset = queryset.exclude(verdict='AC')
         return queryset.select_related('task', 'author', 'task__judge')
 
     serializer_class = serializers.SubmissionSerializer

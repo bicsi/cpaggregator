@@ -31,7 +31,11 @@ urlpatterns = [
          views.profile.RetrieveDestroyHandle.as_view()),
     path('judges/', views.base.ListJudges.as_view(), name='api-judges'),
     path('users/rank/', views.profile.ListUserRank.as_view(), name='api-user-rank'),
-    path('status/best/', views.submissions.ListSubmissions.as_view(only_best=True)),
+    path('status/', include([
+        path('best/', views.submissions.ListSubmissions.as_view(kind='best')),
+        path('solved/', views.submissions.ListSubmissions.as_view(kind='solved')),
+        path('unsolved/', views.submissions.ListSubmissions.as_view(kind='unsolved')),
+    ])),
     path('user/<user>/', include([
         path('', views.profile.RetrieveUser.as_view(), name='api-user'),
         path('subs/', include([
