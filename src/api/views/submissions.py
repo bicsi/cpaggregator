@@ -16,9 +16,15 @@ class ListSubmissions(ListAPIView):
         group_id = self.request.query_params.get('group')
         author_username = self.request.query_params.get('author')
         sheet_id = self.request.query_params.get('sheet')
+        task = self.request.query_params.get('task')
 
         if author_username:
             queryset = queryset.filter(author__user__user__username=author_username)
+
+        if task:
+            task = task.replace(':', '/').lower()
+            judge_id, task_id = task.split('/', 1)
+            queryset = queryset.filter(task__judge__judge_id=judge_id, task__task_id=task_id)
 
         if group_id:
             group = get_group_or_404(group_id, self.request.user)
