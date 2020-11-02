@@ -171,7 +171,8 @@ def scrape_handle_info(handle):
             user_info = scraper.scrape_user_info(handle)
             log.info(f"Successfully scraped user info for '{handle}'")
             log.debug(user_info)
-            user_infos.append(user_info)
+            if user_info:
+                user_infos.append(user_info)
         except NotImplementedError:
             log.warning(
                 f'Scraping handles not implemented for {scraper.__class__.__name__}.')
