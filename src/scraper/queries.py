@@ -8,18 +8,32 @@ from core.logging import log
 from django.utils.text import slugify
 
 
+def is_valid(sub):
+    if not sub.get('verdict'):
+        return False
+    return True
+
+
 def write_submissions(submissions):
     submissions = list(submissions)
+    valid_submissions = []
+    for sub in submissions:
+        if not is_valid(sub):
+            log.warning(f"Not a valid submission: {sub}")
+        else:
+            valid_submissions.append(sub)
+    submissions = valid_submissions
+
     # Get all handles.
     handles = {(handle.judge.judge_id, handle.handle.lower()): handle
                for handle in UserHandle.objects.annotate(handle_lower=Lower('handle')).filter(
-                    handle_lower__in={sub['author_id'].lower() for sub in submissions})
-                   .select_related('judge')}
+        handle_lower__in={sub['author_id'].lower() for sub in submissions})
+        .select_related('judge')}
     # Get all required tasks.
     tasks = {(task.judge.judge_id, task.task_id): task
              for task in Task.objects.filter(
-                task_id__in={sub['task_id'] for sub in submissions})
-                 .select_related('judge')}
+        task_id__in={sub['task_id'] for sub in submissions})
+        .select_related('judge')}
 
     log.info(f"Writing {len(submissions)} submissions to database...")
     log.debug(f"TASKS: {tasks}")
@@ -50,7 +64,8 @@ def write_submissions(submissions):
         submission_models.append(Submission(**fields))
 
     if submission_models:
-        result = Submission.objects.bulk_create(submission_models, ignore_conflicts=True)
+        result = Submission.objects.bulk_create(
+            submission_models, ignore_conflicts=True)
         to_update = [x for x in result if x.pk is None]
         log.warning("TODO: Implement update!")
         log.success(f"Successfully upserted {len(submission_models)} submissions! "
@@ -67,7 +82,8 @@ def write_tasks(tasks):
     total_created = 0
     for task_info in tasks:
         judge = judges[task_info['judge_id']]
-        task, created = Task.objects.get_or_create(judge=judge, task_id=task_info['task_id'])
+        task, created = Task.objects.get_or_create(
+            judge=judge, task_id=task_info['task_id'])
         if created:
             total_created += 1
         task.name = task_info['title']
@@ -83,7 +99,8 @@ def write_tasks(tasks):
                 statement.output_file = task_info['output_file']
 
             if statement.modified_by_user:
-                log.info(f"Skipped updating statement for {task}: modified by user")
+                log.info(
+                    f"Skipped updating statement for {task}: modified by user")
             else:
                 statement.text = task_info['statement']
                 statement.examples = task_info['examples']
@@ -106,14 +123,17 @@ def write_tasks(tasks):
         task.save()
         statistic_defaults = dict(
             total_submission_count=task_info.get('total_submission_count'),
-            accepted_submission_count=task_info.get('accepted_submission_count'),
+            accepted_submission_count=task_info.get(
+                'accepted_submission_count'),
             first_submitted_on=task_info.get('first_submitted_on'),
         )
         statistic_defaults = {k: v for k, v in statistic_defaults.items() if v}
         if len(statistic_defaults) > 0:
-            JudgeTaskStatistic.objects.get_or_create(task=task, defaults=statistic_defaults)
+            JudgeTaskStatistic.objects.get_or_create(
+                task=task, defaults=statistic_defaults)
 
-    log.success(f"Successfully updated {len(tasks)} tasks! ({total_created} created)")
+    log.success(
+        f"Successfully updated {len(tasks)} tasks! ({total_created} created)")
 
 
 def write_handles(handles_info):
@@ -123,7 +143,8 @@ def write_handles(handles_info):
             handle = UserHandle.objects.get(judge__judge_id=handle_info['judge_id'],
                                             handle=handle_info['handle'])
         except ObjectDoesNotExist:
-            log.error(f"Can't update handle: '{handle_info['handle']}': does not exist.")
+            log.error(
+                f"Can't update handle: '{handle_info['handle']}': does not exist.")
             continue
 
         if 'photo_url' in handle_info:
