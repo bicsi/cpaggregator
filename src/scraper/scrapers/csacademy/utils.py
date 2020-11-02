@@ -179,13 +179,17 @@ def scrape_submissions(csrf_token, task_name_dict, task_name=None, username=None
         if task_name not in task_name_dict.values():
             log.error(f"Task '{task_name}' not found.")
             return
-        [task_id] = [t_id for t_id, t_name in task_name_dict.items() if t_name == task_name]
+        [task_id] = [t_id for t_id, t_name in task_name_dict.items() if t_name ==
+                     task_name]
 
     user_id = None
     if username:
         response = requests.get(f'https://csacademy.com/user/{username}/',
                                 headers=__get_headers(csrf_token), cookies=__get_cookies(csrf_token))
         json_data = json.loads(response.text)
+        if json_data.get('error'):
+            log.error(f"API Error: {json_data['error']}")
+            return []
         [user_data] = json_data['state']['publicuser']
         user_id = user_data['id']
 

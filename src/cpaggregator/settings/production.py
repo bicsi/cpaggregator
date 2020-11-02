@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'ladders',
     'rest_framework',
     'silk',
+    'schedule',
     'bootstrap_datepicker_plus',
     'markdownify',
     'corsheaders',

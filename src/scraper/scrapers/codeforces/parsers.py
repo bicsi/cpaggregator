@@ -71,7 +71,7 @@ def parse_submission(submission_data):
             submission_data['problem']['index']])
 
         if submission_data['verdict'] == 'TESTING':
-            log.info(f'Skipped submission {submission_id}: still testing.')
+            log.debug(f'Skipped submission {submission_id}: still testing.')
             return []
 
         if 'verdict' not in submission_data:
@@ -84,16 +84,19 @@ def parse_submission(submission_data):
                 judge_id=CODEFORCES_JUDGE_ID,
                 submission_id=str(submission_id),
                 task_id=task_id.lower(),
-                submitted_on=datetime.datetime.utcfromtimestamp(submission_data['creationTimeSeconds']),
+                submitted_on=datetime.datetime.utcfromtimestamp(
+                    submission_data['creationTimeSeconds']),
                 language=submission_data['programmingLanguage'],
                 verdict=parse_verdict(submission_data['verdict']),
                 author_id=author_id.lower(),
                 time_exec=submission_data['timeConsumedMillis'],
-                memory_used=round(submission_data['memoryConsumedBytes'] / 1024),
+                memory_used=round(
+                    submission_data['memoryConsumedBytes'] / 1024),
             )
             yield submission
     except Exception as ex:
-        log.error(f"Failed to parse submission.\nSubmission data:{submission_data}\nError: {ex}")
+        log.error(
+            f"Failed to parse submission.\nSubmission data:{submission_data}\nError: {ex}")
 
 
 def parse_time_limit(time_limit: str):

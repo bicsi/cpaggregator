@@ -21,9 +21,10 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        log.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        log.opt(depth=depth, exception=record.exc_info).log(
+            level, record.getMessage())
 
 
-logging.basicConfig(handlers=[InterceptHandler()], level=0)
+logging.basicConfig(handlers=[InterceptHandler()],
+                    level=0)
 logging.getLogger("urllib3").setLevel("WARNING")
-
