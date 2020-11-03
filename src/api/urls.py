@@ -4,9 +4,9 @@ from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     path('accounts/', include('rest_registration.api.urls')),
-    path('token/', jwt_views.TokenObtainPairView.as_view(),
+    path('token/', views.token.TokenObtainPairView.as_view(),
          name='token_obtain_pair'),
-    path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/refresh/', views.token.TokenRefreshView.as_view(), name='token_refresh'),
     path('ladders/', include([
         path('rank/', views.ladders.ListLadderRank.as_view(), name='api-list-rank'),
     ])),
