@@ -3,33 +3,20 @@ from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime
+from rest_framework_simplejwt.settings import api_settings
 
 class TokenObtainPairSerializer(jwt_serializers.TokenObtainPairSerializer):
-    def get_token(self, user):
-        token = RefreshToken.for_user(user)
-        self.token = token 
-        return token
-
     def validate(self, attrs):
         data = super(TokenObtainPairSerializer, self).validate(attrs)
-        data['expires_on'] = datetime.now() + self.token.lifetime
+        data['expires_on'] = datetime.now() + api_settings.ACCESS_TOKEN_LIFETIME
         return data
 
 
 
 class TokenRefreshSerializer(jwt_serializers.TokenRefreshSerializer):
-    def get_token(self, user):
-        token = RefreshToken.for_user(user)
-        self.token = token 
-        return token
-
     def validate(self, attrs):
-        token = RefreshToken(attrs['refresh'])
-
-        data = {
-            'access': str(token.access_token),
-            'expires_on': datetime.now() + token.lifetime,
-        }
+        data = super(TokenRefreshSerializer, self).validate(attrs)
+        data['expires_on'] = datetime.now() + api_settings.ACCESS_TOKEN_LIFETIME
         return data
 
 
