@@ -172,7 +172,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class GroupMemberSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer()
+    profile = ProfileSerializerTiny()
 
     class Meta:
         model = GroupMember
