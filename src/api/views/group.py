@@ -159,10 +159,11 @@ class ListResults(ListAPIView):
                     FROM data_submission
                     INNER JOIN info_tasksheet_x_task ON data_submission.task_id = info_tasksheet_x_task.task_id
                     INNER JOIN data_userhandle ON data_submission.author_id = data_userhandle.id
-                    WHERE sheet_id = %s AND verdict = 'AC' AND submitted_on < %s
+                    INNER JOIN data_groupmember ON data_groupmember.profile_id = data_userhandle.user_id
+                    WHERE group_id = %s AND sheet_id = %s AND verdict = 'AC' AND submitted_on < %s
                 ) AS results
                 GROUP BY id;
-            """, [assignment.sheet.pk, assignment.end_on or timezone.now()])
+            """, [assignment.group.pk, assignment.sheet.pk, assignment.end_on or timezone.now()])
             return cursor.fetchall()
 
     def serialize_data(self, results):
