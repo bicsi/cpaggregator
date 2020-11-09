@@ -41,16 +41,6 @@ class RetrieveGroup(RetrieveAPIView):
         return get_group_or_404(self.kwargs['group'], self.request.user)
 
 
-class ListGroupMembers(ListAPIView):
-    serializer_class = GroupMemberSerializer
-
-    def get_queryset(self):
-        group = get_group_or_404(self.kwargs['group'], self.request.user)
-        return GroupMember.objects.filter(group=group).order_by(
-            Case(When(role='owner', then=Value(0)), default=Value(1)),
-            'profile__user__username').select_related('profile', 'profile__user')
-
-
 class RetrieveUser(RetrieveAPIView):
     serializer_class = ProfileSerializer
     lookup_field = "user__username"
@@ -117,7 +107,7 @@ class ListCreateGroupMember(ListCreateAPIView):
         group = get_group_or_404(self.kwargs['group'], self.request.user)
         return GroupMember.objects.filter(group=group).order_by(
             Case(When(role='owner', then=Value(0)), default=Value(1)),
-            'profile__user__username')
+            'profile__user__username').select_related('profile', 'profile__user')
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
