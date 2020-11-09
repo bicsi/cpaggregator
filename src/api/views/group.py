@@ -181,13 +181,17 @@ class ListResults(ListAPIView):
         for sub in submissions:
             submissions_for_profile[sub.author.user.pk].append(sub)
 
-        data = ProfileSerializerTiny(profiles, many=True).data
-        for ((pk, total_score, rank), item) in zip(results, data):
+        data = []
+        profiles = ProfileSerializerTiny(profiles, many=True).data
+        for ((pk, total_score, rank), profile) in zip(results, profiles):
             submissions = submissions_for_profile[pk]
-            item['submissions'] = SubmissionSerializer(
-                submissions, many=True, include_author=False).data
-            item['rank'] = rank
-            item['total_score'] = total_score
+            data.append({
+                'submissions': SubmissionSerializer(
+                    submissions, many=True, include_author=False).data,
+                'rank': rank,
+                'total_score': total_score,
+                'profile': profile,
+            })
 
         return data
 
