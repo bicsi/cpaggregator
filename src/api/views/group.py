@@ -8,11 +8,14 @@ from rest_framework.response import Response
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from rest_framework import status
 from api.serializers import ProfileSerializer, GroupSerializer, GroupMemberSerializer, TaskSerializer, \
-    AssignmentSerializer
+    AssignmentSerializer, ProfileSerializerTiny, SubmissionSerializer
 from data.models import UserProfile, UserGroup, GroupMember
 from info.models import Assignment, TaskSheetTask
 from core.logging import log
 from rest_framework import permissions, serializers
+from django.utils import timezone
+from data.models import Submission
+from django.db import connection
 
 
 def get_group_or_404(group_id: str, user: User):
@@ -136,3 +139,64 @@ class ListCreateGroupMember(ListCreateAPIView):
         serializer = GroupMemberSerializer(member)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ListResults(ListAPIView):
+    def get_queryset(self):
+        assignment = get_object_or_404(
+            Assignment,
+            group__group_id=self.kwargs['group'],
+            sheet__sheet_id=self.kwargs['sheet'])
+        self.assignment = assignment
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT id, sum(score) as total_score,
+                RANK () OVER ( 
+                    ORDER BY sum(score) DESC
+                ) rank
+                FROM (
+                    SELECT DISTINCT data_submission.task_id as task_id, data_userhandle.user_id as id, info_tasksheet_x_task.score as score 
+                    FROM data_submission
+                    INNER JOIN info_tasksheet_x_task ON data_submission.task_id = info_tasksheet_x_task.task_id
+                    INNER JOIN data_userhandle ON data_submission.author_id = data_userhandle.id
+                    WHERE sheet_id = %s AND verdict = 'AC' AND submitted_on < %s
+                ) AS results
+                GROUP BY id;
+            """, [assignment.sheet.pk, assignment.end_on or timezone.now()])
+            return cursor.fetchall()
+
+    def serialize_data(self, results):
+        assignment = self.assignment
+        profile_ids = [res[0] for res in results]
+        profiles = UserProfile.objects.filter(
+            pk__in=profile_ids).select_related('user')
+        submissions = Submission.objects.filter(
+            submitted_on__lte=assignment.end_on or timezone.now(),
+            author__user__in=profile_ids,
+            task__in=TaskSheetTask.objects.filter(
+                sheet=assignment.sheet).values_list('task', flat=True),
+        ).select_related('author', 'author__user', 'author__user__user',
+                         'task', 'task__statistics', 'task__judge').best()
+        submissions_for_profile = {pk: [] for pk in profile_ids}
+        for sub in submissions:
+            submissions_for_profile[sub.author.user.pk].append(sub)
+
+        data = ProfileSerializerTiny(profiles, many=True).data
+        for ((pk, total_score, rank), item) in zip(results, data):
+            submissions = submissions_for_profile[pk]
+            item['submissions'] = SubmissionSerializer(
+                submissions, many=True, include_author=False).data
+            item['rank'] = rank
+            item['total_score'] = total_score
+
+        return data
+
+    def list(self, request, *args, **kwargs):
+        raw_data = self.get_queryset()
+
+        page = self.paginate_queryset(raw_data)
+        if page:
+            data = self.serialize_data(page)
+            return self.get_paginated_response(data)
+
+        return Response(self.serialize_data(list(raw_data)))

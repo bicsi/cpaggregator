@@ -6,7 +6,8 @@ urlpatterns = [
     path('accounts/', include('rest_registration.api.urls')),
     path('token/', views.token.TokenObtainPairView.as_view(),
          name='token_obtain_pair'),
-    path('token/refresh/', views.token.TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/refresh/', views.token.TokenRefreshView.as_view(),
+         name='token_refresh'),
     path('ladders/', include([
         path('rank/', views.ladders.ListLadderRank.as_view(), name='api-list-rank'),
     ])),
@@ -18,6 +19,7 @@ urlpatterns = [
                  views.group.RetrieveDestroyGroupMember.as_view()),
             path('member/', views.group.ListCreateGroupMember.as_view()),
             path('assignments/', views.group.ListAssignments.as_view()),
+            path('sheet/<sheet>/results/', views.group.ListResults.as_view()),
         ])),
     ])),
     path('task/', include([

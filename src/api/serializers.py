@@ -45,6 +45,7 @@ class TaskStatementSerializer(serializers.ModelSerializer):
         model = TaskStatement
         exclude = ["task", "id"]
 
+
 class JudgeTaskStatisticSerializer(serializers.ModelSerializer):
     class Meta:
         model = JudgeTaskStatistic
@@ -63,8 +64,8 @@ class TaskSerializerFull(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ["name", "task_id", "statistics", "judge_id", "statement", 
-            "source", "judge_statistics"]
+        fields = ["name", "task_id", "statistics", "judge_id", "statement",
+                  "source", "judge_statistics"]
 
 
 class UserStatisticsSerializer(serializers.ModelSerializer):
@@ -120,6 +121,7 @@ class ProfileSerializerTiny(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'username',
                   'avatar_url']
 
+
 class LadderStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LadderStatistics
@@ -139,7 +141,15 @@ class SubmissionSerializer(serializers.ModelSerializer):
     task = TaskSerializer()
     author = serializers.SerializerMethodField('get_author')
 
+    def __init__(self, *args, **kwargs):
+        self.include_author = kwargs.pop('include_author', True)
+        super().__init__(self, *args, **kwargs)
+
     def get_author(self, sub):
+        if not self.include_author:
+            return {
+                "handle": sub.author.handle
+            }
         return {
             "handle": sub.author.handle,
             "profile": ProfileSerializerTiny(sub.author.user).data,

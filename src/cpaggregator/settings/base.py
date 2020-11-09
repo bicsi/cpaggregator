@@ -45,14 +45,14 @@ INSTALLED_APPS = [
     'django_tables2',
     'widget_tweaks',
     'bootstrap4',
-    'django_elasticsearch_dsl',
+    # 'django_elasticsearch_dsl',
     'accounts',
     'data',
     'info',
     'scraper',
     'stats',
     'contact',
-    'search',
+    # 'search',
     'ladders',
     'rest_framework',
     'silk',
@@ -180,11 +180,11 @@ BOOTSTRAP4 = {
     'include_jquery': True,
 }
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': os.environ.get('BONSAI_URL')
-    },
-}
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': os.environ.get('BONSAI_URL')
+#     },
+# }
 
 
 MESSAGE_TAGS = {
