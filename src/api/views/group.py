@@ -181,11 +181,12 @@ class ListResults(ListAPIView):
         # Construct data.
         data = []
         for pk, total_score, rank in results:
-            submissions = submissions_for_pk[pk]
+            submissions = SubmissionSerializer(
+                    submissions_for_pk[pk], many=True, 
+                    include_author=False).data
             profile = ProfileSerializerTiny(profile_for_pk[pk]).data
             data.append({
-                'submissions': SubmissionSerializer(
-                    submissions, many=True, include_author=False).data,
+                'submissions': submissions,
                 'rank': rank,
                 'total_score': total_score,
                 'profile': profile,
