@@ -158,24 +158,31 @@ class ListResults(ListAPIView):
 
     def serialize_data(self, results):
         assignment = self.assignment
-        profile_ids = [res[0] for res in results]
-        profiles = UserProfile.objects.filter(
-            pk__in=profile_ids).select_related('user')
+        pks = [res[0] for res in results]
+
+        # Get profiles.
+        profile_for_pk = {
+            profile.pk: profile for profile in 
+                UserProfile.objects.filter(
+                    pk__in=pks).select_related('user')}
+
+        # Get best submissions.
         submissions = Submission.objects.filter(
             submitted_on__lte=assignment.end_on or timezone.now(),
-            author__user__in=profile_ids,
+            author__user__in=pks,
             task__in=TaskSheetTask.objects.filter(
                 sheet=assignment.sheet).values_list('task', flat=True),
         ).select_related('author', 'author__user', 'author__user__user',
                          'task', 'task__statistics', 'task__judge').best()
-        submissions_for_profile = {pk: [] for pk in profile_ids}
+        submissions_for_pk = {pk: [] for pk in pks}
         for sub in submissions:
-            submissions_for_profile[sub.author.user.pk].append(sub)
-
+            submissions_for_pk[sub.author.user.pk].append(sub)
+        
+        # Construct data.
         data = []
-        profiles = ProfileSerializerTiny(profiles, many=True).data
-        for ((pk, total_score, rank), profile) in zip(results, profiles):
-            submissions = submissions_for_profile[pk]
+        for pk, total_score, rank in results:
+            submissions = submissions_for_pk[pk]
+            profile = ProfileSerializerTiny(profile_for_pk[pk]).data
             data.append({
                 'submissions': SubmissionSerializer(
                     submissions, many=True, include_author=False).data,
