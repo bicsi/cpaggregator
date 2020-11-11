@@ -23,6 +23,7 @@ urlpatterns = [
         ])),
     ])),
     path('task/', include([
+        path('', views.task.ListTasks.as_view()),
         path('<task-path:task_path>/', include([
             path('', views.task.RetrieveTask.as_view()),
         ])),
