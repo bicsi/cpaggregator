@@ -19,4 +19,4 @@ class ListTasks(ListAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
-        return Task.objects.all()
+        return Task.objects.order_by('statistics__difficulty_score')
