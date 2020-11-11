@@ -37,6 +37,11 @@ def scrape_task_submissions_all_time():
     services.scrape_task_submissions(to_days=300000, batch_size=15)
 
 
+@scheduler.scheduled_job('interval', minutes=1)
+def scrape_task_info():
+    services.scrape_task_info()
+
+
 @scheduler.scheduled_job('interval', minutes=2)
 def compute_statistics():
     stats_services.compute_user_statistics()

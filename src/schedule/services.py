@@ -46,3 +46,12 @@ def scrape_task_submissions(to_days=300000, batch_size=5):
 
         schedule_info.last_updated_on = timezone.now()
         schedule_info.save()
+
+
+def scrape_task_info():
+    tasks = (Task.objects.filter(
+        name__isnull=True).select_related('judge').all())
+    for task in tasks:
+        task_id = f"{task.judge.judge_id}/{task.task_id}"
+        log.info(f'Scraping task info: {task}')
+        scraper_services.scrape_task_info(task_id)
