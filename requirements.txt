@@ -22,7 +22,7 @@ sqlparse==0.2.4
 urllib3==1.24
 whitenoise==4.1
 APScheduler==3.0.0
-Pillow==4.1.1
+Pillow==9.0.1
 django-markdownx==2.0.27
 django-widget-tweaks==1.4.3
 django-betterforms==1.2
